@@ -14,5 +14,4 @@
 
 (global-set-key (kbd "<C-return>") 'newline-without-break-of-line)
 
-;; Move lines and words with M-*
-(drag-stuff-global-mode)
+
