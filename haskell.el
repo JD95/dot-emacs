@@ -17,6 +17,7 @@
   (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
   (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
   (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)
+  (define-key haskell-mode-map (kbd "M-s") 'avy-goto-word-1) ;; Bind avy key
   (define-key haskell-mode-map (kbd "SPC") 'haskell-mode-contextual-space)))
 
 (eval-after-load 'haskell-cabal '(progn
@@ -27,13 +28,9 @@
 
 
 ;; ghc-mod + HaRe
-(add-to-list 'load-path "~/AppData/Roaming/stack/snapshots/3c8e0366/share/x86_64-windows-ghc-7.10.3/HaRe-0.8.2.2/elisp")
-(require 'hare)
 (autoload 'ghc-init "ghc" nil t)
 (autoload 'ghc-debug "ghc" nil t)
-
-(autoload 'hare-init "hare" nil t)
-(add-hook 'haskell-mode-hook (lambda () (ghc-init) (hare-init)))
+(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
 
 ;; Company mode
 (require 'company)
