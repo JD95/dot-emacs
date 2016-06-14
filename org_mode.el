@@ -8,4 +8,4 @@
  'org-babel-load-languages
  '((dot . t)))
 
-(add-hook 'org-mode-hook (visual-line-mode))
+(add-hook 'org-mode-hook 'visual-line-mode)
