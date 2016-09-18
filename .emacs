@@ -3,12 +3,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(haskell-tags-on-save t)
- '(haskell-process-suggest-remove-import-lines t)
- '(haskell-process-auto-import-loaded-modules t)
- '(haskell-process-log t)
- ;;'(haskell-process-type 'stack-ghci)
- '(company-ghc-show-info t)
  '(custom-enabled-themes (quote (tango-dark)))
 )
 (custom-set-faces
@@ -18,18 +12,35 @@
  ;; If there is more than one, they won't work right.
  )
 
-(require 'package)
-(add-to-list 'package-archives
-  '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+; list the packages you want
+(setq package-list '(avy))
+
+; list the repositories containing them
+(setq package-archives '(("elpa" . "http://tromey.com/elpa/")
+                         ("gnu" . "http://elpa.gnu.org/packages/")
+                         ("marmalade" . "http://marmalade-repo.org/packages/")))
+
+; activate all the packages (in particular autoloads)
 (package-initialize)
 
-;; External Scripts
+;; make sure to have downloaded archive description.
+;; Or use package-archive-contents as suggested by Nicolas Dudebout
+(or (file-exists-p package-user-dir)
+    (package-refresh-contents))
+
+; install the missing packages
+(dolist (package package-list)
+  (unless (package-installed-p package)
+    (package-install package)))
+
+;; External Config Scripts
 (setq launch_scripts '("editor.el"
-		       "haskell.el"
 		       "org_mode.el"))
 
-(setq f (lambda (file_name)
+(setq load_script (lambda (file_name)
 	  (load-file (concat "~/emacs_launch_scripts/" file_name))))
-(mapcar f launch_scripts)
+
+(mapcar load_script launch_scripts)
+
 
 
