@@ -47,3 +47,10 @@
       (if this-win-2nd (other-window 1))))))
 (global-set-key (kbd "C-x |") 'toggle-window-split)
 
+(defun cout-vars-endl ()
+  (interactive
+   (let ((vars (read-string "variables:")))
+    (insert (concat "std::cout << " (mapconcat (lambda (x) (concat x " << ")) (split-string vars) "") "std::endl"))))
+)
+
+(global-set-key (kbd "C-c C-o") 'cout-vars-endl)
