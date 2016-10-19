@@ -47,6 +47,8 @@
       (if this-win-2nd (other-window 1))))))
 (global-set-key (kbd "C-x |") 'toggle-window-split)
 
+
+;; Example
 (defun cout-vars-endl ()
   (interactive
    (let ((vars (read-string "variables:")))
