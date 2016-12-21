@@ -2,7 +2,7 @@
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (setq inhibit-startup-message t)
-
+(smooth-scrolling-mode)
 ;; Allows for shift+arrow to move between frames
 (windmove-default-keybindings)
 
@@ -47,16 +47,6 @@
       (if this-win-2nd (other-window 1))))))
 (global-set-key (kbd "C-x |") 'toggle-window-split)
 
-
-;; Example
-(defun cout-vars-endl ()
-  (interactive
-   (let ((vars (read-string "variables:")))
-    (insert (concat "std::cout << " (mapconcat (lambda (x) (concat x " << ")) (split-string vars) "") "std::endl"))))
-)
-
-(global-set-key (kbd "C-c C-o") 'cout-vars-endl)
-
 ;; For creating new projects
 
 (setq current-projects-directory "E:/Current_Project/")
@@ -74,4 +64,17 @@
     (find-file project-overview)
   )
 )
- 
+
+;; File encodings
+(defun unix-file ()
+    "Change the current buffer to Latin 1 with Unix line-ends."
+    (interactive)
+    (set-buffer-file-coding-system 'iso-latin-1-unix t))
+(defun dos-file ()
+      "Change the current buffer to Latin 1 with DOS line-ends."
+      (interactive)
+      (set-buffer-file-coding-system 'iso-latin-1-dos t))
+(defun mac-file ()
+      "Change the current buffer to Latin 1 with Mac line-ends."
+      (interactive)
+      (set-buffer-file-coding-system 'iso-latin-1-mac t))
