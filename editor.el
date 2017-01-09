@@ -3,8 +3,16 @@
 (scroll-bar-mode -1)
 (setq inhibit-startup-message t)
 (smooth-scrolling-mode)
+
+
+;; WINDOW CONTROLS --------------------------------------
+
 ;; Allows for shift+arrow to move between frames
 (windmove-default-keybindings)
+(global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
+(global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
+(global-set-key (kbd "S-C-<down>") 'shrink-window)
+(global-set-key (kbd "S-C-<up>") 'enlarge-window)
 
 ;; newline-without-break-of-line
 (defun newline-without-break-of-line ()
