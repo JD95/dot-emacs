@@ -9,3 +9,21 @@
  '((dot . t)))
 
 (add-hook 'org-mode-hook 'visual-line-mode)
+
+;; Setting up spell checking
+(cond
+ ((executable-find "aspell")
+  (setq ispell-program-name "aspell")
+  ;; Please note ispell-extra-args contains ACTUAL parameters passed to aspell
+  (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US"))
+ )
+)
+
+;; Archives all done todo's in file
+(defun org-archive-done-tasks ()
+  (interactive)
+  (org-map-entries
+   (lambda ()
+     (org-archive-subtree)
+     (setq org-map-continue-from (outline-previous-heading)))
+   "/DONE" 'tree))
