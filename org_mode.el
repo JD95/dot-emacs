@@ -26,4 +26,4 @@
    (lambda ()
      (org-archive-subtree)
      (setq org-map-continue-from (outline-previous-heading)))
-   "/DONE" 'tree))
+   "/DONE" 'file))
