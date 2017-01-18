@@ -4,7 +4,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes (quote (tango-dark)))
-)
+ '(org-agenda-files (quote ("d:/OneDrive/Planner/TODO.org"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -18,7 +18,10 @@
 ; list the repositories containing them
 (setq package-archives '(("elpa" . "http://tromey.com/elpa/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
-                         ("marmalade" . "http://marmalade-repo.org/packages/")))
+			 ("melpa" . "http://melpa.org/packages/")
+                         ;;("marmalade" . "http://marmalade-repo.org/packages/")
+			 )
+)
 
 ; activate all the packages (in particular autoloads)
 (package-initialize)
@@ -35,12 +38,12 @@
 
 ;; External Config Scripts
 (setq launch_scripts '("editor.el"
-		       "org_mode.el"))
+		       "org_mode.el"
+		       "haskell.el"
+		       "markdown.el"
+		       "agda.el"))
 
 (setq load_script (lambda (file_name)
 	  (load-file (concat "~/emacs_launch_scripts/" file_name))))
 
 (mapcar load_script launch_scripts)
-
-
-
