@@ -4,7 +4,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-enabled-themes (quote (tango-dark)))
- '(org-agenda-files (quote ("d:/OneDrive/Planner/TODO.org"))))
+ '(org-agenda-files (quote ("f:/OneDrive/Planner/TODO.org")))
+ '(package-selected-packages
+   (quote
+    (intero smooth-scrolling py-autopep8 neotree material-theme flycheck elpy avy))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -12,14 +15,36 @@
  ;; If there is more than one, they won't work right.
  )
 
+;; Executable Paths
+(setq exec-path (append exec-path '("D:\Program Files (x86)\diffutils-2.8.7-1-bin\bin")) )
+
 ; list the packages you want
-(setq package-list '(avy))
+(setq package-list 
+      '(;; Themes
+	material-theme
+	
+	;; Navigation
+	avy 
+	smooth-scrolling
+	neotree
+
+	;; Text Manipulation
+	drag-stuff
+	
+	;; Python
+	elpy
+	flycheck
+	py-autopep8
+
+	;; Haskell
+	intero
+	shm
+))
 
 ; list the repositories containing them
 (setq package-archives '(("elpa" . "http://tromey.com/elpa/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
 			 ("melpa" . "http://melpa.org/packages/")
-                         ;;("marmalade" . "http://marmalade-repo.org/packages/")
 			 )
 )
 
@@ -37,11 +62,14 @@
     (package-install package)))
 
 ;; External Config Scripts
-(setq launch_scripts '("editor.el"
+(setq launch_scripts '(
+		       "editor.el"
 		       "org_mode.el"
 		       "haskell.el"
 		       "markdown.el"
-		       "agda.el"))
+		       "python.el"
+		      ;; "agda.el"
+		       ))
 
 (setq load_script (lambda (file_name)
 	  (load-file (concat "~/emacs_launch_scripts/" file_name))))

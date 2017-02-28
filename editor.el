@@ -4,6 +4,8 @@
 (setq inhibit-startup-message t)
 (smooth-scrolling-mode)
 
+;; Themes and Colors ------------------------------------
+(load-theme 'material t)
 
 ;; WINDOW CONTROLS --------------------------------------
 
