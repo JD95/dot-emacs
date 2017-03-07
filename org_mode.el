@@ -27,3 +27,13 @@
      (org-archive-subtree)
      (setq org-map-continue-from (outline-previous-heading)))
    "/DONE" 'file))
+
+(setq org-todo-keyword-faces
+      '(
+	("TODO" . (:foreground "red"))
+        ("HOLD" . (:foreground "yellow"))
+	("FAILED" . (:foreground "grey"))
+        ))
+
+(setq org-todo-keywords
+      '((sequence "TODO" "HOLD" "|" "DONE" "FAILED")))
