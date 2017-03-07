@@ -5,7 +5,7 @@
 (smooth-scrolling-mode)
 
 ;; Themes and Colors ------------------------------------
-(load-theme 'material t)
+(load-theme 'flatland t)
 
 ;; WINDOW CONTROLS --------------------------------------
 

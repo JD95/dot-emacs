@@ -22,7 +22,7 @@
 ; list the packages you want
 (setq package-list 
       '(;; Themes
-	material-theme
+	flatland-theme
 	
 	;; Navigation
 	avy 
@@ -43,6 +43,7 @@
 	;; Haskell
 	intero
 	shm
+	rainbow-delimiters
 ))
 
 ; list the repositories containing them

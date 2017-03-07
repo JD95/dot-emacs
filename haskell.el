@@ -1,6 +1,3 @@
-;; Indentation mode
-;;(add-hook 'haskell-mode-hook 'structured-haskell-mode)
-
 ;; Link to stack binaries
 (setq windows-location "~/AppData/Roaming/local/bin")
 (setq linux-location "")
@@ -28,3 +25,23 @@
 
 ;; Drag line mode
 (add-hook 'haskell-mode-hook 'drag-stuff-mode)
+
+;; rainbow delimiters
+(require 'rainbow-delimiters)
+(add-hook 'haskell-mode-hook #'rainbow-delimiters-mode)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
