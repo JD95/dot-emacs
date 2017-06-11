@@ -44,6 +44,9 @@
 	intero
 	shm
 	rainbow-delimiters
+
+	;; Markdown
+	markdown-mode
 ))
 
 ; list the repositories containing them
