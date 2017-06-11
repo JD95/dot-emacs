@@ -1,7 +1,11 @@
 ;; Link to stack binaries
 (setq windows-location "~/AppData/Roaming/local/bin")
 (setq linux-location "")
-(setq stack-location (if (eq system-type 'windows-nt) windows-location linux-location))
+(setq macos-location "~/.local/bin")
+(setq stack-location (cond ((eq system-type 'windows-nt) windows-location)
+			   ((eq system-type 'linux) linux-location)
+			   (t macos-location)))
+
 (let ((my-stack-path (expand-file-name stack-location)))
   (setenv "PATH" (concat my-stack-path path-separator (getenv "PATH")))
   (add-to-list 'exec-path my-stack-path))
@@ -21,7 +25,7 @@
 
 (add-hook 'haskell-mode-hook 'haskell-style)
 
-(add-hook 'haskell-mode-hook 'structured-haskell-mode)
+;;(add-hook 'haskell-mode-hook 'structured-haskell-mode)
 
 ;; Drag line mode
 (add-hook 'haskell-mode-hook 'drag-stuff-mode)
