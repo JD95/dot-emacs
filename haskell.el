@@ -21,8 +21,6 @@
 
 (add-hook 'haskell-mode-hook 'haskell-style)
 
-(add-hook 'haskell-mode-hook 'structured-haskell-mode)
-
 ;; Drag line mode
 (add-hook 'haskell-mode-hook 'drag-stuff-mode)
 
