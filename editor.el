@@ -1,8 +1,16 @@
+;;; editor.el --- Utilities for editing in all modes
+
+;;; Commentary:
+;; 
+
+;;; Code:
+
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (setq inhibit-startup-message t)
 (smooth-scrolling-mode)
+(elmacro-mode)
 
 ;; Themes and Colors ------------------------------------
 (load-theme 'flatland t)
@@ -21,22 +29,14 @@
 (global-set-key (kbd "S-C-<down>") 'shrink-window)
 (global-set-key (kbd "S-C-<up>") 'enlarge-window)
 
-;; newline-without-break-of-line
-(defun newline-without-break-of-line ()
-  "1. move to end of the line.
-  2. insert newline with index"
-  (interactive)
-  (let ((oldpos (point)))
-    (end-of-line)
-    (newline-and-indent)))
-
-(global-set-key (kbd "<C-return>") 'newline-without-break-of-line)
+(global-set-key (kbd "C-M-;") 'elmacro-show-last-macro)
 
 ;; Move using avy search
 (global-set-key (kbd "M-s") 'avy-goto-word-1)
 
 ;; Swap horizontal and vertical splits
 (defun toggle-window-split ()
+  "Changes the window split from horizontal to vertical"
   (interactive)
   (if (= (count-windows) 2)
       (let* ((this-win-buffer (window-buffer))
@@ -60,6 +60,7 @@
       (set-window-buffer (next-window) next-win-buffer)
       (select-window first-win)
       (if this-win-2nd (other-window 1))))))
+
 (global-set-key (kbd "C-x |") 'toggle-window-split)
 
 ;; For creating new projects
@@ -69,30 +70,17 @@
 (setq default-org-header "#+STARTUP: hidestars\n")
 
 (defun new-project ()
+  "Create a new org mode project."
   (interactive)
   (let* ((project-name (read-string "project name:"))
 	(project-folder (concat current-projects-directory project-name))
 	(project-overview (concat project-folder "/overview.org"))
 	)
     (make-directory project-folder)
-    (append-to-file default-org-header nil project-overview) 
+    (append-to-file default-org-header nil project-overview)
     (find-file project-overview)
   )
 )
-
-;; File encodings
-(defun unix-file ()
-    "Change the current buffer to Latin 1 with Unix line-ends."
-    (interactive)
-    (set-buffer-file-coding-system 'iso-latin-1-unix t))
-(defun dos-file ()
-      "Change the current buffer to Latin 1 with DOS line-ends."
-      (interactive)
-      (set-buffer-file-coding-system 'iso-latin-1-dos t))
-(defun mac-file ()
-      "Change the current buffer to Latin 1 with Mac line-ends."
-      (interactive)
-      (set-buffer-file-coding-system 'iso-latin-1-mac t))
 
 ;; Utilities
 
@@ -104,11 +92,16 @@
     (insert (calendar-date-string (calendar-current-date) nil
 				  omit-day-of-week-p)))
 ;; File Encryption
+
 (require 'epa-file)
     (epa-file-enable)
 
 
 (defun epg--list-keys-1 (context name mode)
+  "A fix for the epa bug.
+Argument CONTEXT Not sure.
+Argument NAME Not sure.
+Argument MODE Not sure."
   (let ((args (append (if (epg-context-home-directory context)
 			  (list "--homedir"
 				(epg-context-home-directory context)))
@@ -151,3 +144,18 @@
 
 ;; Buffer Menu items
 (global-set-key "\C-x\C-b" 'buffer-menu)
+
+(defun general-workspace ()
+  "Set up a general split screen workspace."
+  (interactive)
+  (split-window-below nil)
+  (split-window-right nil)
+  (other-window 1)
+  (other-window 1)
+  (powershell nil)
+  (neotree)
+  (execute-extended-command nil "powershell"))
+
+(provide 'editor)
+
+;;; editor.el ends here

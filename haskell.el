@@ -1,3 +1,10 @@
+;;; haskell.el --- Utilities for Haskell
+
+;;; Commentary:
+;; 
+
+;;; Code:
+
 ;; Link to stack binaries
 (setq windows-location "~/AppData/Roaming/local/bin")
 (setq linux-location "")
@@ -10,27 +17,32 @@
   (setenv "PATH" (concat my-stack-path path-separator (getenv "PATH")))
   (add-to-list 'exec-path my-stack-path))
 
-;; Install Intero
-(add-hook 'haskell-mode-hook 'intero-mode)
-
 ;; Haskell Style
 (defun haskell-style ()
-  "Sets the current buffer to use Haskell Style. Meant to be
-  added to `haskell-mode-hook'"
+  "Set the current buffer to use Haskell Style."
   (interactive)
   (setq tab-width 4
         haskell-indentation-layout-offset 4
         haskell-indentation-left-offset 4
         haskell-indentation-ifte-offset 4))
 
-(add-hook 'haskell-mode-hook 'haskell-style)
+;; rainbow delimiter
+(add-hook 'haskell-mode-hook
+	  (lambda ()
+	    (intero-mode)
+	    (haskell-style)
+	    (rainbow-delimiters-mode)
+	    (drag-stuff-mode)
+	    (paredit-mode)
+	    ))
 
-;;(add-hook 'haskell-mode-hook 'structured-haskell-mode)
 
-;; Drag line mode
-(add-hook 'haskell-mode-hook 'drag-stuff-mode)
+(eval-after-load 'haskell-mode
+  '(progn  (define-key haskell-mode-map (kbd "M-<up>") 'drag-stuff-up)
+	   (define-key haskell-mode-map (kbd "M-<down>") 'drag-stuff-down)
+	   (define-key haskell-mode-map (kbd "M-<left>") 'drag-stuff-left)
+	   (define-key haskell-mode-map (kbd "M-<right>") 'drag-stuff-right)))
 
-;; rainbow delimiters
-(require 'rainbow-delimiters)
-(add-hook 'haskell-mode-hook #'rainbow-delimiters-mode)
+(provide 'haskell)
 
+;;; haskell.el ends here
