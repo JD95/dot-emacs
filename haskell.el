@@ -33,7 +33,6 @@
 	    (haskell-style)
 	    (rainbow-delimiters-mode)
 	    (drag-stuff-mode)
-	    (paredit-mode)
 	    ))
 
 
