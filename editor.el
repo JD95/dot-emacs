@@ -36,7 +36,7 @@
 
 ;; Swap horizontal and vertical splits
 (defun toggle-window-split ()
-  "Changes the window split from horizontal to vertical"
+  "Change the window split from horizontal to vertical."
   (interactive)
   (if (= (count-windows) 2)
       (let* ((this-win-buffer (window-buffer))
@@ -156,6 +156,12 @@ Argument MODE Not sure."
   (powershell nil)
   (neotree)
   (execute-extended-command nil "powershell"))
+
+(defun single-window-workspace ()
+  "Change to a single window workspace."
+  (interactive)
+  (delete-other-windows nil)
+  (neotree-hide))
 
 (provide 'editor)
 
