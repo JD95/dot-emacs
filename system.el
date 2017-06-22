@@ -52,6 +52,7 @@
 	hindent ;; Style
 
 	;; Purescript
+	purescript-mode
 	psc-ide
 
 	;; Lisp
