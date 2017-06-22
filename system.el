@@ -48,6 +48,8 @@
 
 	;; Haskell
 	intero ;; IDE
+	hlint-refactor ;; Refactoring
+	hindent ;; Style
 
 	;; Lisp
 	elmacro

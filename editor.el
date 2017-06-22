@@ -148,6 +148,7 @@ Argument MODE Not sure."
 (defun general-workspace ()
   "Set up a general split screen workspace."
   (interactive)
+  (delete-other-windows nil)
   (split-window-below nil)
   (split-window-right nil)
   (other-window 1)

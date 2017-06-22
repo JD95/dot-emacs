@@ -33,14 +33,18 @@
 	    (haskell-style)
 	    (rainbow-delimiters-mode)
 	    (drag-stuff-mode)
+	    (hlint-refactor-mode)
+	    (hindent-mode)
 	    ))
 
 
 (eval-after-load 'haskell-mode
   '(progn  (define-key haskell-mode-map (kbd "M-<up>") 'drag-stuff-up)
 	   (define-key haskell-mode-map (kbd "M-<down>") 'drag-stuff-down)
-	   (define-key haskell-mode-map (kbd "M-<left>") 'drag-stuff-left)
-	   (define-key haskell-mode-map (kbd "M-<right>") 'drag-stuff-right)))
+	   ))
+
+(with-eval-after-load 'intero
+  (flycheck-add-next-checker 'intero '(warning . haskell-hlint)))
 
 (provide 'haskell)
 
