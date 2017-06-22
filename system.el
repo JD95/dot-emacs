@@ -51,6 +51,9 @@
 	hlint-refactor ;; Refactoring
 	hindent ;; Style
 
+	;; Purescript
+	psc-ide
+
 	;; Lisp
 	elmacro
 
@@ -87,6 +90,7 @@
 		       "python.el"
 		       "idris.el"
 		       "lisp.el"
+		       "purescript.el"
 		       ))
 
 (setq load_script (lambda (file_name)
