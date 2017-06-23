@@ -34,6 +34,15 @@
 ;; Move using avy search
 (global-set-key (kbd "M-s") 'avy-goto-word-1)
 
+;; Completion
+(require 'helm-config)
+(global-set-key (kbd "M-x") #'helm-M-x)
+(global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
+(global-set-key (kbd "C-x C-f") #'helm-find-files)
+(helm-mode 1)
+
+(projectile-mode)
+
 ;; Swap horizontal and vertical splits
 (defun toggle-window-split ()
   "Change the window split from horizontal to vertical."
@@ -153,9 +162,8 @@ Argument MODE Not sure."
   (split-window-right nil)
   (other-window 1)
   (other-window 1)
-  (powershell nil)
-  (neotree)
-  (execute-extended-command nil "powershell"))
+  (eshell nil)
+  (neotree))
 
 (defun single-window-workspace ()
   "Change to a single window workspace."

@@ -23,44 +23,47 @@
 
 ; list the packages you want
 (setq package-list 
-      '(;; Themes
-	flatland-theme
+      ';; Themes
+      (flatland-theme
 	
-	;; Navigation
-	avy 
-	smooth-scrolling
-	neotree
+       ;; Navigation
+       avy 
+       smooth-scrolling
+       neotree
 
-	;; Git
-	magit
+       ;; Git
+       magit
 	
-	;; Text Manipulation
-	drag-stuff
+       ;; Text Manipulation
+       drag-stuff
 
-	;; General coding
-	paredit
-	rainbow-delimiters
+       ;; General coding
+       paredit
+       rainbow-delimiters
+       helm
+       helm-projectile
+       projectile
 	
-	;; Python
-	elpy
-	flycheck
-	py-autopep8
+       ;; Python
+       elpy
+       flycheck
+       py-autopep8
 
-	;; Haskell
-	intero ;; IDE
-	hlint-refactor ;; Refactoring
-	hindent ;; Style
+       ;; Haskell
+       intero	      ;; IDE
+       hlint-refactor ;; Refactoring
+       hindent	      ;; Style
 
-	;; Purescript
-	purescript-mode
-	psc-ide
+       ;; Purescript
+       purescript-mode
+       psc-ide
 
-	;; Lisp
-	elmacro
+       ;; Lisp
+       elmacro
 
-	;; Markdown
-	markdown-mode
-))
+       ;; Markdown
+       markdown-mode
+       ))
 
 ; list the repositories containing them
 (setq package-archives '(("elpa" . "http://tromey.com/elpa/")
