@@ -8,8 +8,6 @@
  'org-babel-load-languages
  '((dot . t)))
 
-(add-hook 'org-mode-hook 'visual-line-mode)
-
 ;; Setting up spell checking
 (cond
  ((executable-find "aspell")
@@ -65,10 +63,6 @@
                         (file-name-sans-extension rel)
                         ".html"))))
 
-(add-hook 'org-mode-hook
-          (lambda ()
-            (local-set-key (kbd "C-;") 'org-twbs-export-to-html)))
-
 ;; Org projects
 (setq org-publish-project-alist
       '(("programming-tutorials"
@@ -80,7 +74,20 @@
 
 (eval-after-load "org" '(require 'ox-md nil t))
 
+(defun org-mode-setup ()
+  (local-set-key (kbd "C-;") 'org-twbs-export-to-html)
+  (visual-line-mode)
+  (xah-math-input-mode-on))
+
 ;; Unicode Symbols
-(add-hook 'org-mode-hook
-          (lambda ()
-            (xah-math-input-mode-on)))
+(add-hook 'org-mode-hook 'org-mode-setup)
+
+;; org-brain
+(setq org-brain-path "F:/brain")
+(setq org-id-locations-file "~/.emacs.d/.org-id-locations")
+(setq org-brain-visualize-default-choices 'all)
+
+(defun aa2u-buffer ()
+  (aa2u (point-min) (point-max)))
+
+(add-hook 'org-brain-after-visualize-hook #'aa2u-buffer)

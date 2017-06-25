@@ -17,30 +17,23 @@
   (setenv "PATH" (concat my-stack-path path-separator (getenv "PATH")))
   (add-to-list 'exec-path my-stack-path))
 
-;; Haskell Style
-(defun haskell-style ()
-  "Set the current buffer to use Haskell Style."
-  (interactive)
-  (setq tab-width 4
-        haskell-indentation-layout-offset 4
-        haskell-indentation-left-offset 4
-        haskell-indentation-ifte-offset 4))
-
-;; rainbow delimiter
-(add-hook 'haskell-mode-hook
-	  (lambda ()
-	    (intero-mode)
-	    (haskell-style)
+(defun haskell-setup ()
 	    (rainbow-delimiters-mode)
 	    (drag-stuff-mode)
 	    (hlint-refactor-mode)
-	    (hindent-mode)
-	    ))
+	    (structured-haskell-mode nil)
+	    (intero-mode nil)
+	    )
 
 
+;; rainbow delimiter
+(add-hook 'haskell-mode-hook 'haskell-setup)
+
+(require 'shm)
 (eval-after-load 'haskell-mode
   '(progn  (define-key haskell-mode-map (kbd "M-<up>") 'drag-stuff-up)
 	   (define-key haskell-mode-map (kbd "M-<down>") 'drag-stuff-down)
+	   (define-key shm-map (kbd "C-c C-s") 'shm/case-split)
 	   ))
 
 (with-eval-after-load 'intero

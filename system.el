@@ -5,7 +5,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-enabled-themes (quote (tango-dark)))
  '(org-agenda-files (quote ("f:/OneDrive/Planner/TODO.org")))
  '(package-selected-packages
    (quote
@@ -18,14 +17,22 @@
  ;; If there is more than one, they won't work right.
  )
 
+;; Setting the font
+(set-face-attribute 'default nil :font "DejaVu Sans Mono-10")
+(set-frame-font "DejaVu Sans Mono-10" nil t)
+
 ;; Executable Paths
 (setq exec-path (append exec-path '("D:\Program Files (x86)\diffutils-2.8.7-1-bin\bin")) )
 
 ; list the packages you want
 (setq package-list 
       ';; Themes
-      (flatland-theme
-	
+      (gotham-theme
+
+       ;; Apps
+       org-brain
+       ascii-art-to-unicode
+       
        ;; Navigation
        avy 
        smooth-scrolling
@@ -36,6 +43,7 @@
 	
        ;; Text Manipulation
        drag-stuff
+       xah-math-input
 
        ;; General coding
        paredit
@@ -53,6 +61,7 @@
        intero	      ;; IDE
        hlint-refactor ;; Refactoring
        hindent	      ;; Style
+       shm            ;; Formatting
 
        ;; Purescript
        purescript-mode
@@ -65,10 +74,12 @@
        markdown-mode
        ))
 
-; list the repositories containing them
+					; list the repositories containing them
+(require 'package)
 (setq package-archives '(("elpa" . "http://tromey.com/elpa/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
 			 ("melpa" . "http://melpa.org/packages/")
+			 ("org" . "http://orgmode.org/elpa/")
 			 )
 )
 
@@ -95,6 +106,7 @@
 		       "idris.el"
 		       "lisp.el"
 		       "purescript.el"
+		       "google.el"
 		       ))
 
 (setq load_script (lambda (file_name)

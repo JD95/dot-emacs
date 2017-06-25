@@ -13,7 +13,7 @@
 (elmacro-mode)
 
 ;; Themes and Colors ------------------------------------
-(load-theme 'flatland t)
+(load-theme 'gotham t)
 
 ;; WINDOW CONTROLS --------------------------------------
 
