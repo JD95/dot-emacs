@@ -44,8 +44,7 @@
 	 (end (string-to-number (read-string "end index: ")))
 	 (todo-item (concat "* TODO " item))
 	 (line-item (lambda (i) (concat todo-item " " (number-to-string i) "\n")))
-	 (indices (number-sequence start end))
-	 (items (mapcar line-item indices)))
+	 (items (mapcar line-item (number-sequence start end))))
     (mapc 'insert items)))
 
 ;; Exporting Org files as HTML

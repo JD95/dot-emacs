@@ -113,3 +113,9 @@
 	  (load-file (concat "~/emacs_launch_scripts/" file_name))))
 
 (mapcar load_script launch_scripts)
+
+;; Utility functions
+(defun system-switch (options)
+  (cond ((eq system-type 'windows-nt) (nth 0 options))
+	((eq system-type 'linux) (nth 1 options))
+	(t nth 2 options)))

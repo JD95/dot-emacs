@@ -30,7 +30,34 @@
 (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)
 
 (require 'company)
-(add-hook 'c++-mode-hook 'company-mode)
+(require 'cc-mode)
+(require 'semantic)
+(require 'rtags)
+
+(defvar clang-includes
+  (system-switch
+   '(("D:/msys64/mingw64/include/c++/7.1.0" "D:/msys64/mingw64/include/c++/7.1.0/x86_64-w64-mingw32")
+     ("")
+     ("")
+     )))
+
+(defun cpp-config ()
+  (global-semanticdb-minor-mode)
+  (global-semantic-idle-scheduler-mode)
+  (semantic-mode)
+  (flycheck-mode nil)
+  (auto-complete-mode)
+  (irony-mode)
+  (company-mode)
+  (cmake-ide-setup)
+  (setq flycheck-clang-include-path 'clang-includes)
+  )
+
+(add-hook 'c++-mode-hook #'cpp-config)
+
+
+;;(add-to-list 'company-backends 'company-c-headers)
+;;(add-to-list 'company-c-headers-path-system "D:/Program Files/LLVM/lib/clang/4.0.1/include")
 
 (provide 'c)
 
