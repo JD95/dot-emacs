@@ -5,6 +5,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (setq
  helm-gtags-ignore-case t
  helm-gtags-auto-update t
@@ -19,7 +21,6 @@
 (add-hook 'dired-mode-hook 'helm-gtags-mode)
 (add-hook 'eshell-mode-hook 'helm-gtags-mode)
 (add-hook 'c-mode-hook 'helm-gtags-mode)
-(add-hook 'c++-mode-hook 'helm-gtags-mode)
 (add-hook 'asm-mode-hook 'helm-gtags-mode)
 
 (define-key helm-gtags-mode-map (kbd "C-c g a") 'helm-gtags-tags-in-this-function)
@@ -37,23 +38,25 @@
 (defvar clang-includes
   (system-switch
    '(("D:/msys64/mingw64/include/c++/7.1.0" "D:/msys64/mingw64/include/c++/7.1.0/x86_64-w64-mingw32")
-     ("")
-     ("")
+     ("/" "")
+     ("" "")
      )))
 
 (defun cpp-config ()
-  (global-semanticdb-minor-mode)
-  (global-semantic-idle-scheduler-mode)
-  (semantic-mode)
-  (flycheck-mode nil)
-  (auto-complete-mode)
-  (irony-mode)
-  (company-mode)
+  (interactive)
+  (global-semanticdb-minor-mode 1)
+  (global-semantic-idle-scheduler-mode 1)
+  (semantic-mode 1)
+  (flycheck-mode 1)
+  (auto-complete-mode 1)
+  (irony-mode 1)
+  (company-mode 1)
+  (helm-gtags-mode 1)
   (cmake-ide-setup)
-  (setq flycheck-clang-include-path 'clang-includes)
+;;  (setq flycheck-clang-include-path 'clang-includes)
   )
 
-(add-hook 'c++-mode-hook #'cpp-config)
+(add-hook 'c++-mode-hook 'cpp-config)
 
 
 ;;(add-to-list 'company-backends 'company-c-headers)

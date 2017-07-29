@@ -70,6 +70,13 @@
        ;; Lisp
        elmacro
 
+       ;; C++
+       cmake-ide
+       auto-complete
+       auto-complete-clang
+       irony
+       helm-gtags
+
        ;; Markdown
        markdown-mode
        ))
@@ -98,6 +105,7 @@
 
 ;; External Config Scripts
 (setq launch_scripts '(
+		       "utilities.el"
 		       "editor.el"
 		       "org_mode.el"
 		       "haskell.el"
@@ -107,6 +115,7 @@
 		       "lisp.el"
 		       "purescript.el"
 		       "google.el"
+		       "c.el"
 		       ))
 
 (setq load_script (lambda (file_name)
@@ -114,8 +123,4 @@
 
 (mapcar load_script launch_scripts)
 
-;; Utility functions
-(defun system-switch (options)
-  (cond ((eq system-type 'windows-nt) (nth 0 options))
-	((eq system-type 'linux) (nth 1 options))
-	(t nth 2 options)))
+
