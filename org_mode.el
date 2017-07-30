@@ -90,3 +90,11 @@
   (aa2u (point-min) (point-max)))
 
 (add-hook 'org-brain-after-visualize-hook #'aa2u-buffer)
+
+(setq org-priority-faces '((?1 . (:foreground "green" :weight 'bold))
+                           (?2 . (:foreground "pale green"))
+                           (?3 . (:foreground "yellow"))
+			   (?4 . (:foreground "orange"))
+   			   (?5 . (:foreground "red"))
+			   (?6 . (:foreground "deep pink"))
+			   ))
