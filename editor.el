@@ -15,6 +15,15 @@
 ;; Themes and Colors ------------------------------------
 (load-theme 'gotham t)
 
+;; Style Enforcement
+(setq whitespace-style '(face
+			 empty
+			 lines-tail
+			 trailing
+			 indentation
+			 ))
+
+
 ;; WINDOW CONTROLS --------------------------------------
 
 ;; Allows for shift+arrow to move between frames
@@ -33,6 +42,8 @@
 
 ;; Move using avy search
 (global-set-key (kbd "M-s") 'avy-goto-word-1)
+(bind-keys*
+ ("M-s" . avy-goto-word-1))
 
 ;; Completion
 (require 'helm-config)
@@ -162,8 +173,7 @@ Argument MODE Not sure."
   (split-window-right nil)
   (other-window 1)
   (other-window 1)
-  (eshell nil)
-  (neotree))
+  (eshell nil))
 
 (defun single-window-workspace ()
   "Change to a single window workspace."

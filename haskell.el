@@ -23,6 +23,7 @@
 	    (hlint-refactor-mode)
 	    (structured-haskell-mode nil)
 	    (intero-mode nil)
+	    (global-set-key (kbd "M-s") 'avy-goto-word-1)
 	    )
 
 
@@ -33,11 +34,41 @@
 (eval-after-load 'haskell-mode
   '(progn  (define-key haskell-mode-map (kbd "M-<up>") 'drag-stuff-up)
 	   (define-key haskell-mode-map (kbd "M-<down>") 'drag-stuff-down)
-	   (define-key shm-map (kbd "C-c C-s") 'shm/case-split)
+	   (define-key shm-map (kbd "C-c C-s") 'shm/case-split)	   
 	   ))
 
 (with-eval-after-load 'intero
   (flycheck-add-next-checker 'intero '(warning . haskell-hlint)))
+
+(defun haskell-new-spock-action-component ()
+  "Generates a new Haskell Spock api action from template"
+  (interactive)
+  (let* ((name (read-string "component name: "))
+	 (template `("{-# LANGUAGE TypeApplications #-}\n"
+		     "{-# LANGUAGE GADTs #-}\n"
+		     "{-# LANGUAGE TypeFamilies #-}\n"
+		     "{-# LANGUAGE OverloadedStrings #-}\n"
+		     "\n"
+		     ,(concat "module Actions." name "(" (downcase name) ") where\n")
+		     "\n"
+		     "import Data.Aeson\n"
+		     "import Protolude\n"
+		     "import Prelude ()\n"
+		     "import Data.HVect\n"
+		     "import Web.Spock\n"
+		     "\n"
+		     "import ServerTypes\n"
+		     "import DatabaseTypes\n"
+		     "import DefaultResponses\n"
+		     "import Utilities\n"
+		     "import Database.Persist\n"
+		     "import Types\n"
+		     "\n"
+		     ,(concat (downcase name) " :: ListContains n User xs => API (HVect xs)\n")
+		     ,(concat (downcase name) " = pure ()\n")
+   		     )))
+    (mapc 'insert template))
+  )
 
 (provide 'haskell)
 

@@ -22,7 +22,8 @@
 (set-frame-font "DejaVu Sans Mono-10" nil t)
 
 ;; Executable Paths
-(setq exec-path (append exec-path '("D:\Program Files (x86)\diffutils-2.8.7-1-bin\bin")) )
+
+
 
 ; list the packages you want
 (setq package-list 
@@ -77,6 +78,10 @@
        irony
        helm-gtags
 
+       ;; Rust
+       rust-mode
+       racer
+
        ;; Markdown
        markdown-mode
        ))
@@ -116,6 +121,7 @@
 		       "purescript.el"
 		       "google.el"
 		       "c.el"
+		       "rust.el"
 		       ))
 
 (setq load_script (lambda (file_name)

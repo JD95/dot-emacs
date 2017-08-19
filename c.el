@@ -33,7 +33,6 @@
 (require 'company)
 (require 'cc-mode)
 (require 'semantic)
-(require 'rtags)
 
 (defvar clang-includes
   (system-switch
