@@ -81,6 +81,7 @@
        ;; Rust
        rust-mode
        racer
+       flycheck-rust
 
        ;; Markdown
        markdown-mode

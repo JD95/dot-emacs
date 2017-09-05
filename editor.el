@@ -25,28 +25,33 @@
 
 
 ;; WINDOW CONTROLS --------------------------------------
+(require 'evil)
+(evil-mode 1)
 
 ;; Allows for shift+arrow to move between frames
-(global-set-key (kbd "C-M-<left>")  'windmove-left)
-(global-set-key (kbd "C-M-<right>") 'windmove-right)
-(global-set-key (kbd "C-M-<up>")    'windmove-up)
-(global-set-key (kbd "C-M-<down>")  'windmove-down)
 
 ;; Shrink or grow windows
-(global-set-key (kbd "S-C-<left>") 'shrink-window-horizontally)
-(global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
-(global-set-key (kbd "S-C-<down>") 'shrink-window)
-(global-set-key (kbd "S-C-<up>") 'enlarge-window)
+(global-set-key (kbd "C-,") #'shrink-window-horizontally)
+(global-set-key (kbd "C-.") #'enlarge-window-horizontally)
+(global-set-key (kbd "C-{") #'shrink-window)
+(global-set-key (kbd "C-}") #'enlarge-window)
 
 (global-set-key (kbd "C-M-;") 'elmacro-show-last-macro)
 
 ;; Move using avy search
-(global-set-key (kbd "M-s") 'avy-goto-word-1)
+;;(global-set-key (kbd "M-s") 'avy-goto-word-1)
+
 (bind-keys*
- ("M-s" . avy-goto-word-1))
+ ("M-s" . avy-goto-word-1)
+ ("C-h" . windmove-left)
+ ("C-l" . windmove-right)
+ ("C-k" . windmove-up)
+ ("C-j" . windmove-down)
+)
 
 ;; Completion
-(require 'helm-config)
+;;(require 'helm-config)
+;;(global-set-key (kbd "M-x") nil)
 (global-set-key (kbd "M-x") #'helm-M-x)
 (global-set-key (kbd "C-x r b") #'helm-filtered-bookmarks)
 (global-set-key (kbd "C-x C-f") #'helm-find-files)
@@ -115,7 +120,6 @@
 
 (require 'epa-file)
     (epa-file-enable)
-
 
 (defun epg--list-keys-1 (context name mode)
   "A fix for the epa bug.
