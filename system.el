@@ -39,6 +39,9 @@
        smooth-scrolling
        neotree
 
+       ;; Research
+       org-ref
+       
        ;; Git
        magit
 	
@@ -70,13 +73,6 @@
 
        ;; Lisp
        elmacro
-
-       ;; C++
-       cmake-ide
-       auto-complete
-       auto-complete-clang
-       irony
-       helm-gtags
 
        ;; Rust
        rust-mode
@@ -121,7 +117,6 @@
 		       "lisp.el"
 		       "purescript.el"
 		       "google.el"
-		       "c.el"
 		       "rust.el"
 		       ))
 
