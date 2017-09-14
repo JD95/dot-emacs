@@ -37,7 +37,6 @@
        ;; Navigation
        avy 
        smooth-scrolling
-       neotree
 
        ;; Research
        org-ref
