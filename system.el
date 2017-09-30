@@ -31,12 +31,12 @@
       (gotham-theme
 
        ;; Apps
-       org-brain
-       ascii-art-to-unicode
+       use-package
        
        ;; Navigation
        avy 
        smooth-scrolling
+       evil
 
        ;; Research
        org-ref
@@ -54,6 +54,7 @@
        helm
        helm-projectile
        projectile
+       column-marker
 	
        ;; Python
        elpy

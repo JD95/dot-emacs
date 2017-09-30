@@ -20,7 +20,6 @@
 (defun haskell-setup ()
 	    (rainbow-delimiters-mode)
 	    (drag-stuff-mode)
-	    (hlint-refactor-mode)
 	    (structured-haskell-mode nil)
 	    (intero-mode nil)
 	    (global-set-key (kbd "M-s") 'avy-goto-word-1)
