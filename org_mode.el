@@ -1,5 +1,9 @@
 ;; Org Mode
 
+(require 'evil-org)
+(add-hook 'org-mode-hook 'evil-org-mode)
+(evil-org-set-key-theme '(navigation insert textobjects additional))
+
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
@@ -98,3 +102,6 @@
    			   (?5 . (:foreground "red"))
 			   (?6 . (:foreground "deep pink"))
 			   ))
+
+;; org-ref
+(require 'org-ref)

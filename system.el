@@ -6,9 +6,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(org-agenda-files (quote ("f:/OneDrive/Planner/TODO.org")))
- '(package-selected-packages
-   (quote
-    (intero smooth-scrolling py-autopep8 neotree material-theme flycheck elpy avy))))
+)
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -37,6 +35,9 @@
        avy 
        smooth-scrolling
        evil
+       evil-magit
+       evil-org
+       evil-tutor
 
        ;; Research
        org-ref
@@ -107,21 +108,24 @@
 
 ;; External Config Scripts
 (setq launch_scripts '(
-		       "utilities.el"
-		       "editor.el"
-		       "org_mode.el"
-		       "haskell.el"
-		       "markdown.el"
-		       "python.el"
-		       "idris.el"
-		       "lisp.el"
-		       "purescript.el"
-		       "google.el"
-		       "rust.el"
-		       ))
+  "utilities.el"
+  "editor.el"
+  "org_mode.el"
+  "haskell.el"
+  "markdown.el"
+  "python.el"
+  "idris.el"
+  "lisp.el"
+  "purescript.el"
+  "google.el"
+  "rust.el"
+  "templates.el"
+))
+
+
 
 (setq load_script (lambda (file_name)
-	  (load-file (concat "~/emacs_launch_scripts/" file_name))))
+  (load-file (concat "~/emacs_launch_scripts/" file_name))))
 
 (mapcar load_script launch_scripts)
 

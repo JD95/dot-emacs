@@ -28,8 +28,6 @@
 (require 'evil)
 (evil-mode 1)
 
-;; Allows for shift+arrow to move between frames
-
 ;; Shrink or grow windows
 (global-set-key (kbd "C-,") #'shrink-window-horizontally)
 (global-set-key (kbd "C-.") #'enlarge-window-horizontally)
