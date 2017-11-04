@@ -73,7 +73,6 @@
     (mapc 'insert template))
   )
 
-
 (provide 'purescript)
 
 ;;; purescript.el ends here

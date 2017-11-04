@@ -33,12 +33,13 @@
 (setq org-todo-keyword-faces
       '(
 	("TODO" . (:foreground "red"))
+	("PROGRESSING" . (:foreground "orange"))
         ("HOLD" . (:foreground "yellow"))
 	("FAILED" . (:foreground "grey"))
         ))
 
 (setq org-todo-keywords
-      '((sequence "TODO" "HOLD" "|" "DONE" "FAILED")))
+      '((sequence "TODO" "PROGRESSING" "HOLD" "|" "DONE" "FAILED")))
 
 (defun org-todo-sequence ()
   "Creates a list of todo items ending with numbers from start to end"
@@ -105,3 +106,11 @@
 
 ;; org-ref
 (require 'org-ref)
+
+;; Latex 
+(setq org-latex-pdf-process
+      '("bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
+	"bash -c \"bibtex %b\""
+	"bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
+	"bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
+	))

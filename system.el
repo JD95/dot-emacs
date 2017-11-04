@@ -1,11 +1,22 @@
 (require 'cl-lib)
 
+
+(require 'json)
+
+;; Load from config file
+(let* ((json-object-type 'hash-table)
+       (json-array-type 'list)
+       (json-key-type 'string)
+       (json (json-read-file "~/emacs_launch_scripts/config.json")))
+  (setq emacs-config json))
+
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-agenda-files (quote ("f:/OneDrive/Planner/TODO.org")))
+ '(org-agenda-files (gethash "agenda-files" emacs-config))
 )
 
 (custom-set-faces
@@ -16,12 +27,10 @@
  )
 
 ;; Setting the font
-(set-face-attribute 'default nil :font "DejaVu Sans Mono-10")
-(set-frame-font "DejaVu Sans Mono-10" nil t)
+(set-face-attribute 'default nil :font "FiraCode-Medium")
+(set-frame-font "FiraCode-Medium" nil t)
 
 ;; Executable Paths
-
-
 
 ; list the packages you want
 (setq package-list 
@@ -49,6 +58,9 @@
        drag-stuff
        xah-math-input
 
+       ;; Windows
+       powershell
+
        ;; General coding
        paredit
        rainbow-delimiters
@@ -71,6 +83,9 @@
        ;; Purescript
        purescript-mode
        psc-ide
+
+       ;; coq
+       company-coq
 
        ;; Lisp
        elmacro
@@ -116,6 +131,7 @@
   "python.el"
   "idris.el"
   "lisp.el"
+  "coq.el"
   "purescript.el"
   "google.el"
   "rust.el"
@@ -128,5 +144,4 @@
   (load-file (concat "~/emacs_launch_scripts/" file_name))))
 
 (mapcar load_script launch_scripts)
-
 

@@ -25,6 +25,7 @@
 
 
 ;; WINDOW CONTROLS --------------------------------------
+(setq evil-want-abbrev-expand-on-insert-exit nil)
 (require 'evil)
 (evil-mode 1)
 
@@ -88,22 +89,8 @@
 
 ;; For creating new projects
 
-(setq current-projects-directory "E:/Current_Project/")
 
 (setq default-org-header "#+STARTUP: hidestars\n")
-
-(defun new-project ()
-  "Create a new org mode project."
-  (interactive)
-  (let* ((project-name (read-string "project name:"))
-	(project-folder (concat current-projects-directory project-name))
-	(project-overview (concat project-folder "/overview.org"))
-	)
-    (make-directory project-folder)
-    (append-to-file default-org-header nil project-overview)
-    (find-file project-overview)
-  )
-)
 
 ;; Utilities
 
