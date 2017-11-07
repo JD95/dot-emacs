@@ -16,6 +16,7 @@
 	    (rainbow-delimiters-mode)
 	    (drag-stuff-mode)
 	    (structured-haskell-mode nil)
+	    (hindent-mode)
 	    (intero-mode nil)
 	    (global-set-key (kbd "M-s") 'avy-goto-word-1)
 	    )
