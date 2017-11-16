@@ -12,9 +12,14 @@
    `(,(concat "#+TITLE: " title)
      ,(concat "#+AUTHOR: " author)
      ,(concat "#+DATE: " date)
-     "#+OPTIONS: toc:nil"
+     "#+STARTUP: hidestar"
+     "#+STARTUP: indent"
+     "\n"
      "# latex options"
-     "#+LATEX_HEADER: \\usepackage[margin=0.5in]{geometry}"
+     "#+OPTIONS: toc:nil"
+     "#+LATEX_HEADER: \\usepackage[margin=1.5in]{geometry}"
+     "#+LATEX_HEADER: \\usepackage{apacite}"
+     "#+LATEX_HEADER: \\usepackage{setspace}"
     )))
 (provide 'templates-org)
 

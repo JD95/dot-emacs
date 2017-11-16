@@ -107,7 +107,8 @@
 ;; org-ref
 (require 'org-ref)
 
-;; Latex 
+;; Latex
+(setq org-highlight-latex-and-related '(latex script entities))
 (setq org-latex-pdf-process
       '("bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
 	"bash -c \"bibtex %b\""
