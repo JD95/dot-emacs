@@ -27,8 +27,8 @@
  )
 
 ;; Setting the font
-(set-face-attribute 'default nil :font "FiraCode-Medium")
-(set-frame-font "FiraCode-Medium" nil t)
+(set-face-attribute 'default nil :font "FiraCode")
+(set-frame-font "FiraCode" nil t)
 
 ;; Executable Paths
 
@@ -105,6 +105,7 @@
                          ("gnu" . "http://elpa.gnu.org/packages/")
 			 ("melpa" . "http://melpa.org/packages/")
 			 ("org" . "http://orgmode.org/elpa/")
+			 ("marmalade" . "http://marmalade-repo.org/packages/")
 			 )
 )
 
@@ -131,10 +132,10 @@
   "python.el"
   "idris.el"
   "lisp.el"
-  "coq.el"
-  "purescript.el"
-  "google.el"
-  "rust.el"
+  ;;"coq.el"
+  ;; "purescript.el"
+  ;; "google.el"
+  ;; "rust.el"
   "templates.el"
 ))
 
