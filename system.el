@@ -80,6 +80,9 @@
        hindent	      ;; Style
        shm            ;; Formatting
 
+       ;; Idris
+       idris-mode
+       
        ;; Purescript
        purescript-mode
        psc-ide
