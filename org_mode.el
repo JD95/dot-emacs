@@ -41,6 +41,8 @@
 (setq org-todo-keywords
       '((sequence "TODO" "PROGRESSING" "HOLD" "|" "DONE" "FAILED")))
 
+(setq org-scheduled-delay-days 0)
+
 (defun org-todo-sequence ()
   "Creates a list of todo items ending with numbers from start to end"
   (interactive)

@@ -50,6 +50,7 @@
 
        ;; Research
        org-ref
+       ox-reveal
        
        ;; Git
        magit

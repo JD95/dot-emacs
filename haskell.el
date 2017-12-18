@@ -21,6 +21,7 @@
 	    (global-set-key (kbd "M-s") 'avy-goto-word-1)
 	    )
 
+(setq haskell-stylish-on-save t)
 ;; rainbow delimiter
 (add-hook 'haskell-mode-hook 'haskell-setup)
 
@@ -28,7 +29,7 @@
 (eval-after-load 'haskell-mode
   '(progn  (define-key haskell-mode-map (kbd "M-<up>") 'drag-stuff-up)
 	   (define-key haskell-mode-map (kbd "M-<down>") 'drag-stuff-down)
-	   (define-key shm-map (kbd "C-c C-s") 'shm/case-split)	   
+	   (define-key shm-map (kbd "C-c C-s") 'shm/case-split)
 	   ))
 
 (with-eval-after-load 'intero
