@@ -29,6 +29,9 @@
 (require 'evil)
 (evil-mode 1)
 
+(setq uniquify-buffer-name-style 'forward)
+(setq-default indent-tabs-mode nil)
+
 ;; Shrink or grow windows
 (global-set-key (kbd "C-,") #'shrink-window-horizontally)
 (global-set-key (kbd "C-.") #'enlarge-window-horizontally)
