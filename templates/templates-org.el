@@ -48,10 +48,10 @@
      "#+REVEAL_PLUGINGS: (notes)"
      "#+OPTIONS: num:nil"
      ""
-     `(concat "#+TITLE: " title)
-     `(concat "#+AUTHOR: " author)
-     `(concat "#+DATE: " date)
-     ))
+     ,(concat "#+TITLE: " title)
+     ,(concat "#+AUTHOR: " author)
+     ,(concat "#+DATE: " date)
+     )))
 
 
 ;;; templates-org.el ends here

@@ -82,8 +82,7 @@
 
 (defun org-mode-setup ()
   (local-set-key (kbd "C-;") 'org-twbs-export-to-html)
-  (visual-line-mode)
-  (xah-math-input-mode-on))
+  (visual-line-mode))
 
 ;; Unicode Symbols
 (add-hook 'org-mode-hook 'org-mode-setup)
