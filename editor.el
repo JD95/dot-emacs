@@ -51,10 +51,6 @@
 
 (bind-keys*
  ("M-s" . avy-goto-word-1)
- ("C-h" . windmove-left)
- ("C-l" . windmove-right)
- ("C-k" . windmove-up)
- ("C-j" . windmove-down)
 )
 
 ;; Completion
