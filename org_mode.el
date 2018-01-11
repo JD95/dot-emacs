@@ -54,30 +54,56 @@
 	 (items (mapcar line-item (number-sequence start end))))
     (mapc 'insert items)))
 
-;; Exporting Org files as HTML
-(defun my-org-publish-buffer ()
-  (interactive)
-  (save-buffer)
-  (save-excursion (org-publish-current-file))
-  (let* ((proj (org-publish-get-project-from-filename buffer-file-name))
-         (proj-plist (cdr proj))
-         (rel (file-relative-name buffer-file-name
-                                  (plist-get proj-plist :base-directory)))
-         (dest (plist-get proj-plist :publishing-directory)))
-    (browse-url (concat "file://"
-                        (file-name-as-directory (expand-file-name dest))
-                        (file-name-sans-extension rel)
-                        ".html"))))
+;; Exporting Org files
+
+;; html export settings
+(defun org-html-set-export-options
+    (orig &optional async subtreep visible-only body-only ext-plist)
+  (let ((org-export-exclude-tags '("no_html_export")))
+    (funcall orig async subtreep visible-only body-only ext-plist)))
+
+(advice-add 'org-html-export-to-html
+            :around #'org-html-set-export-options)
+
+(advice-add 'org-html-export-to-html-and-browse
+            :around #'org-html-set-export-options)
+
+
+;; latex export settings
+(defun org-latex-set-export-options
+    (orig &optional async subtreep visible-only body-only ext-plist)
+  (let ((org-export-exclude-tags '("no_latex_export")))
+    (funcall orig async subtreep visible-only body-only ext-plist)))
+
+(advice-add 'org-latex-export-to-pdf
+            :around #'org-latex-set-export-options)
+
+
+;; reveal export settings
+(defun org-reveal-set-export-options
+    (orig &optional async subtreep visible-only body-only ext-plist)
+  (let ((org-export-exclude-tags '("no_reveal_export")))
+    (funcall orig async subtreep visible-only body-only ext-plist)))
+
+(advice-add 'org-reveal-export-to-html
+            :around #'org-reveal-set-export-options)
+
+(advice-add 'org-reveal-export-to-html-and-browse
+            :around #'org-reveal-set-export-options)
+
+;; twbs export settings
+(defun org-twbs-set-export-options
+    (orig &optional async subtreep visible-only body-only ext-plist)
+  (let ((org-export-exclude-tags '("no_twbs_export")))
+    (funcall orig async subtreep visible-only body-only ext-plist)))
+
+(advice-add 'org-twbs-export-to-html
+            :around #'org-twbs-set-export-options)
+
+(advice-add 'org-twbs-export-to-html-and-browse
+            :around #'org-twbs-set-export-options)
 
 ;; Org projects
-(setq org-publish-project-alist
-      '(("programming-tutorials"
-         :base-directory "d:/Current_Project/programming-tutorials/Haskell/Chatpers/Absolute Beginners/"
-         :publishing-directory "c:/Users/jeffr/Desktop/"
-         :publishing-function org-twbs-publish-to-html
-         :with-sub-superscript nil
-         )))
-
 (eval-after-load "org" '(require 'ox-md nil t))
 
 (defun org-mode-setup ()
