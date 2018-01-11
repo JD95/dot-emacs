@@ -27,10 +27,8 @@
  )
 
 ;; Setting the font
-(set-face-attribute 'default nil :font "FiraCode")
-(set-frame-font "FiraCode" nil t)
-
-;; Executable Paths
+(set-face-attribute 'default nil :font "Fira Code")
+(set-frame-font "Fira Code" nil t)
 
 ; list the packages you want
 (setq package-list 
@@ -44,6 +42,7 @@
        avy 
        smooth-scrolling
        evil
+       evil-collection
        evil-magit
        evil-org
        evil-tutor
@@ -57,7 +56,6 @@
 	
        ;; Text Manipulation
        drag-stuff
-       xah-math-input
 
        ;; Windows
        powershell
@@ -136,7 +134,7 @@
   "python.el"
   "idris.el"
   "lisp.el"
-  ;;"coq.el"
+  "coq.el"
   ;; "purescript.el"
   ;; "google.el"
   ;; "rust.el"

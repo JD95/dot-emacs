@@ -43,12 +43,14 @@
 ;; Move using avy search
 ;;(global-set-key (kbd "M-s") 'avy-goto-word-1)
 
+(when (require 'evil-collection nil t)
+  (evil-collection-init))
+(use-package evil-collection
+  :custom (evil-collection-setup-minibuffer t)
+  :init (evil-collection-init))
+
 (bind-keys*
  ("M-s" . avy-goto-word-1)
- ("C-h" . windmove-left)
- ("C-l" . windmove-right)
- ("C-k" . windmove-up)
- ("C-j" . windmove-down)
 )
 
 ;; Completion
