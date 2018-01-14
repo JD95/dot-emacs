@@ -25,10 +25,6 @@
 
 
 ;; WINDOW CONTROLS --------------------------------------
-(setq evil-want-abbrev-expand-on-insert-exit nil)
-(require 'evil)
-(evil-mode 1)
-
 (setq uniquify-buffer-name-style 'forward)
 (setq-default indent-tabs-mode nil)
 
@@ -42,12 +38,6 @@
 
 ;; Move using avy search
 ;;(global-set-key (kbd "M-s") 'avy-goto-word-1)
-
-(when (require 'evil-collection nil t)
-  (evil-collection-init))
-(use-package evil-collection
-  :custom (evil-collection-setup-minibuffer t)
-  :init (evil-collection-init))
 
 (bind-keys*
  ("M-s" . avy-goto-word-1)
@@ -174,6 +164,14 @@ Argument MODE Not sure."
   (interactive)
   (delete-other-windows nil)
   (neotree-hide))
+
+;; evil config
+(setq evil-want-abbrev-expand-on-insert-exit nil)
+(setq evil-want-integration nil)
+(setq evil-collection-setup-minibuffer t)
+(require 'evil)
+(evil-mode 1)
+(evil-collection-init)
 
 (provide 'editor)
 
