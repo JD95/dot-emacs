@@ -172,6 +172,7 @@ Argument MODE Not sure."
 (require 'evil)
 (evil-mode 1)
 (evil-collection-init)
+(evil-magit-init)
 
 (provide 'editor)
 
