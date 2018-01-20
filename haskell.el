@@ -13,17 +13,17 @@
   (add-to-list 'exec-path my-stack-path))
 
 (defun haskell-setup ()
-	    (rainbow-delimiters-mode)
-	    (drag-stuff-mode)
-	    (structured-haskell-mode nil)
-	    (hindent-mode)
-	    (intero-mode nil)
-	    (global-set-key (kbd "M-s") 'avy-goto-word-1)
-	    )
+  (rainbow-delimiters-mode)
+  (drag-stuff-mode)
+  (structured-haskell-mode nil)
+  (hindent-mode)
+  (intero-mode nil)
+  (global-set-key (kbd "M-s") 'avy-goto-word-1)
+  )
 
 (setq haskell-stylish-on-save t)
 ;; rainbow delimiter
-(add-hook 'haskell-mode-hook 'haskell-setup)
+(add-hook 'haskell-mode-hook #'haskell-setup)
 
 (require 'shm)
 (eval-after-load 'haskell-mode

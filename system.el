@@ -92,6 +92,8 @@
 
        ;; Lisp
        elmacro
+       lispy
+       evil-lispy
 
        ;; Rust
        rust-mode
@@ -104,13 +106,14 @@
 
 					; list the repositories containing them
 (require 'package)
-(setq package-archives '(("elpa" . "http://tromey.com/elpa/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")
-			 ("melpa" . "http://melpa.org/packages/")
-			 ("org" . "http://orgmode.org/elpa/")
-			 ("marmalade" . "http://marmalade-repo.org/packages/")
-			 )
-)
+(setq package-archives
+      '(("elpa" . "http://tromey.com/elpa/")
+        ("gnu" . "http://elpa.gnu.org/packages/")
+        ("melpa" . "http://melpa.org/packages/")
+        ("org" . "http://orgmode.org/elpa/")
+        ("marmalade" . "http://marmalade-repo.org/packages/")
+        )
+      )
 
 ; activate all the packages (in particular autoloads)
 (package-initialize)
@@ -136,7 +139,7 @@
   "idris.el"
   "lisp.el"
   "coq.el"
-  ;; "purescript.el"
+  " purescript.el"
   ;; "google.el"
   ;; "rust.el"
   "templates.el"

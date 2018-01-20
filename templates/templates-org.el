@@ -22,6 +22,29 @@
      "#+LATEX_HEADER: \\usepackage{setspace}"
      )))
 
+(defun template-new-org-comp51-project ()
+  (interactive)
+  (template-new-template
+   ((title "title:") (due-date "due date:"))
+   `(,(concat "#+TITLE: " title)
+     ,(concat "#+DATE: " due-date)
+     "#+STARTUP: hidestar"
+     "#+STARTUP: indent"
+     "\n"
+     "# latex options"
+     "#+OPTIONS: toc:nil num:nil html:postamble:nil date:nil"
+     "#+LATEX_HEADER: \\usepackage[margin=1.5in]{geometry}"
+     "#+LATEX_HEADER: \\usepackage{apacite}"
+     "#+LATEX_HEADER: \\usepackage{setspace}"
+     ""
+     "* Objective:"
+     ""
+     "* Description:"
+     ""
+     "* Requirements:"
+     )))
+
+
 (defun template-new-org-latex-codesnippet ()
   (interactive)
   (template-new-template
@@ -44,9 +67,8 @@
      "#+STARTUP: hidestar"
      ""
      "#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/"
-     "#+REVEAL_THEmE: serif"
-     "#+REVEAL_PLUGINGS: (notes)"
-     "#+OPTIONS: num:nil"
+     "#+REVEAL_THEME: serif"
+     "#+OPTIONS: num:nil timestamp:nil html-postamble:nil tags:nil toc:nil"
      ""
      ,(concat "#+TITLE: " title)
      ,(concat "#+AUTHOR: " author)
