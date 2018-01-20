@@ -133,7 +133,7 @@
   "idris.el"
   "lisp.el"
   "coq.el"
-  ;; "purescript.el"
+  " purescript.el"
   ;; "google.el"
   ;; "rust.el"
   "templates.el"
