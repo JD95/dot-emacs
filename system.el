@@ -145,8 +145,6 @@
   "templates.el"
 ))
 
-
-
 (setq load_script (lambda (file_name)
   (load-file (concat "~/emacs_launch_scripts/" file_name))))
 
