@@ -44,19 +44,6 @@
      "* Requirements:"
      )))
 
-
-(defun template-new-org-latex-codesnippet ()
-  (interactive)
-  (template-new-template
-   ((language "language:"))
-   `("\\begin{spacing}{0.5}"
-     ,(concat "\\begin{lstlisting}[language=" language "]")
-     ""
-     "\\end{lstlisting}"
-     "\\end{spacing}"
-     "\\vspace{5mm}"
-     )))
-
 (provide 'templates-org)
 
 (defun template-new-org-reveal-presentation ()
