@@ -28,6 +28,7 @@
 (setq templates
   '( "templates-haskell.el"
      "templates-org.el"
+     "templates-python.el"
    ))
 
 (setq load_templates (lambda (file_name)

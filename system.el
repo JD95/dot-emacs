@@ -1,6 +1,5 @@
 (require 'cl-lib)
 
-
 (require 'json)
 
 ;; Load from config file
@@ -141,7 +140,7 @@
   "coq.el"
   "purescript.el"
   ;; "google.el"
-  ;; "rust.el"
+  "rust.el"
   "templates.el"
 ))
 

@@ -55,6 +55,17 @@
     (mapc 'insert items)))
 
 ;; Exporting Org files
+(defun org-ascii-set-export-options
+    (orig &optional async subtreep visible-only body-only ext-plist)
+  (let ((org-export-exclude-tags '("no_ascii_export")))
+    (funcall orig async subtreep visible-only body-only ext-plist)))
+
+(advice-add 'org-ascii-export-to-ascii
+            :around #'org-ascii-set-export-options)
+
+(advice-add 'org-ascii-export-as-ascii
+            :around #'org-ascii-set-export-options)
+
 
 ;; html export settings
 (defun org-html-set-export-options
@@ -123,12 +134,17 @@
 
 (add-hook 'org-brain-after-visualize-hook #'aa2u-buffer)
 
-(setq org-priority-faces '((?1 . (:foreground "green" :weight 'bold))
-                           (?2 . (:foreground "pale green"))
-                           (?3 . (:foreground "yellow"))
+(setq org-priority-faces '(
+			   (?0 . (:foreground "green"))
+                           (?1 . (:foreground "green yellow" :weight 'bold))
+                           (?2 . (:foreground "yellow"))
+                           (?3 . (:foreground "gold"))
 			   (?4 . (:foreground "orange"))
-   			   (?5 . (:foreground "red"))
-			   (?6 . (:foreground "deep pink"))
+   			   (?5 . (:foreground "chocolate"))
+			   (?6 . (:foreground "firebrick"))
+			   (?7 . (:foreground "brown"))
+			   (?8 . (:foreground "plum"))
+			   (?9 . (:foreground "DarkOrchid4"))
 			   ))
 
 ;; org-ref

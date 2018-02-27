@@ -45,6 +45,8 @@
 (global-set-key (kbd "C-x C-f") #'helm-find-files)
 (helm-mode 1)
 
+(setq find-program (gethash "find" emacs-config))
+
 (projectile-mode)
 
 ;; Swap horizontal and vertical splits
@@ -168,6 +170,8 @@ Argument MODE Not sure."
 (evil-collection-init)
 (evil-magit-init)
 
+;; Magit
+(setenv "GIT_ASKPASS" "git-gui--askpass")
 
 ;; Utilities
 (defun find-first-non-ascii-char ()
