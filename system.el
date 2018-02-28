@@ -131,7 +131,6 @@
 (setq launch_scripts '(
   "utilities.el"
   "editor.el"
-  "org_mode.el"
   "haskell.el"
   "markdown.el"
   "python.el"
@@ -139,9 +138,9 @@
   "lisp.el"
   "coq.el"
   "purescript.el"
-  ;; "google.el"
   "rust.el"
   "templates.el"
+  "org_mode.el"
 ))
 
 (setq load_script (lambda (file_name)

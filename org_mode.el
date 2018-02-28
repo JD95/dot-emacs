@@ -4,7 +4,7 @@
 (add-hook 'org-mode-hook 'evil-org-mode)
 (evil-org-set-key-theme '(navigation insert textobjects additional))
 
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode)
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
 
@@ -125,14 +125,6 @@
 (add-hook 'org-mode-hook 'org-mode-setup)
 
 ;; org-brain
-(setq org-brain-path "F:/brain")
-(setq org-id-locations-file "~/.emacs.d/.org-id-locations")
-(setq org-brain-visualize-default-choices 'all)
-
-(defun aa2u-buffer ()
-  (aa2u (point-min) (point-max)))
-
-(add-hook 'org-brain-after-visualize-hook #'aa2u-buffer)
 
 (setq org-priority-faces '(
 			   (?0 . (:foreground "green"))
