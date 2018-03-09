@@ -4,7 +4,7 @@
 (add-hook 'org-mode-hook 'evil-org-mode)
 (evil-org-set-key-theme '(navigation insert textobjects additional))
 
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode)
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
 
@@ -140,7 +140,6 @@
 			   ))
 
 ;; org-ref
-(require 'org-ref)
 
 ;; Latex
 (setq org-highlight-latex-and-related '(latex script entities))

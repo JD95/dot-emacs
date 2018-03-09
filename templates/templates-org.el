@@ -25,16 +25,15 @@
 (defun template-new-org-comp51-project ()
   (interactive)
   (template-new-template
-   ((title "title:") (due-date "due date:"))
+   ((title "title:"))
    `(,(concat "#+TITLE: " title)
-     ,(concat "#+DATE: " due-date)
+     "#+SUBTITLE: COMP 51"
      "#+STARTUP: hidestar"
      "#+STARTUP: indent"
-     "\n"
+     ""
      "# latex options"
      "#+OPTIONS: toc:nil num:nil html:postamble:nil date:nil"
      "#+LATEX_HEADER: \\usepackage[margin=1.5in]{geometry}"
-     "#+LATEX_HEADER: \\usepackage{apacite}"
      "#+LATEX_HEADER: \\usepackage{setspace}"
      ""
      "* Objective:"
