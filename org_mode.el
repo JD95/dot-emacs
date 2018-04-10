@@ -149,3 +149,7 @@
 	"bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
 	"bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
 	))
+
+;; Gnuplot
+
+(local-set-key "\C-\M-g" #'org-plot/gnuplot)

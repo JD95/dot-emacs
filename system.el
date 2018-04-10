@@ -98,6 +98,7 @@
        rust-mode
        racer
        flycheck-rust
+       cargo
 
        ;; Markdown
        markdown-mode
@@ -147,13 +148,3 @@
   (load-file (concat "~/emacs_launch_scripts/" file_name))))
 
 (mapcar load_script launch_scripts)
-
-(require 'server)
-(unless (server-running-p)
-  (cond
-   ((eq system-type 'windows-nt)
-    (setq server-author-dir "~\\.emacs.d\\server\\"))
-   ((eq system-type 'gnu/linux)
-    (setq server-author-dir "~/.emacs.d/server/")))
-  (setq server-name "emacs-server-file")
-  (server-start))
