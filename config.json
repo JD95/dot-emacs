@@ -1,0 +1,8 @@
+{
+    "projects" : ["Hello"],
+    "agenda-files": ["f:/OneDrive/Planner/TODO.org"],
+    "idris-location": "C:/Users/jeffr/AppData/Roaming/local/bin",
+    "coq-proof-site-location": "d:/programming-libraries/coq/PG/generic/proof-site",
+    "haskell-stack-location": "~/AppData/Roaming/local/bin",
+    "find": "D:/msys64/usr/bin/find.exe"
+}
