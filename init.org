@@ -269,7 +269,6 @@ a config.json file which is not tracked by version control.
 
    #+BEGIN_SRC emacs-lisp
    (setq-default fill-column 79                    ; Maximum line width
-                 truncate-lines t                  ; Don't fold lines
                  indent-tabs-mode nil              ; Use spaces instead of tabs
                  split-width-threshold 160         ; Split verticly by default
                  split-height-threshold nil        ; Split verticly by default
