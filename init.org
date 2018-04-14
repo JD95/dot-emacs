@@ -46,33 +46,19 @@ experience bugs, please let me know!
 
 The init.el file essentially exists to replace itself with the contents
 of init.org on the initial load. Subsequent updates to the file can be 
-achieved using the following function.
+achieved using =update-init-el= which is defined later.
 
-#+BEGIN_SRC emacs-lisp
-(require 'org)
 
-(defun update-init-el () 
-  (interactive)
-  ;; Open the configuration
-  (find-file (concat user-emacs-directory "init.org"))
-  ;; tangle it
-  (org-babel-tangle)
-  ;; load it
-  (load-file (concat user-emacs-directory "init.el"))
-  ;; finally byte-compile it
-  (byte-compile-file (concat user-emacs-directory "init.el"))
-)
-#+END_SRC
 
 * Configurations
 
 ** Packages
 
-   Managing extensions for Emacs is simplified using =package= which is
-   built in to Emacs 24 and newer. To load downloaded packages we need to
-   initialize =package=. =cl= is a library that contains many functions from
-   Common Lisp, and comes in handy quite often, so we want to make sure it's
-   loaded, along with =package=, which is obviously needed.
+Managing extensions for Emacs is simplified using =package= which is
+built in to Emacs 24 and newer. To load downloaded packages we need to
+initialize =package=. =cl= is a library that contains many functions from
+Common Lisp, and comes in handy quite often, so we want to make sure it's
+loaded, along with =package=, which is obviously needed.
 
 #+BEGIN_SRC emacs-lisp
 (require 'cl)
@@ -660,190 +646,208 @@ This is quite an ugly fix for allowing code markup for expressions like
 ** Interactive functions
    <<sec:defuns>>
 
-   =just-one-space= removes all whitespace around a point - giving it a
-   negative argument it removes newlines as well. We wrap a interactive
-   function around it to be able to bind it to a key. In Emacs 24.4
-   =cycle-spacing= was introduced, and it works like =just-one-space=, but
-   when run in succession it cycles between one, zero and the original
-   number of spaces.
+This updates the compiled init.el file with any changes made to this file.
 
-   #+BEGIN_SRC emacs-lisp
-   (defun cycle-spacing-delete-newlines ()
-     "Removes whitespace before and after the point."
-     (interactive)
-     (if (version< emacs-version "24.4")
-         (just-one-space -1)
-       (cycle-spacing -1)))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(require 'org)
 
-   Often I want to find other occurrences of a word I'm at, or more
-   specifically the symbol (or tag) I'm at. The
-   =isearch-forward-symbol-at-point= in Emacs 24.4 works well for this, but
-   I don't want to be bothered with the =isearch= interface. Rather jump
-   quickly between occurrences of a symbol, or if non is found, don't do
-   anything.
+(defun update-init-el () 
+  (interactive)
+  ;; Open the configuration
+  (find-file (concat user-emacs-directory "init.org"))
+  ;; tangle it
+  (org-babel-tangle)
+  ;; load it
+  (load-file (concat user-emacs-directory "init.el"))
+  ;; finally byte-compile it
+  (byte-compile-file (concat user-emacs-directory "init.el"))
+)
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
-   (defun jump-to-symbol-internal (&optional backwardp)
-     "Jumps to the next symbol near the point if such a symbol
-   exists. If BACKWARDP is non-nil it jumps backward."
-     (let* ((point (point))
-            (bounds (find-tag-default-bounds))
-            (beg (car bounds)) (end (cdr bounds))
-            (str (isearch-symbol-regexp (find-tag-default)))
-            (search (if backwardp 'search-backward-regexp
-                      'search-forward-regexp)))
-       (goto-char (if backwardp beg end))
-       (funcall search str nil t)
-       (cond ((<= beg (point) end) (goto-char point))
-             (backwardp (forward-char (- point beg)))
-             (t  (backward-char (- end point))))))
+=just-one-space= removes all whitespace around a point - giving it a
+negative argument it removes newlines as well. We wrap a interactive
+function around it to be able to bind it to a key. In Emacs 24.4
+=cycle-spacing= was introduced, and it works like =just-one-space=, but
+when run in succession it cycles between one, zero and the original
+number of spaces.
 
-   (defun jump-to-previous-like-this ()
-     "Jumps to the previous occurrence of the symbol at point."
-     (interactive)
-     (jump-to-symbol-internal t))
+#+BEGIN_SRC emacs-lisp
+(defun cycle-spacing-delete-newlines ()
+  "Removes whitespace before and after the point."
+  (interactive)
+  (if (version< emacs-version "24.4")
+      (just-one-space -1)
+    (cycle-spacing -1)))
+#+END_SRC
 
-   (defun jump-to-next-like-this ()
-     "Jumps to the next occurrence of the symbol at point."
-     (interactive)
-     (jump-to-symbol-internal))
-   #+END_SRC
+Often I want to find other occurrences of a word I'm at, or more
+specifically the symbol (or tag) I'm at. The
+=isearch-forward-symbol-at-point= in Emacs 24.4 works well for this, but
+I don't want to be bothered with the =isearch= interface. Rather jump
+quickly between occurrences of a symbol, or if non is found, don't do
+anything.
 
-   I sometimes regret killing the =*scratch*=-buffer, and have realized I
-   never want to actually kill it. I just want to get it out of the way, and
-   clean it up. The function below does just this for the
-   =*scratch*=-buffer, and works like =kill-this-buffer= for any other
-   buffer. It removes all buffer content and buries the buffer (this means
-   making it the least likely candidate for =other-buffer=).
+#+BEGIN_SRC emacs-lisp
+(defun jump-to-symbol-internal (&optional backwardp)
+  "Jumps to the next symbol near the point if such a symbol
+exists. If BACKWARDP is non-nil it jumps backward."
+  (let* ((point (point))
+         (bounds (find-tag-default-bounds))
+         (beg (car bounds)) (end (cdr bounds))
+         (str (isearch-symbol-regexp (find-tag-default)))
+         (search (if backwardp 'search-backward-regexp
+                   'search-forward-regexp)))
+    (goto-char (if backwardp beg end))
+    (funcall search str nil t)
+    (cond ((<= beg (point) end) (goto-char point))
+          (backwardp (forward-char (- point beg)))
+          (t  (backward-char (- end point))))))
 
-   #+BEGIN_SRC emacs-lisp
-   (defun kill-this-buffer-unless-scratch ()
-     "Works like `kill-this-buffer' unless the current buffer is the
-   ,*scratch* buffer. In witch case the buffer content is deleted and
-   the buffer is buried."
-     (interactive)
-     (if (not (string= (buffer-name) "*scratch*"))
-         (kill-this-buffer)
-       (delete-region (point-min) (point-max))
-       (switch-to-buffer (other-buffer))
-       (bury-buffer "*scratch*")))
-   #+END_SRC
+(defun jump-to-previous-like-this ()
+  "Jumps to the previous occurrence of the symbol at point."
+  (interactive)
+  (jump-to-symbol-internal t))
 
-   To duplicate either selected text or a line we define this interactive
-   function.
+(defun jump-to-next-like-this ()
+  "Jumps to the next occurrence of the symbol at point."
+  (interactive)
+  (jump-to-symbol-internal))
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
-   (defun duplicate-thing (comment)
-     "Duplicates the current line, or the region if active. If an argument is
-   given, the duplicated region will be commented out."
-     (interactive "P")
-     (save-excursion
-       (let ((start (if (region-active-p) (region-beginning) (point-at-bol)))
-             (end   (if (region-active-p) (region-end) (point-at-eol))))
-         (goto-char end)
-         (unless (region-active-p)
-           (newline))
-         (insert (buffer-substring start end))
-         (when comment (comment-region start end)))))
-   #+END_SRC
+I sometimes regret killing the =*scratch*=-buffer, and have realized I
+never want to actually kill it. I just want to get it out of the way, and
+clean it up. The function below does just this for the
+=*scratch*=-buffer, and works like =kill-this-buffer= for any other
+buffer. It removes all buffer content and buries the buffer (this means
+making it the least likely candidate for =other-buffer=).
 
-   To tidy up a buffer we define this function borrowed from [[https://github.com/simenheg][simenheg]].
+#+BEGIN_SRC emacs-lisp
+(defun kill-this-buffer-unless-scratch ()
+  "Works like `kill-this-buffer' unless the current buffer is the
+,*scratch* buffer. In witch case the buffer content is deleted and
+the buffer is buried."
+  (interactive)
+  (if (not (string= (buffer-name) "*scratch*"))
+      (kill-this-buffer)
+    (delete-region (point-min) (point-max))
+    (switch-to-buffer (other-buffer))
+    (bury-buffer "*scratch*")))
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
-   (defun tidy ()
-     "Ident, untabify and unwhitespacify current buffer, or region if active."
-     (interactive)
-     (let ((beg (if (region-active-p) (region-beginning) (point-min)))
-           (end (if (region-active-p) (region-end) (point-max))))
-       (indent-region beg end)
-       (whitespace-cleanup)
-       (untabify beg (if (< end (point-max)) end (point-max)))))
-   #+END_SRC
+To duplicate either selected text or a line we define this interactive
+function.
 
-   Org mode does currently not support synctex (which enables you to jump from
-   a point in your TeX-file to the corresponding point in the pdf), and it
-   [[http://comments.gmane.org/gmane.emacs.orgmode/69454][seems like a tricky problem]].
+#+BEGIN_SRC emacs-lisp
+(defun duplicate-thing (comment)
+  "Duplicates the current line, or the region if active. If an argument is
+given, the duplicated region will be commented out."
+  (interactive "P")
+  (save-excursion
+    (let ((start (if (region-active-p) (region-beginning) (point-at-bol)))
+          (end   (if (region-active-p) (region-end) (point-at-eol))))
+      (goto-char end)
+      (unless (region-active-p)
+        (newline))
+      (insert (buffer-substring start end))
+      (when comment (comment-region start end)))))
+#+END_SRC
 
-   Calling this function from an org-buffer jumps to the corresponding section
-   in the exported pdf (given that the pdf-file exists), using pdf-tools.
+To tidy up a buffer we define this function borrowed from [[https://github.com/simenheg][simenheg]].
 
-   #+BEGIN_SRC emacs-lisp
-   (defun org-sync-pdf ()
-     (interactive)
-     (let ((headline (nth 4 (org-heading-components)))
-           (pdf (concat (file-name-base (buffer-name)) ".pdf")))
-       (when (file-exists-p pdf)
-         (find-file-other-window pdf)
-         (pdf-links-action-perform
-          (cl-find headline (pdf-info-outline pdf)
-                   :key (lambda (alist) (cdr (assoc 'title alist)))
-                   :test 'string-equal)))))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(defun tidy ()
+  "Ident, untabify and unwhitespacify current buffer, or region if active."
+  (interactive)
+  (let ((beg (if (region-active-p) (region-beginning) (point-min)))
+        (end (if (region-active-p) (region-end) (point-max))))
+    (indent-region beg end)
+    (whitespace-cleanup)
+    (untabify beg (if (< end (point-max)) end (point-max)))))
+#+END_SRC
 
-   This allows a window to shift from a horizontal split into a vertical split
+Org mode does currently not support synctex (which enables you to jump from
+a point in your TeX-file to the corresponding point in the pdf), and it
+seems like a tricky problem]].
 
-   #+BEGIN_SRC emacs-lisp
-   (defun toggle-window-split ()
-     "Change the window split from horizontal to vertical."
-     (interactive)
-     (if (= (count-windows) 2)
-         (let* ((this-win-buffer (window-buffer))
-                (next-win-buffer (window-buffer (next-window)))
-                (this-win-edges (window-edges (selected-window)))
-                (next-win-edges (window-edges (next-window)))
-                (this-win-2nd (not (and (<= (car this-win-edges)
-                                            (car next-win-edges))
-                                        (<= (cadr this-win-edges)
-                                            (cadr next-win-edges)))))
-                (splitter
-                 (if (= (car this-win-edges)
-                        (car (window-edges (next-window))))
-                     'split-window-horizontally
-                   'split-window-vertically)))
-           (delete-other-windows)
-           (let ((first-win (selected-window)))
-             (funcall splitter)
-             (if this-win-2nd (other-window 1))
-             (set-window-buffer (selected-window) this-win-buffer)
-             (set-window-buffer (next-window) next-win-buffer)
-             (select-window first-win)
-             (if this-win-2nd (other-window 1))))))
-   #+END_SRC
+Calling this function from an org-buffer jumps to the corresponding section
+in the exported pdf (given that the pdf-file exists), using pdf-tools.
 
-   A utility for inserting the current date. 
+#+BEGIN_SRC emacs-lisp
+(defun org-sync-pdf ()
+  (interactive)
+  (let ((headline (nth 4 (org-heading-components)))
+        (pdf (concat (file-name-base (buffer-name)) ".pdf")))
+    (when (file-exists-p pdf)
+      (find-file-other-window pdf)
+      (pdf-links-action-perform
+       (cl-find headline (pdf-info-outline pdf)
+                :key (lambda (alist) (cdr (assoc 'title alist)))
+                :test 'string-equal)))))
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
-   (defun insert-current-date (&optional omit-day-of-week-p)
-      "Insert today's date using the current locale.
-     With a prefix argument, the date is inserted without the day of
-     the week."
-      (interactive "P*")
-      (insert (calendar-date-string (calendar-current-date) nil
-                                    omit-day-of-week-p)))
-   #+END_SRC
+This allows a window to shift from a horizontal split into a vertical split
 
-   Here are some utilities for setting up a workspace. Generally, they 
-   are just present window configs generated from a macro.
+#+BEGIN_SRC emacs-lisp
+(defun toggle-window-split ()
+  "Change the window split from horizontal to vertical."
+  (interactive)
+  (if (= (count-windows) 2)
+      (let* ((this-win-buffer (window-buffer))
+             (next-win-buffer (window-buffer (next-window)))
+             (this-win-edges (window-edges (selected-window)))
+             (next-win-edges (window-edges (next-window)))
+             (this-win-2nd (not (and (<= (car this-win-edges)
+                                         (car next-win-edges))
+                                     (<= (cadr this-win-edges)
+                                         (cadr next-win-edges)))))
+             (splitter
+              (if (= (car this-win-edges)
+                     (car (window-edges (next-window))))
+                  'split-window-horizontally
+                'split-window-vertically)))
+        (delete-other-windows)
+        (let ((first-win (selected-window)))
+          (funcall splitter)
+          (if this-win-2nd (other-window 1))
+          (set-window-buffer (selected-window) this-win-buffer)
+          (set-window-buffer (next-window) next-win-buffer)
+          (select-window first-win)
+          (if this-win-2nd (other-window 1))))))
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
-   (defun general-workspace ()
-    "Set up a general split screen workspace."
-    (interactive)
-    (delete-other-windows nil)
-    (split-window-below nil)
-    (split-window-right nil)
-    (other-window 1)
-    (other-window 1)
-    (eshell nil))
+A utility for inserting the current date. 
 
-    (defun single-window-workspace ()
-    "Change to a single window workspace."
-    (interactive)
-    (delete-other-windows nil)
-    (neotree-hide))
-  
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(defun insert-current-date (&optional omit-day-of-week-p)
+   "Insert today's date using the current locale.
+  With a prefix argument, the date is inserted without the day of
+  the week."
+   (interactive "P*")
+   (insert (calendar-date-string (calendar-current-date) nil
+                                 omit-day-of-week-p)))
+#+END_SRC
+
+Here are some utilities for setting up a workspace. Generally, they 
+are just present window configs generated from a macro.
+
+#+BEGIN_SRC emacs-lisp
+(defun general-workspace ()
+ "Set up a general split screen workspace."
+ (interactive)
+ (delete-other-windows nil)
+ (split-window-below nil)
+ (split-window-right nil)
+ (other-window 1)
+ (other-window 1)
+ (eshell nil))
+
+ (defun single-window-workspace ()
+ "Change to a single window workspace."
+ (interactive)
+ (delete-other-windows nil)
+ (neotree-hide))
+
+#+END_SRC
 
 This provides a utility for finding the next non-ascii character. 
 This is useful when pasting text from websites or word.
