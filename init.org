@@ -10,13 +10,13 @@
 
 * About
 
-This is an Emacs configuration file written in [[http://orgmode.org][Org mode]]. It is an attempt
-to keep my =~/.emacs.d= tidy, but still be able to keep it all in one
-file. I aim to briefly explain all my configurations as I go along!
-
-I would not recommend using this configuration /as-is/, because it
-probably contains a lot you don't really need. I do, however, hope people
-find some golden nuggets that they can smuggle into their own configs.
+This is an Emacs configuration file written in [[http://orgmode.org][Org mode]] based on the original
+config by [[https://github.com/larstvei/dot-emacs][larstvei]]. I find organizing the various configurations in an org file
+to be easier to maintain than keeping separate files. I'm hoping to
+meticulously document my emacs configuration to help both myself and others
+that want to use this as a starting point for their own setup. Note that I just
+recently adding my settings *on top* of larstvei's so there may still be some
+choices that seem contradictory or odd.
 
 If you really do want to try this config out, this is how I'd go about it:
 
@@ -43,6 +43,26 @@ mv dot-emacs ~/.emacs.d
 On first run it should install a bunch of packages (this might take a
 while), and you might have to restart your Emacs the first time. If you
 experience bugs, please let me know!
+
+The init.el file essentially exists to replace itself with the contents
+of init.org on the initial load. Subsequent updates to the file can be 
+achieved using the following function.
+
+#+BEGIN_SRC emacs-lisp
+(require 'org)
+
+(defun update-init-el () 
+  (interactive)
+  ;; Open the configuration
+  (find-file (concat user-emacs-directory "init.org"))
+  ;; tangle it
+  (org-babel-tangle)
+  ;; load it
+  (load-file (concat user-emacs-directory "init.el"))
+  ;; finally byte-compile it
+  (byte-compile-file (concat user-emacs-directory "init.el"))
+)
+#+END_SRC
 
 * Configurations
 
@@ -434,36 +454,36 @@ New in Emacs 24.4 is the =prettify-symbols-mode=! It's neat.
 
 ** Helm
 
-   ~helm~ has a wonderful feature, being able to grep files by ~C-s~ anywhere,
-   which is useful. [[http://beyondgrep.com/][ack]] is a great ~grep~-replacement, and is designed to
-   search source code, so I want to use that if it's available.
+~helm~ has a wonderful feature, being able to grep files by ~C-s~ anywhere,
+which is useful. [[http://beyondgrep.com/][ack]] is a great ~grep~-replacement, and is designed to
+search source code, so I want to use that if it's available.
 
-   Note that some changes in bindings are located in the key bindings (found
-   near the end of the configuration).
+Note that some changes in bindings are located in the key bindings (found
+near the end of the configuration).
 
-   #+BEGIN_SRC emacs-lisp
-   (require 'helm)
-   (require 'helm-config)
+#+BEGIN_SRC emacs-lisp
+(require 'helm)
+(require 'helm-config)
 
-   (setq helm-split-window-in-side-p t
-         helm-M-x-fuzzy-match t
-         helm-buffers-fuzzy-matching t
-         helm-recentf-fuzzy-match t
-         helm-move-to-line-cycle-in-source t
-         projectile-completion-system 'helm)
+(setq helm-split-window-in-side-p t
+      helm-M-x-fuzzy-match t
+      helm-buffers-fuzzy-matching t
+      helm-recentf-fuzzy-match t
+      helm-move-to-line-cycle-in-source t
+      projectile-completion-system 'helm)
 
-   (when (executable-find "ack")
-     (setq helm-grep-default-command
-           "ack -Hn --no-group --no-color %e %p %f"
-           helm-grep-default-recurse-command
-           "ack -H --no-group --no-color %e %p %f"))
+(when (executable-find "ack")
+  (setq helm-grep-default-command
+        "ack -Hn --no-group --no-color %e %p %f"
+        helm-grep-default-recurse-command
+        "ack -H --no-group --no-color %e %p %f"))
 
-   (set-face-attribute 'helm-selection nil :background "cyan")
+;;(set-face-attribute 'helm-selection nil :background "cyan")
 
-   (helm-mode 1)
-   (helm-projectile-on)
-   (helm-adaptive-mode 1)
-   #+END_SRC
+(helm-mode 1)
+(helm-projectile-on)
+(helm-adaptive-mode 1)
+#+END_SRC
 
 *** Helm dash
 

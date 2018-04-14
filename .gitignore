@@ -1,0 +1,10 @@
+snippets/
+elpa/
+autosaves/
+auto-save-list/
+init.elc
+helm-adaptive-history
+projectile.cache
+projectile-bookmarks.eld
+recentf
+config.json
