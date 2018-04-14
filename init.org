@@ -48,8 +48,6 @@ The init.el file essentially exists to replace itself with the contents
 of init.org on the initial load. Subsequent updates to the file can be 
 achieved using =update-init-el= which is defined later.
 
-
-
 * Configurations
 
 ** Packages
@@ -1627,6 +1625,10 @@ or haskell modules.
   (define-key custom-bindings-map (kbd "C-c m") 'magit-status)
   #+END_SRC
 
+** Bindings for [[https://github.com/syohex/emacs-git-gutter-fringe][git-gutter-fringe]]
+#+BEGIN_SRC emacs-lisp
+(define-key custom-bindings-map (kbd "M-g r") #'git-gutter:update-all-windows)
+#+END_SRC
 ** Bindings for [[http://company-mode.github.io/][company-mode]]
 
   #+BEGIN_SRC emacs-lisp
