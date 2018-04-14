@@ -2,6 +2,7 @@ snippets/
 elpa/
 autosaves/
 auto-save-list/
+server/
 init.elc
 helm-adaptive-history
 projectile.cache
