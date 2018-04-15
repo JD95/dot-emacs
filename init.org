@@ -97,7 +97,6 @@ installed. To ensure we install missing packages if they are missing.
    focus                ; Dim color of text in surrounding sections
    diminish             ; Diminished modes from modeline
    expand-region        ; Increase selected region by semantic units
-   rainbow-delimieters
    
    ;; Themes
    gotham-theme
@@ -266,11 +265,9 @@ a config.json file which is not tracked by version control.
    buffer-local variable's default value.
 
    #+BEGIN_SRC emacs-lisp
-   (setq-default fill-column 79                    ; Maximum line width
-                 indent-tabs-mode nil              ; Use spaces instead of tabs
+   (setq-default indent-tabs-mode nil              ; Use spaces instead of tabs
                  split-width-threshold 160         ; Split verticly by default
-                 split-height-threshold nil        ; Split verticly by default
-                 auto-fill-function 'do-auto-fill) ; Auto-fill-mode everywhere
+                 split-height-threshold nil)       ; Split verticly by default
    #+END_SRC
 
    The =load-path= specifies where Emacs should look for =.el=-files (or
@@ -333,50 +330,54 @@ a config.json file which is not tracked by version control.
 
 ** Modes
 
-   There are some modes that are enabled by default that I don't find
-   particularly useful. We create a list of these modes, and disable all of
-   these.
+There are some modes that are enabled by default that I don't find
+particularly useful. We create a list of these modes, and disable all of
+these.
 
-   #+BEGIN_SRC emacs-lisp
-   (dolist (mode
-            '(tool-bar-mode                ; No toolbars, more room for text
-              scroll-bar-mode              ; No scroll bars either
-              menu-bar-mode
-              blink-cursor-mode))          ; The blinking cursor gets old
-     (funcall mode 0))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(dolist (mode
+         '(tool-bar-mode                ; No toolbars, more room for text
+           scroll-bar-mode              ; No scroll bars either
+           menu-bar-mode                ; No menubar
+           blink-cursor-mode))          ; The blinking cursor gets old
+  (funcall mode 0))
+#+END_SRC
 
-   Let's apply the same technique for enabling modes that are disabled by
-   default.
+Let's apply the same technique for enabling modes that are disabled by
+default.
 
-   #+BEGIN_SRC emacs-lisp
-   (dolist (mode
-            '(abbrev-mode                  ; E.g. sopl -> System.out.println
-              column-number-mode           ; Show column number in mode line
-              delete-selection-mode        ; Replace selected text
-              dirtrack-mode                ; directory tracking in *shell*
-              drag-stuff-global-mode       ; Drag stuff around
-              global-company-mode          ; Auto-completion everywhere
-              global-git-gutter-mode       ; Show changes latest commit
-              global-prettify-symbols-mode ; Greek letters should look greek
-              projectile-global-mode       ; Manage and navigate projects
-              recentf-mode                 ; Recently opened files
-              show-paren-mode              ; Highlight matching parentheses
-              smooth-scrolling-mode
-              which-key-mode))             ; Available keybindings in popup
-     (funcall mode 1))
+#+BEGIN_SRC emacs-lisp
+(dolist (mode
+         '(abbrev-mode                  ; E.g. sopl -> System.out.println
+           column-number-mode           ; Show column number in mode line
+           delete-selection-mode        ; Replace selected text
+           dirtrack-mode                ; directory tracking in *shell*
+           drag-stuff-global-mode       ; Drag stuff around
+           global-company-mode          ; Auto-completion everywhere
+           global-git-gutter-mode       ; Show changes latest commit
+           global-prettify-symbols-mode ; Greek letters should look greek
+           projectile-global-mode       ; Manage and navigate projects
+           recentf-mode                 ; Recently opened files
+           show-paren-mode              ; Highlight matching parentheses
+           smooth-scrolling-mode
+           which-key-mode))             ; Available keybindings in popup
+  (funcall mode 1))
 
-   (when (version< emacs-version "24.4")
-     (eval-after-load 'auto-compile
-       '((auto-compile-on-save-mode 1))))  ; compile .el files on save
-   #+END_SRC
+(auto-fill-mode -1)
+(remove-hook 'text-mode-hook #'turn-on-auto-fill)
+
+(when (version< emacs-version "24.4")
+  (eval-after-load 'auto-compile
+    '((auto-compile-on-save-mode 1))))  ; compile .el files on save
+#+END_SRC
 
 ** Visual
 
 Change the color-theme to =gotham=.
 
 #+BEGIN_SRC emacs-lisp
-(load-theme 'gotham t)
+;;(load-theme 'gotham t)
+
 #+END_SRC
 
 Use the [[ https://github.com/tonsky/FiraCode][Fira Code]] font if it's installed on the system.
@@ -400,7 +401,6 @@ is provided.
   `(with-eval-after-load ,file
      (diminish ,mode ,new-name)))
 
-(diminish 'auto-fill-function)
 (safe-diminish "eldoc" 'eldoc-mode)
 (safe-diminish "flyspell" 'flyspell-mode)
 (safe-diminish "helm-mode" 'helm-mode)
@@ -484,7 +484,7 @@ Use a custom program for projectile's grep
 
 #+BEGIN_SRC emacs-lisp
 (setq find-program (gethash "find" emacs-config))
-#+END_SRC emacs-lisp
+#+END_SRC 
 
 Enable projectile mode everywhere.
 
@@ -584,17 +584,19 @@ These are the configurations for evil mode editing.
    global cycle). We can implement this by using a [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Closures.html][closure]].
 
    #+BEGIN_SRC emacs-lisp
-   (defun cycle-languages ()
-     "Changes the ispell dictionary to the first element in
-   ISPELL-LANGUAGES, and returns an interactive function that cycles
-   the languages in ISPELL-LANGUAGES when invoked."
-     (lexical-let ((ispell-languages '#1=("american" "norsk" . #1#)))
-       (ispell-change-dictionary (car ispell-languages))
-       (lambda ()
-         (interactive)
-         ;; Rotates the languages cycle and changes the ispell dictionary.
-         (ispell-change-dictionary
-          (car (setq ispell-languages (cdr ispell-languages)))))))
+      (defun cycle-languages ()
+        "Changes the ispell dictionary to the first element in
+      ISPELL-LANGUAGES, and returns an interactive function that cycles
+      the languages in ISPELL-LANGUAGES when invoked."
+        (lexical-let ((ispell-languages '#1=("american" "norsk" . #1#)))
+          (ispell-change-dictionary (car i
+
+spell-languages))
+          (lambda ()
+            (interactive)
+            ;; Rotates the languages cycle and changes the ispell dictionary.
+            (ispell-change-dictionary
+             (car (setq ispell-languages (cdr ispell-languages)))))))
    #+END_SRC
 
    =flyspell= signals an error if there is no spell-checking tool is
@@ -1621,9 +1623,9 @@ or haskell modules.
 
 ** Bindings for [[http://magit.github.io][Magit]]
 
-  #+BEGIN_SRC emacs-lisp
-  (define-key custom-bindings-map (kbd "C-c m") 'magit-status)
-  #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(define-key custom-bindings-map (kbd "C-c m") 'magit-status)
+#+END_SRC
 
 ** Bindings for [[https://github.com/syohex/emacs-git-gutter-fringe][git-gutter-fringe]]
 #+BEGIN_SRC emacs-lisp
@@ -1645,7 +1647,7 @@ or haskell modules.
 
   #+BEGIN_SRC emacs-lisp
   (define-key custom-bindings-map (kbd "C-c h")   #'helm-command-prefix)
-  (define-key custom-bindings-map (kbd "M-x")     #'helm-M-x)
+  (define-key custom-bindings-map (kbd "M-x")     'helm-M-x)
   (define-key custom-bindings-map (kbd "M-y")     #'helm-show-kill-ring)
   (define-key custom-bindings-map (kbd "C-x b")   #'helm-mini)
   (define-key custom-bindings-map (kbd "C-x C-f") #'helm-find-files)
@@ -1669,7 +1671,6 @@ or haskell modules.
 (define-key custom-bindings-map (kbd "M-c")         'capitalize-dwim)
 (define-key custom-bindings-map (kbd "M-l")         'downcase-dwim)
 (define-key custom-bindings-map (kbd "M-]")         'other-frame)
-(define-key custom-bindings-map (kbd "C-j")         'newline-and-indent)
 (define-key custom-bindings-map (kbd "C-c s")       'ispell-word)
 
 ;; Org Mode
@@ -1700,7 +1701,6 @@ or haskell modules.
 (define-key custom-bindings-map (kbd "C-c C-=") 'global-scale-up)
 (define-key custom-bindings-map (kbd "C-c C-+") 'global-scale-up)
 (define-key custom-bindings-map (kbd "C-c C--") 'global-scale-down)
-(define-key custom-bindings-map (kbd "C-c j")   'cycle-spacing-delete-newlines)
 (define-key custom-bindings-map (kbd "C-c d")   'duplicate-thing)
 (define-key custom-bindings-map (kbd "<C-tab>") 'tidy)
 (define-key custom-bindings-map (kbd "M-§")     'toggle-shell)
