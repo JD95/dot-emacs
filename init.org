@@ -376,8 +376,7 @@ default.
 Change the color-theme to =gotham=.
 
 #+BEGIN_SRC emacs-lisp
-;;(load-theme 'gotham t)
-
+(load-theme 'gotham t)
 #+END_SRC
 
 Use the [[ https://github.com/tonsky/FiraCode][Fira Code]] font if it's installed on the system.
