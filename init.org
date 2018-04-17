@@ -588,9 +588,7 @@ These are the configurations for evil mode editing.
       ISPELL-LANGUAGES, and returns an interactive function that cycles
       the languages in ISPELL-LANGUAGES when invoked."
         (lexical-let ((ispell-languages '#1=("american" "norsk" . #1#)))
-          (ispell-change-dictionary (car i
-
-spell-languages))
+          (ispell-change-dictionary (car ispell-languages))
           (lambda ()
             (interactive)
             ;; Rotates the languages cycle and changes the ispell dictionary.
@@ -995,7 +993,9 @@ Argument MODE Not sure."
    #+END_SRC
 ** Coq
 #+BEGIN_SRC emacs-lisp
-(load (gethash "coq-proof-site-location" emacs-config))
+(ignore-errors
+  (load (gethash "coq-proof-site-location" emacs-config)))
+
 (defun coq-setup ()
   (interactive)
   (company-coq-mode)
@@ -1330,11 +1330,17 @@ subsystem.
 #+BEGIN_SRC emacs-lisp
 (require 'rust-mode)
 
-(add-hook 'rust-mode-hook #'racer-mode)
-(add-hook 'rust-mode-hook #'cargo-minor-mode)
-(add-hook 'racer-mode-hook #'eldoc-mode)
-(add-hook 'racer-mode-hook #'company-mode)
-(add-hook 'racer-mode-hool #'flycheck-mode)
+(defun rust-mode-setup ()
+  (racer-mode nil)
+  (cargo-minor-mode nil))
+
+(defun racer-mode-setup ()
+  (eldoc-mode)
+  (company-mode)
+  (flycheck-mode))
+
+(add-hook 'rust-mode-hook #'rust-mode-setup)
+(add-hook 'racer-mode-hook #'racer-mode-setup)
 (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
 
 (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
