@@ -1017,7 +1017,6 @@ the echo area. Haskell has several indentation modes - I prefer using
   (add-to-list 'exec-path my-stack-path))
 
 (defun haskell-setup ()
-  (rainbow-delimiters-mode)
   (drag-stuff-mode)
   (structured-haskell-mode nil)
   (hindent-mode)
@@ -1505,6 +1504,23 @@ or haskell modules.
      )))
 #+end_src
 
+*** blogging
+#+BEGIN_SRC emacs-lisp
+(defun template-new-org-blog-post ()
+  (interactive)
+  (template-new-template
+    ((title "title:"))
+    `(,(concat "#+title: " title)
+     "#+startup: hidestar"
+     "#+startup: indent"
+     ""
+     "# latex options"
+     "#+options: toc:nil num:nil html:postamble:nil date:nil"
+     "#+latex_header: \\usepackage[margin=1.5in]{geometry}"
+     "#+latex_header: \\usepackage{setspace}"
+     ""
+  )))
+#+END_SRC
 ** Python
 
 #+BEGIN_SRC emacs-lisp
