@@ -198,7 +198,6 @@ installed. To ensure we install missing packages if they are missing.
            mac-option-modifier nil
            mac-command-modifier 'meta
            x-select-enable-clipboard t)
-     (exec-path-from-shell-initialize)
      (when (fboundp 'mac-auto-operator-composition-mode)
        (mac-auto-operator-composition-mode 1)))'
    #+END_SRC
