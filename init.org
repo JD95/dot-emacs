@@ -1509,7 +1509,7 @@ or haskell modules.
      "#+startup: indent"
      ""
      "# latex options"
-     "#+options: toc:nil num:nil html:postamble:nil date:nil"
+     "#+options: toc:nil num:nil html-postamble:nil date:nil"
      "#+latex_header: \\usepackage[margin=1.5in]{geometry}"
      "#+latex_header: \\usepackage{setspace}"
      ""
