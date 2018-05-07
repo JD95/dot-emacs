@@ -1329,17 +1329,12 @@ subsystem.
 (require 'rust-mode)
 
 (defun rust-mode-setup ()
-  (racer-mode nil)
   (cargo-minor-mode nil))
 
 (defun racer-mode-setup ()
-  (eldoc-mode)
-  (company-mode)
-  (flycheck-mode))
+  (eldoc-mode))
 
 (add-hook 'rust-mode-hook #'rust-mode-setup)
-(add-hook 'racer-mode-hook #'racer-mode-setup)
-(add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
 
 (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
 (define-key rust-mode-map (kbd "C-?") #'racer-describe)
