@@ -87,6 +87,7 @@ installed. To ensure we install missing packages if they are missing.
    idle-require         ; load elisp libraries while Emacs is idle
    try                  ; Try out Emacs packages
    which-key            ; Display available keybindings in popup
+   exec-path-from-shell
    
    ;; Editing
    company              ; Modular text completion framework
@@ -175,12 +176,11 @@ installed. To ensure we install missing packages if they are missing.
 (ignore-errors ;; This package is only relevant for Mac OS X.
   (when (memq window-system '(mac ns))
         (push 'exec-path-from-shell packages)
-        (push 'reveal-in-osx-finder packages))
-  (package-initialize)
-  (unless package-archive-contents
+        (push 'reveal-in-osx-finder packages)))
+(package-initialize)
+(unless package-archive-contents
     (package-refresh-contents))
-  (package-install-selected-packages)
-)
+(package-install-selected-packages)
 #+END_SRC
 
 ** Mac OS X
@@ -198,6 +198,7 @@ installed. To ensure we install missing packages if they are missing.
            mac-option-modifier nil
            mac-command-modifier 'meta
            x-select-enable-clipboard t)
+     (exec-path-from-shell-initialize)
      (when (fboundp 'mac-auto-operator-composition-mode)
        (mac-auto-operator-composition-mode 1)))'
    #+END_SRC
