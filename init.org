@@ -177,10 +177,16 @@ installed. To ensure we install missing packages if they are missing.
   (when (memq window-system '(mac ns))
         (push 'exec-path-from-shell packages)
         (push 'reveal-in-osx-finder packages)))
+
 (package-initialize)
 (unless package-archive-contents
     (package-refresh-contents))
 (package-install-selected-packages)
+#+END_SRC
+
+Some packages need to be installed manually, so we add a custom folder to the load path
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/lisp/")
 #+END_SRC
 
 ** macOS 
@@ -643,6 +649,7 @@ This is quite an ugly fix for allowing code markup for expressions like
 ;;(require 'org)
 (eval-after-load "org"
   '(progn
+     (require 'ob-shell)
      (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n,")
      (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist))))
 #+END_SRC
@@ -1147,6 +1154,29 @@ Use aspell if present, mainly useful on windows.
  )
 )
 #+END_SRC
+
+*** Org Babel
+
+This allows for the execution of literate sh files.
+
+#+BEGIN_SRC emacs-lisp
+(defun org-tangle-and-run-sh ()
+  (interactive)
+  (find-file buffer-file-name)
+  (org-babel-tangle)
+  (let ((script-file (concat
+        (car (split-string buffer-file-name ".org")) ".sh")))
+    (shell)
+    (insert (concat "chmod +x " script-file))
+    (comint-send-input)
+    (insert (concat script-file))
+    (comint-send-input)
+    (delete-file script-file))
+)
+#+END_SRC
+
+#+RESULTS:
+: org-tangle-and-run-sh
 
 *** Org Agenda
 
