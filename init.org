@@ -130,6 +130,9 @@ installed. To ensure we install missing packages if they are missing.
    org-ref              ; citations bibliographies in org-mode
    ox-reveal
    ox-twbs
+
+   ;; Docker
+   dockerfile-mode
    
    ;; Windows
    powershell
@@ -171,6 +174,9 @@ installed. To ensure we install missing packages if they are missing.
   
    ;; Markdown
    markdown-mode        ; Emacs Major mode for Markdown-formatted files
+
+   ;; YAML
+   yaml-mode
    ))
 
 (ignore-errors ;; This package is only relevant for Mac OS X.
