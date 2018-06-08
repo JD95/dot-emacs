@@ -1186,7 +1186,7 @@ Don't delay for scheduled tasks
 (setq org-scheduled-delay-days 0)
 #+END_SRC
 
-This function helps clear out done tasks in an org file
+These functions helps clear out done tasks in an org file
 
 #+BEGIN_SRC emacs-lisp
 (defun org-archive-done-tasks ()
@@ -1194,6 +1194,14 @@ This function helps clear out done tasks in an org file
   (org-map-entries
    (lambda ()
      (org-archive-subtree)
+     (setq org-map-continue-from (outline-previous-heading)))
+   "/DONE" 'file))
+
+(defun org-cut-done-tasks ()
+  (interactive)
+  (org-map-entries
+   (lambda ()
+     (org-cut-subtree)
      (setq org-map-continue-from (outline-previous-heading)))
    "/DONE" 'file))
 #+END_SRC
