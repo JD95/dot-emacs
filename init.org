@@ -20,24 +20,17 @@ choices that seem contradictory or odd.
 
 If you really do want to try this config out, this is how I'd go about it:
 
-Clone the repo.
 #+BEGIN_SRC sh :tangle no
-git clone https://gitlab.com/JD95/dot-emacs
+  git clone https://gitlab.com/JD95/dot-emacs.git
+  rm -rf ~/.emacs.d
+  mv ~/dot-emacs ~/.emacs.d 
+  cp ~/.emacs.d/default-config.json ~/.emacs.d/config.json
 #+END_SRC
 
-Backup your old =~/.emacs.d= (if necessary).
+Backup your old =~/.emacs=-file =~/.emacs.d= (if necessary).
 #+BEGIN_SRC sh :tangle no
 mv ~/.emacs.d ~/.emacs.d-bak
-#+END_SRC
-
-Backup your old =~/.emacs=-file (if necessary).
-#+BEGIN_SRC sh :tangle no
 mv ~/.emacs ~/.emacs-bak
-#+END_SRC
-
-And finally
-#+BEGIN_SRC sh :tangle no
-mv dot-emacs ~/.emacs.d
 #+END_SRC
 
 On first run it should install a bunch of packages (this might take a
