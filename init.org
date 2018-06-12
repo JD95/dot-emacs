@@ -145,6 +145,7 @@ installed. To ensure we install missing packages if they are missing.
    
    ;; Idris
    idris-mode
+   helm-idris
    
    ;; Purescript
    purescript-mode
@@ -177,6 +178,10 @@ installed. To ensure we install missing packages if they are missing.
 
    ;; YAML
    yaml-mode
+
+   ;; Solidity
+   solidity-mode 
+   company-solidity
    ))
 
 (ignore-errors ;; This package is only relevant for Mac OS X.
@@ -407,7 +412,9 @@ Use the [[ https://github.com/tonsky/FiraCode][Fira Code]] font if it's installe
        (set-frame-font "Fira Code" nil t)))
 #+END_SRC
 
-diminish.el]] allows you to hide or abbreviate their presence in the
+Enable Fira Code ligatures
+
+diminish.el allows you to hide or abbreviate their presence in the
 modeline. I rarely look at the modeline to find out what minor-modes are
 enabled, so I disable every global minor-mode, and some for lisp editing.
 
@@ -1451,6 +1458,11 @@ subsystem.
    #+BEGIN_SRC emacs-lisp
    (add-hook 'comint-mode-hook (lambda () (local-set-key (kbd "C-l") 'clear-comint)))
    #+END_SRC
+** Solidity
+#+BEGIN_SRC emacs-lisp
+(require 'solidity-mode)
+(setq solidity-comment-style 'slash)
+#+END_SRC
 * Templates
 
 This section sets up templates for files like org-mode reveal presentations
@@ -1721,7 +1733,6 @@ or haskell modules.
   (define-key helm-map (kbd "C-i")   #'helm-execute-persistent-action)
   (define-key helm-map (kbd "C-z")   #'helm-select-action)
   #+END_SRC
-
 ** Bindings for built-ins
 
 #+BEGIN_SRC emacs-lisp
