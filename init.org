@@ -844,6 +844,15 @@ A utility for inserting the current date.
                                  omit-day-of-week-p)))
 #+END_SRC
 
+A utility for inserting the current time
+
+#+BEGIN_SRC emacs-lisp
+(defun insert-current-time ()
+  "Insert the current time."
+  (interactive "P*")
+  (insert (format-time-string current-time-format (current-time))))
+#+END_SRC
+
 Here are some utilities for setting up a workspace. Generally, they 
 are just present window configs generated from a macro.
 
