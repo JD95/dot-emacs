@@ -18,3 +18,5 @@ config.json
 /session.10816c38afee520a78152756426461059300000014390066
 /session.1087f33bd3f9cbc6b7152752867371523500000020670064
 /session.*
+/eshell/.#history
+/eshell/history

@@ -20,24 +20,17 @@ choices that seem contradictory or odd.
 
 If you really do want to try this config out, this is how I'd go about it:
 
-Clone the repo.
-#+BEGIN_SRC sh :tangle no
-git clone https://gitlab.com/JD95/dot-emacs
-#+END_SRC
-
-Backup your old =~/.emacs.d= (if necessary).
+Backup your old =~/.emacs=-file =~/.emacs.d= (if necessary).
 #+BEGIN_SRC sh :tangle no
 mv ~/.emacs.d ~/.emacs.d-bak
-#+END_SRC
-
-Backup your old =~/.emacs=-file (if necessary).
-#+BEGIN_SRC sh :tangle no
 mv ~/.emacs ~/.emacs-bak
 #+END_SRC
 
-And finally
 #+BEGIN_SRC sh :tangle no
-mv dot-emacs ~/.emacs.d
+  git clone https://gitlab.com/JD95/dot-emacs.git
+  rm -rf ~/.emacs.d
+  mv ~/dot-emacs ~/.emacs.d 
+  cp ~/.emacs.d/default-config.json ~/.emacs.d/config.json
 #+END_SRC
 
 On first run it should install a bunch of packages (this might take a
@@ -124,6 +117,9 @@ installed. To ensure we install missing packages if they are missing.
    git-gutter-fringe    ; Fringe version of git-gutter.el
    magit                ; control Git from Emacs
    flycheck
+
+   ;; Planning
+   org-alert
    
    ;; Writing 
    org                  ; Outline-based notes management and organizer
@@ -145,6 +141,7 @@ installed. To ensure we install missing packages if they are missing.
    
    ;; Idris
    idris-mode
+   helm-idris
    
    ;; Purescript
    purescript-mode
@@ -177,6 +174,10 @@ installed. To ensure we install missing packages if they are missing.
 
    ;; YAML
    yaml-mode
+
+   ;; Solidity
+   solidity-mode 
+   company-solidity
    ))
 
 (ignore-errors ;; This package is only relevant for Mac OS X.
@@ -407,7 +408,9 @@ Use the [[ https://github.com/tonsky/FiraCode][Fira Code]] font if it's installe
        (set-frame-font "Fira Code" nil t)))
 #+END_SRC
 
-diminish.el]] allows you to hide or abbreviate their presence in the
+Enable Fira Code ligatures
+
+diminish.el allows you to hide or abbreviate their presence in the
 modeline. I rarely look at the modeline to find out what minor-modes are
 enabled, so I disable every global minor-mode, and some for lisp editing.
 
@@ -658,6 +661,12 @@ This is quite an ugly fix for allowing code markup for expressions like
      (require 'ob-shell)
      (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n,")
      (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist))))
+#+END_SRC
+
+Enable [[https://github.com/spegoraro/org-alert][org-alert]]
+#+BEGIN_SRC emacs-lisp
+;;(require 'org-alert)
+;;(setq alert-default-style 'libnotify)
 #+END_SRC
 
 ** Interactive functions
@@ -1204,21 +1213,20 @@ Don't delay for scheduled tasks
 These functions helps clear out done tasks in an org file
 
 #+BEGIN_SRC emacs-lisp
+(defun org-map-tasks (action state)
+  (org-map-entries
+    (lambda ()
+      (funcall action)
+      (setq org-map-continue-from (outline-previous-heading)))
+    state 'file))
+
 (defun org-archive-done-tasks ()
   (interactive)
-  (org-map-entries
-   (lambda ()
-     (org-archive-subtree)
-     (setq org-map-continue-from (outline-previous-heading)))
-   "/DONE" 'file))
+  (org-map-tasks 'org-archive-subtree "/DONE"))
 
 (defun org-cut-done-tasks ()
   (interactive)
-  (org-map-entries
-   (lambda ()
-     (org-cut-subtree)
-     (setq org-map-continue-from (outline-previous-heading)))
-   "/DONE" 'file))
+  (org-map-tasks 'org-cut-subtree "/DONE"))
 #+END_SRC
 
 Set the default todo keywords
@@ -1266,6 +1274,11 @@ Sets priority color faces
 			   (?8 . (:foreground "plum"))
 			   (?9 . (:foreground "DarkOrchid4"))
 			   ))
+#+END_SRC
+
+Allows for exporting tables to csv files
+
+#+BEGIN_SRC emacs-lisp
 #+END_SRC
 
 *** Org Export
@@ -1468,6 +1481,11 @@ subsystem.
    #+BEGIN_SRC emacs-lisp
    (add-hook 'comint-mode-hook (lambda () (local-set-key (kbd "C-l") 'clear-comint)))
    #+END_SRC
+** Solidity
+#+BEGIN_SRC emacs-lisp
+(require 'solidity-mode)
+(setq solidity-comment-style 'slash)
+#+END_SRC
 * Templates
 
 This section sets up templates for files like org-mode reveal presentations
@@ -1738,7 +1756,6 @@ or haskell modules.
   (define-key helm-map (kbd "C-i")   #'helm-execute-persistent-action)
   (define-key helm-map (kbd "C-z")   #'helm-select-action)
   #+END_SRC
-
 ** Bindings for built-ins
 
 #+BEGIN_SRC emacs-lisp
