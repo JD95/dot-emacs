@@ -1179,6 +1179,17 @@ Use aspell if present, mainly useful on windows.
 )
 #+END_SRC
 
+Shortens url links in org mode
+
+#+BEGIN_SRC emacs-lisp 
+(defun compress-org-link (arg)
+  (interactive "P")
+  (let ((url (thing-at-point 'url))
+    (bounds (bounds-of-thing-at-point 'url)))
+    (kill-region (car bounds) (cdr bounds))
+    (insert (format "[[%s][%s]]" url (truncate-string-to-width url (if arg (prefix-numeric-value arg) 40) nil nil "...")))))
+#+END_SRC
+
 *** Org Babel
 
 This allows for the execution of literate sh files.
