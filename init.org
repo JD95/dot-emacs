@@ -1251,6 +1251,7 @@ Set the default todo keywords
 	("PROGRESSING" . (:foreground "orange"))
         ("HOLD" . (:foreground "yellow"))
 	("FAILED" . (:foreground "grey"))
+  ("ANSWERED" . (:foreground "green"))
    ))
 
 (setq org-todo-keywords
