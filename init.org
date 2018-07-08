@@ -1195,18 +1195,20 @@ Shortens url links in org mode
 This allows for the execution of literate sh files.
 
 #+BEGIN_SRC emacs-lisp
-(defun org-tangle-and-run-sh ()
+(defun sudo-shell-command (command)
+  (interactive "MShell command (root): ")
+  (with-temp-buffer
+    (cd "/sudo::/")
+    (async-shell-command command)))
+(defun org-tangle-sh ()
   (interactive)
   (find-file buffer-file-name)
   (org-babel-tangle)
   (let ((script-file (concat
-        (car (split-string buffer-file-name ".org")) ".sh")))
-    (shell)
-    (insert (concat "chmod +x " script-file))
-    (comint-send-input)
-    (insert (concat script-file))
-    (comint-send-input)
-    (delete-file script-file))
+          (car (split-string buffer-file-name ".org")) ".sh")))
+    (sudo-shell-command 
+      (concat "chmod +x " script-file " && " "./" script-file))
+  )
 )
 #+END_SRC
 
@@ -1252,7 +1254,7 @@ Set the default todo keywords
    ))
 
 (setq org-todo-keywords
-      '((sequence "TODO" "PROGRESSING" "HOLD" "|" "DONE" "FAILED")))
+      '((sequence "TODO" "PROGRESSING" "HOLD" "|" "DONE" "ANSWERED" "FAILED")))
 #+END_SRC
 
 Generates a sequence of todo items based on a sequence of numbers
