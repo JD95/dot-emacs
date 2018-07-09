@@ -1007,12 +1007,63 @@ near the end of the configuration).
 This menu allows for zooming in and out of the current buffer.
 
 #+BEGIN_SRC emacs-lisp
-(defhydra hydra-zoom (custom-bindings-map "<f2>")
+(defhydra hydra-zoom nil
 "zoom"
   ("k" text-scale-increase "in")
   ("j" text-scale-decrease "out"))
+
+(global-set-key (kbd "<f2>") #'hydra-zoom/body)
 #+END_SRC
 
+
+*** help
+#+BEGIN_SRC emacs-lisp
+(defhydra hydra-help (:exit t)
+    ;; Better to exit after any command because otherwise helm gets in a
+    ;; mess, set hint to nil: written out manually.
+
+  "
+Describe        ^^Keys                    ^^Search                    ^^Documentation
+---------------------------------------------------------------------------------------
+_f_unction        _k_eybinding              _a_propros                  _i_nfo
+_p_ackage         _w_here-is                _d_oc strings               _n_: man
+_m_ode            _b_: show all bindings    _s_: info by symbol         _h_elm-dash
+_v_ariable
+
+"
+;; Boring help commands...
+("e" view-echo-area-messages "messages")
+("l" view-lossage "lossage")
+("C" describe-coding-system "coding-system")
+("I" describe-input-method "input-method")
+
+;; Documentation
+("i" info nil)
+("n" helm-man-woman nil)
+("h" helm-dash)
+
+;; Keybinds
+("b" describe-bindings nil)
+("c" describe-key-briefly nil)
+("k" describe-key nil)
+("w" where-is nil)
+
+;; Search
+("a" apropos-command nil)
+("d" apropos-documentation nil)
+("s" info-lookup-symbol nil)
+
+;; Describe
+("f" describe-function nil)
+("p" describe-package nil)
+("m" describe-mode nil)
+("v" describe-variable nil)
+("y" describe-syntax nil)
+
+;; quit
+("q" help-quit "quit"))
+(global-set-key (kbd "<f1>") #'hydra-help/body)
+#+END_SRC
 * Project Management
 ** Projectile
 
