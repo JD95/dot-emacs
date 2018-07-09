@@ -20,3 +20,4 @@ config.json
 /session.*
 /eshell/.#history
 /eshell/history
+/tramp

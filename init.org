@@ -111,6 +111,7 @@ installed. To ensure we install missing packages if they are missing.
    helm-company         ; Helm interface for company-mode
    helm-projectile      ; Helm integration for Projectile
    helm-swoop           ; Efficiently hopping squeezed lines
+   hydra
   
    ;; Project Management
    projectile           ; Manage and navigate projects in Emacs easily
@@ -196,7 +197,8 @@ Some packages need to be installed manually, so we add a custom folder to the lo
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 #+END_SRC
 
-** macOS 
+** System
+*** macOS 
 
 Settings for macOS machines. =exec-path-from-shell= is included to solve
 path issues. It to includes environment-variables from the shell, making 
@@ -214,7 +216,7 @@ using the =Command=-key as the =Meta=-key.
     (mac-auto-operator-composition-mode 1)))
 #+END_SRC
 
-** Linux
+*** Linux
 
 Settings specific for linux installs. Like macOS, =exec-path-from-shell= will
 be used to resolve environment variables from the shell.
@@ -223,7 +225,7 @@ be used to resolve environment variables from the shell.
 (when (eq window-system 'gnu/linux)
   (exec-path-from-shell-initialize))
 #+END_SRC
-** Require
+*** Require
 
    Some features are not loaded by default to minimize initialization time,
    so they have to be required (or loaded, if you will). =require=-calls
@@ -246,7 +248,7 @@ be used to resolve environment variables from the shell.
    (setq idle-require-idle-delay 5)
    (idle-require-mode 1)
    #+END_SRC
-** Machine Dependent Settings
+*** Machine Dependent Settings
 
 I pull out any machine specific settings like paths or keys and put them in
 a config.json file which is not tracked by version control.
@@ -260,7 +262,7 @@ a config.json file which is not tracked by version control.
   (setq emacs-config json))
 #+END_SRC
 
-** Sane defaults
+*** Sane defaults
 
    These are what /I/ consider to be saner defaults.
 
@@ -349,7 +351,7 @@ a config.json file which is not tracked by version control.
    (add-hook 'doc-view-mode-hook 'auto-revert-mode)
    #+END_SRC
 
-** Modes
+*** Modes
 
 There are some modes that are enabled by default that I don't find
 particularly useful. We create a list of these modes, and disable all of
@@ -391,8 +393,61 @@ default.
   (eval-after-load 'auto-compile
     '((auto-compile-on-save-mode 1))))  ; compile .el files on save
 #+END_SRC
+*** Encryption
 
-** Visual
+This fixes a problem using PGP encryption on windows
+
+#+BEGIN_SRC emacs-lisp
+(require 'epa-file)
+(epa-file-enable)
+
+(defun epg--list-keys-1 (context name mode)
+  "A fix for the epa bug.
+Argument CONTEXT Not sure.
+Argument NAME Not sure.
+Argument MODE Not sure."
+  (let ((args (append (if (epg-context-home-directory context)
+			  (list "--homedir"
+				(epg-context-home-directory context)))
+		      '("--with-colons" "--no-greeting" "--batch"
+			"--with-fingerprint" "--with-fingerprint")
+		      (unless (eq (epg-context-protocol context) 'CMS)
+			'("--fixed-list-mode"))))
+	(list-keys-option (if (memq mode '(t secret))
+			      "--list-secret-keys"
+			    (if (memq mode '(nil public))
+				"--list-keys"
+			      "--list-sigs")))
+	(coding-system-for-read 'binary)
+	keys string field index)
+    (if name
+	(progn
+	  (unless (listp name)
+	    (setq name (list name)))
+	  (while name
+	    (setq args (append args (list list-keys-option (car name)))
+		  name (cdr name)))) 
+      (setq args (append args (list list-keys-option))))
+    (with-temp-buffer
+      (apply #'call-process
+	     (epg-context-program context)
+	     nil (list t nil) nil args)
+      (goto-char (point-min))
+      (while (re-search-forward "^[a-z][a-z][a-z]:.*" nil t)
+	(setq keys (cons (make-vector 15 nil) keys)
+	      string (match-string 0)
+	      index 0
+	      field 0)
+	(while (and (< field (length (car keys)))
+		    (eq index
+			(string-match "\\([^:]+\\)?:" string index)))
+	  (setq index (match-end 0))
+	  (aset (car keys) field (match-string 1 string))
+	  (setq field (1+ field))))
+      (nreverse keys))))
+#+END_SRC
+
+*** Visual
 
 Change the color-theme to =gotham=.
 
@@ -457,130 +512,78 @@ New in Emacs 24.4 is the =prettify-symbols-mode=! It's neat.
                                        ("psi" . ?ψ)))
 #+END_SRC
 
-** Helm
+*** Custom Bindings Map
 
-~helm~ has a wonderful feature, being able to grep files by ~C-s~ anywhere,
-which is useful. [[http://beyondgrep.com/][ack]] is a great ~grep~-replacement, and is designed to
-search source code, so I want to use that if it's available.
-
-Note that some changes in bindings are located in the key bindings (found
-near the end of the configuration).
+Inspired by [[http://stackoverflow.com/questions/683425/globally-override-key-binding-in-emacs][this StackOverflow post]] I keep a =custom-bindings-map= that
+holds all my custom bindings. This map can be activated by toggling a
+simple =minor-mode= that does nothing more than activating the map. This
+inhibits other =major-modes= to override these bindings. I keep this at
+the end of the init-file to make sure that all functions are actually
+defined.
 
 #+BEGIN_SRC emacs-lisp
-(require 'helm)
-(require 'helm-config)
-
-(setq helm-split-window-in-side-p t
-      helm-M-x-fuzzy-match t
-      helm-buffers-fuzzy-matching t
-      helm-recentf-fuzzy-match t
-      helm-move-to-line-cycle-in-source t
-      projectile-completion-system 'helm)
-
-(when (executable-find "ack")
-  (setq helm-grep-default-command
-        "ack -Hn --no-group --no-color %e %p %f"
-        helm-grep-default-recurse-command
-        "ack -H --no-group --no-color %e %p %f"))
-
-;;(set-face-attribute 'helm-selection nil :background "cyan")
-
-(helm-mode 1)
-(helm-projectile-on)
-(helm-adaptive-mode 1)
+(defvar custom-bindings-map (make-keymap)
+  "A keymap for custom bindings.")
 #+END_SRC
 
-*** Helm dash
-
-    #+BEGIN_SRC emacs-lisp
-    (setq helm-dash-browser-func 'eww)
-    (add-hook 'emacs-lisp-mode-hook
-              (lambda () (setq-local helm-dash-docsets '("Emacs Lisp"))))
-    (add-hook 'haskell-mode-hook
-              (lambda () (setq-local helm-dash-docsets '("Haskell"))))
-    #+END_SRC
-
-** Projectile
-
-Use a custom program for projectile's grep
-
-#+BEGIN_SRC emacs-lisp
-(setq find-program (gethash "find" emacs-config))
-#+END_SRC 
-
-Enable projectile mode everywhere.
-
-#+BEGIN_SRC emacs-lisp
-(projectile-mode)
-#+END_SRC
-** Evil
-
-These are the configurations for evil mode editing.
-
-#+BEGIN_SRC emacs-lisp
-(setq evil-want-abbrev-expand-on-insert-exit nil)
-(setq evil-want-integration nil)
-(require 'evil)
-(evil-mode 1)
-(evil-magit-init)
-#+END_SRC
+Defined here to allow bindings throughout the rest of the config
 
 ** PDF Tools
 
-   [[https://github.com/politza/pdf-tools][PDF Tools]] makes a huge improvement on the built-in [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Document-View.html][doc-view-mode]]; the only
-   drawback is the =pdf-tools-install= (which has to be executed before the
-   package can be used) takes a couple of /seconds/ to execute. Instead of
-   running it at init-time, we'll run it whenever a PDF is opened. Note that
-   it's only slow on the first run!
+PDF Tools]] makes a huge improvement on the built-in [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Document-View.html][doc-view-mode]]; the only
+drawback is the =pdf-tools-install= (which has to be executed before the
+package can be used) takes a couple of /seconds/ to execute. Instead of
+running it at init-time, we'll run it whenever a PDF is opened. Note that
+it's only slow on the first run!
 
-   #+BEGIN_SRC emacs-lisp
-   (add-hook 'pdf-tools-enabled-hook 'auto-revert-mode)
-   (add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(add-hook 'pdf-tools-enabled-hook 'auto-revert-mode)
+(add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
+#+END_SRC
 
 ** Completion
 
-   I want a pretty aggressive completion system, hence the no delay settings 
-   and short prefix length.
+I want a pretty aggressive completion system, hence the no delay settings 
+and short prefix length.
 
-   #+BEGIN_SRC emacs-lisp
-   (setq company-idle-delay 0
-         company-echo-delay 0
-         company-dabbrev-downcase nil
-         company-minimum-prefix-length 2
-         company-selection-wrap-around t
-         company-transformers '(company-sort-by-occurrence
-                                company-sort-by-backend-importance))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(setq company-idle-delay 0
+      company-echo-delay 0
+      company-dabbrev-downcase nil
+      company-minimum-prefix-length 2
+      company-selection-wrap-around t
+      company-transformers '(company-sort-by-occurrence
+                             company-sort-by-backend-importance))
+#+END_SRC
 
 ** Calendar
 
-   Define a function to display week numbers in =calender-mode=. The snippet
-   is from [[http://www.emacswiki.org/emacs/CalendarWeekNumbers][EmacsWiki]].
+Define a function to display week numbers in =calender-mode=. The snippet
+is from [[http://www.emacswiki.org/emacs/CalendarWeekNumbers][EmacsWiki]].
 
-   #+BEGIN_SRC emacs-lisp
-   (defun calendar-show-week (arg)
-     "Displaying week number in calendar-mode."
-     (interactive "P")
-     (copy-face font-lock-constant-face 'calendar-iso-week-face)
-     (set-face-attribute
-      'calendar-iso-week-face nil :height 0.7)
-     (setq calendar-intermonth-text
-           (and arg
-                '(propertize
-                  (format
-                   "%2d"
-                   (car (calendar-iso-from-absolute
-                         (calendar-absolute-from-gregorian
-                          (list month day year)))))
-                  'font-lock-face 'calendar-iso-week-face))))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(defun calendar-show-week (arg)
+  "Displaying week number in calendar-mode."
+  (interactive "P")
+  (copy-face font-lock-constant-face 'calendar-iso-week-face)
+  (set-face-attribute
+   'calendar-iso-week-face nil :height 0.7)
+  (setq calendar-intermonth-text
+        (and arg
+             '(propertize
+               (format
+                "%2d"
+                (car (calendar-iso-from-absolute
+                      (calendar-absolute-from-gregorian
+                       (list month day year)))))
+               'font-lock-face 'calendar-iso-week-face))))
+#+END_SRC
 
-   Evaluate the =calendar-show-week= function.
+Evaluate the =calendar-show-week= function.
 
-   #+BEGIN_SRC emacs-lisp
-   (calendar-show-week t)
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(calendar-show-week t)
+#+END_SRC
 
 ** Flyspell
 
@@ -639,38 +642,7 @@ These are the configurations for evil mode editing.
        (local-set-key (kbd "C-c l") (cycle-languages))))
    #+END_SRC
 
-** Org
-
-When editing org-files with source-blocks, we want the source blocks to
-be themed as they would in their native mode.
-
-#+BEGIN_SRC emacs-lisp
-(setq org-src-fontify-natively t
-      org-src-tab-acts-natively t
-      org-confirm-babel-evaluate nil
-      org-edit-src-content-indentation 0)
-#+END_SRC
-
-This is quite an ugly fix for allowing code markup for expressions like
-="this string"=, because the quotation marks causes problems.
-
-#+BEGIN_SRC emacs-lisp
-;;(require 'org)
-(eval-after-load "org"
-  '(progn
-     (require 'ob-shell)
-     (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n,")
-     (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist))))
-#+END_SRC
-
-Enable [[https://github.com/spegoraro/org-alert][org-alert]]
-#+BEGIN_SRC emacs-lisp
-;;(require 'org-alert)
-;;(setq alert-default-style 'libnotify)
-#+END_SRC
-
-** Interactive functions
-   <<sec:defuns>>
+** User Functions 
 
 This updates the compiled init.el file with any changes made to this file.
 
@@ -908,132 +880,164 @@ This is useful when pasting text from websites or word.
         (goto-char point)
       (message "No non-ascii characters."))))
 #+END_SRC   
+*** Advice
 
-** file encryption
-
-This fixes a problem using PGP encryption on windows
+An advice can be given to a function to make it behave differently. This
+advice makes =eval-last-sexp= (bound to =C-x C-e=) replace the sexp with
+the value.
 
 #+BEGIN_SRC emacs-lisp
-(require 'epa-file)
-(epa-file-enable)
-
-(defun epg--list-keys-1 (context name mode)
-  "A fix for the epa bug.
-Argument CONTEXT Not sure.
-Argument NAME Not sure.
-Argument MODE Not sure."
-  (let ((args (append (if (epg-context-home-directory context)
-			  (list "--homedir"
-				(epg-context-home-directory context)))
-		      '("--with-colons" "--no-greeting" "--batch"
-			"--with-fingerprint" "--with-fingerprint")
-		      (unless (eq (epg-context-protocol context) 'CMS)
-			'("--fixed-list-mode"))))
-	(list-keys-option (if (memq mode '(t secret))
-			      "--list-secret-keys"
-			    (if (memq mode '(nil public))
-				"--list-keys"
-			      "--list-sigs")))
-	(coding-system-for-read 'binary)
-	keys string field index)
-    (if name
-	(progn
-	  (unless (listp name)
-	    (setq name (list name)))
-	  (while name
-	    (setq args (append args (list list-keys-option (car name)))
-		  name (cdr name)))) 
-      (setq args (append args (list list-keys-option))))
-    (with-temp-buffer
-      (apply #'call-process
-	     (epg-context-program context)
-	     nil (list t nil) nil args)
-      (goto-char (point-min))
-      (while (re-search-forward "^[a-z][a-z][a-z]:.*" nil t)
-	(setq keys (cons (make-vector 15 nil) keys)
-	      string (match-string 0)
-	      index 0
-	      field 0)
-	(while (and (< field (length (car keys)))
-		    (eq index
-			(string-match "\\([^:]+\\)?:" string index)))
-	  (setq index (match-end 0))
-	  (aset (car keys) field (match-string 1 string))
-	  (setq field (1+ field))))
-      (nreverse keys))))
+(defadvice eval-last-sexp (around replace-sexp (arg) activate)
+  "Replace sexp when called with a prefix argument."
+  (if arg
+      (let ((pos (point)))
+        ad-do-it
+        (goto-char pos)
+        (backward-kill-sexp)
+        (forward-sexp))
+    ad-do-it))
 #+END_SRC
-** Advice
 
-   An advice can be given to a function to make it behave differently. This
-   advice makes =eval-last-sexp= (bound to =C-x C-e=) replace the sexp with
-   the value.
+When interactively changing the theme (using =M-x load-theme=), the
+current custom theme is not disabled. This often gives weird-looking
+results; we can advice =load-theme= to always disable themes currently
+enabled themes.
 
-   #+BEGIN_SRC emacs-lisp
-   (defadvice eval-last-sexp (around replace-sexp (arg) activate)
-     "Replace sexp when called with a prefix argument."
-     (if arg
-         (let ((pos (point)))
-           ad-do-it
-           (goto-char pos)
-           (backward-kill-sexp)
-           (forward-sexp))
-       ad-do-it))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(defadvice load-theme
+    (before disable-before-load (theme &optional no-confirm no-enable) activate)
+  (mapc 'disable-theme custom-enabled-themes))
+#+END_SRC
 
-   When interactively changing the theme (using =M-x load-theme=), the
-   current custom theme is not disabled. This often gives weird-looking
-   results; we can advice =load-theme= to always disable themes currently
-   enabled themes.
+*** global-scale-mode
 
-   #+BEGIN_SRC emacs-lisp
-   (defadvice load-theme
-       (before disable-before-load (theme &optional no-confirm no-enable) activate)
-     (mapc 'disable-theme custom-enabled-themes))
-   #+END_SRC
+These functions provide something close to ~text-scale-mode~, but for every
+buffer, including the minibuffer and mode line.
 
-** global-scale-mode
+#+BEGIN_SRC emacs-lisp
+(lexical-let* ((default (face-attribute 'default :height))
+               (size default))
 
-   These functions provide something close to ~text-scale-mode~, but for every
-   buffer, including the minibuffer and mode line.
+  (defun global-scale-default ()
+    (interactive)
+    (setq size default)
+    (global-scale-internal size))
 
-   #+BEGIN_SRC emacs-lisp
-   (lexical-let* ((default (face-attribute 'default :height))
-                  (size default))
+  (defun global-scale-up ()
+    (interactive)
+    (global-scale-internal (incf size 20)))
 
-     (defun global-scale-default ()
-       (interactive)
-       (setq size default)
-       (global-scale-internal size))
+  (defun global-scale-down ()
+    (interactive)
+    (global-scale-internal (decf size 20)))
 
-     (defun global-scale-up ()
-       (interactive)
-       (global-scale-internal (incf size 20)))
+  (defun global-scale-internal (arg)
+    (set-face-attribute 'default (selected-frame) :height arg)
+    (set-temporary-overlay-map
+     (let ((map (make-sparse-keymap)))
+       (define-key map (kbd "C-=") 'global-scale-up)
+       (define-key map (kbd "C-+") 'global-scale-up)
+       (define-key map (kbd "C--") 'global-scale-down)
+       (define-key map (kbd "C-0") 'global-scale-default) map))))
+#+END_SRC
+   
+* Controls 
+** Evil
 
-     (defun global-scale-down ()
-       (interactive)
-       (global-scale-internal (decf size 20)))
+These are the configurations for evil mode editing.
 
-     (defun global-scale-internal (arg)
-       (set-face-attribute 'default (selected-frame) :height arg)
-       (set-temporary-overlay-map
-        (let ((map (make-sparse-keymap)))
-          (define-key map (kbd "C-=") 'global-scale-up)
-          (define-key map (kbd "C-+") 'global-scale-up)
-          (define-key map (kbd "C--") 'global-scale-down)
-          (define-key map (kbd "C-0") 'global-scale-default) map))))
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(setq evil-want-abbrev-expand-on-insert-exit nil)
+(setq evil-want-integration nil)
+(require 'evil)
+(evil-mode 1)
+(evil-magit-init)
+#+END_SRC
 
+** Helm
+
+~helm~ has a wonderful feature, being able to grep files by ~C-s~ anywhere,
+which is useful. [[http://beyondgrep.com/][ack]] is a great ~grep~-replacement, and is designed to
+search source code, so I want to use that if it's available.
+
+Note that some changes in bindings are located in the key bindings (found
+near the end of the configuration).
+
+#+BEGIN_SRC emacs-lisp
+(require 'helm)
+(require 'helm-config)
+
+(setq helm-split-window-in-side-p t
+      helm-M-x-fuzzy-match t
+      helm-buffers-fuzzy-matching t
+      helm-recentf-fuzzy-match t
+      helm-move-to-line-cycle-in-source t
+      projectile-completion-system 'helm)
+
+(when (executable-find "ack")
+  (setq helm-grep-default-command
+        "ack -Hn --no-group --no-color %e %p %f"
+        helm-grep-default-recurse-command
+        "ack -H --no-group --no-color %e %p %f"))
+
+;;(set-face-attribute 'helm-selection nil :background "cyan")
+
+(helm-mode 1)
+(helm-projectile-on)
+(helm-adaptive-mode 1)
+#+END_SRC
+
+*** Helm dash
+
+#+BEGIN_SRC emacs-lisp
+(setq helm-dash-browser-func 'eww)
+(add-hook 'emacs-lisp-mode-hook
+          (lambda () (setq-local helm-dash-docsets '("Emacs Lisp"))))
+(add-hook 'haskell-mode-hook
+          (lambda () (setq-local helm-dash-docsets '("Haskell"))))
+#+END_SRC
+
+** Hyrda
+#+BEGIN_SRC emacs-lisp 
+(require 'hydra)
+#+END_SRC
+
+*** zoom
+
+This menu allows for zooming in and out of the current buffer.
+
+#+BEGIN_SRC emacs-lisp
+(defhydra hydra-zoom (custom-bindings-map "<f2>")
+"zoom"
+  ("k" text-scale-increase "in")
+  ("j" text-scale-decrease "out"))
+#+END_SRC
+
+* Project Management
+** Projectile
+
+Use a custom program for projectile's grep
+
+#+BEGIN_SRC emacs-lisp
+(setq find-program (gethash "find" emacs-config))
+#+END_SRC 
+
+Enable projectile mode everywhere.
+
+#+BEGIN_SRC emacs-lisp
+(projectile-mode)
+#+END_SRC
 * Mode specific
 ** Compilation
 
-   I often run ~latexmk -pdf -pvc~ in a compilation buffer, which recompiles
-   the latex-file whenever it is changed. This often results in annoyingly
-   large compilation buffers; the following snippet limits the buffer size in
-   accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
+I often run ~latexmk -pdf -pvc~ in a compilation buffer, which recompiles
+the latex-file whenever it is changed. This often results in annoyingly
+large compilation buffers; the following snippet limits the buffer size in
+accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
 
-   #+BEGIN_SRC emacs-lisp
-   (add-hook 'compilation-filter-hook 'comint-truncate-buffer)
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(add-hook 'compilation-filter-hook 'comint-truncate-buffer)
+#+END_SRC
 ** Coq
 #+BEGIN_SRC emacs-lisp
 (ignore-errors
@@ -1149,6 +1153,33 @@ the echo area. Haskell has several indentation modes - I prefer using
    #+END_SRC
 ** Org 
 
+When editing org-files with source-blocks, we want the source blocks to
+be themed as they would in their native mode.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t
+      org-src-tab-acts-natively t
+      org-confirm-babel-evaluate nil
+      org-edit-src-content-indentation 0)
+#+END_SRC
+
+This is quite an ugly fix for allowing code markup for expressions like
+="this string"=, because the quotation marks causes problems.
+
+#+BEGIN_SRC emacs-lisp
+(eval-after-load "org"
+  '(progn
+     (require 'ob-shell)
+     (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n,")
+     (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist))))
+#+END_SRC
+
+Enable [[https://github.com/spegoraro/org-alert][org-alert]]
+
+#+BEGIN_SRC emacs-lisp
+;;(require 'org-alert)
+;;(setq alert-default-style 'libnotify)
+#+END_SRC
 Ensure that .org files are opened with org-mode
 
 #+BEGIN_SRC emacs-lisp
@@ -1183,23 +1214,36 @@ Use aspell if present, mainly useful on windows.
 )
 #+END_SRC
 
+Shortens url links in org mode
+
+#+BEGIN_SRC emacs-lisp 
+(defun compress-org-link (arg)
+  (interactive "P")
+  (let ((url (thing-at-point 'url))
+    (bounds (bounds-of-thing-at-point 'url)))
+    (kill-region (car bounds) (cdr bounds))
+    (insert (format "[[%s][%s]]" url (truncate-string-to-width url (if arg (prefix-numeric-value arg) 40) nil nil "...")))))
+#+END_SRC
+
 *** Org Babel
 
 This allows for the execution of literate sh files.
 
 #+BEGIN_SRC emacs-lisp
-(defun org-tangle-and-run-sh ()
+(defun sudo-shell-command (command)
+  (interactive "MShell command (root): ")
+  (with-temp-buffer
+    (cd "/sudo::/")
+    (async-shell-command command)))
+(defun org-tangle-sh ()
   (interactive)
   (find-file buffer-file-name)
   (org-babel-tangle)
   (let ((script-file (concat
-        (car (split-string buffer-file-name ".org")) ".sh")))
-    (shell)
-    (insert (concat "chmod +x " script-file))
-    (comint-send-input)
-    (insert (concat script-file))
-    (comint-send-input)
-    (delete-file script-file))
+          (car (split-string buffer-file-name ".org")) ".sh")))
+    (sudo-shell-command 
+      (concat "chmod +x " script-file " && " "./" script-file))
+  )
 )
 #+END_SRC
 
@@ -1242,10 +1286,11 @@ Set the default todo keywords
 	("PROGRESSING" . (:foreground "orange"))
         ("HOLD" . (:foreground "yellow"))
 	("FAILED" . (:foreground "grey"))
+  ("ANSWERED" . (:foreground "green"))
    ))
 
 (setq org-todo-keywords
-      '((sequence "TODO" "PROGRESSING" "HOLD" "|" "DONE" "FAILED")))
+      '((sequence "TODO" "PROGRESSING" "HOLD" "|" "DONE" "ANSWERED" "FAILED")))
 #+END_SRC
 
 Generates a sequence of todo items based on a sequence of numbers
@@ -1372,6 +1417,10 @@ subsystem.
       "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
       "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""))
 #+END_SRC
+*** Org Ref
+#+BEGIN_SRC emacs-lisp
+(require 'org-ref)
+#+END_SRC
 ** Purescript
 #+BEGIN_SRC emacs-lisp
 (require 'psc-ide)
@@ -1487,7 +1536,7 @@ subsystem.
    #+END_SRC
 ** Solidity
 #+BEGIN_SRC emacs-lisp
-(require 'solidity-mode)
+;;(require 'solidity-mode)
 (setq solidity-comment-style 'slash)
 #+END_SRC
 * Templates
@@ -1684,21 +1733,7 @@ or haskell modules.
      "    }"))
   )
 #+END_SRC
-
 * Key bindings
-
-  Inspired by [[http://stackoverflow.com/questions/683425/globally-override-key-binding-in-emacs][this StackOverflow post]] I keep a =custom-bindings-map= that
-  holds all my custom bindings. This map can be activated by toggling a
-  simple =minor-mode= that does nothing more than activating the map. This
-  inhibits other =major-modes= to override these bindings. I keep this at
-  the end of the init-file to make sure that all functions are actually
-  defined.
-
-  #+BEGIN_SRC emacs-lisp
-  (defvar custom-bindings-map (make-keymap)
-    "A keymap for custom bindings.")
-  #+END_SRC
-
 ** Bindings for [[https://github.com/abo-abo/define-word][define-word]]
 
   #+BEGIN_SRC emacs-lisp
@@ -1760,6 +1795,7 @@ or haskell modules.
   (define-key helm-map (kbd "C-i")   #'helm-execute-persistent-action)
   (define-key helm-map (kbd "C-z")   #'helm-select-action)
   #+END_SRC
+
 ** Bindings for built-ins
 
 #+BEGIN_SRC emacs-lisp
@@ -1784,9 +1820,7 @@ or haskell modules.
 (define-key custom-bindings-map (kbd "C-c <down>")  'windmove-down)
 (define-key custom-bindings-map (kbd "C-c <left>")  'windmove-left)
 (define-key custom-bindings-map (kbd "C-c <right>") 'windmove-right)
-(define-key custom-bindings-map (kbd "C-x C-b")     'buffer-menu)
 #+END_SRC
-
 ** Bindings for functions defined [[sec:defuns][above]].
 
 #+BEGIN_SRC emacs-lisp
