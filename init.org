@@ -111,6 +111,7 @@ installed. To ensure we install missing packages if they are missing.
    helm-company         ; Helm interface for company-mode
    helm-projectile      ; Helm integration for Projectile
    helm-swoop           ; Efficiently hopping squeezed lines
+   hydra
   
    ;; Project Management
    projectile           ; Manage and navigate projects in Emacs easily
@@ -1382,6 +1383,10 @@ subsystem.
       "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
       "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""))
 #+END_SRC
+*** Org Ref
+#+BEGIN_SRC emacs-lisp
+(require 'org-ref)
+#+END_SRC
 ** Purescript
 #+BEGIN_SRC emacs-lisp
 (require 'psc-ide)
@@ -1497,7 +1502,7 @@ subsystem.
    #+END_SRC
 ** Solidity
 #+BEGIN_SRC emacs-lisp
-(require 'solidity-mode)
+;;(require 'solidity-mode)
 (setq solidity-comment-style 'slash)
 #+END_SRC
 * Templates
@@ -1694,7 +1699,6 @@ or haskell modules.
      "    }"))
   )
 #+END_SRC
-
 * Key bindings
 
   Inspired by [[http://stackoverflow.com/questions/683425/globally-override-key-binding-in-emacs][this StackOverflow post]] I keep a =custom-bindings-map= that
@@ -1770,6 +1774,7 @@ or haskell modules.
   (define-key helm-map (kbd "C-i")   #'helm-execute-persistent-action)
   (define-key helm-map (kbd "C-z")   #'helm-select-action)
   #+END_SRC
+
 ** Bindings for built-ins
 
 #+BEGIN_SRC emacs-lisp
@@ -1794,7 +1799,18 @@ or haskell modules.
 (define-key custom-bindings-map (kbd "C-c <down>")  'windmove-down)
 (define-key custom-bindings-map (kbd "C-c <left>")  'windmove-left)
 (define-key custom-bindings-map (kbd "C-c <right>") 'windmove-right)
-(define-key custom-bindings-map (kbd "C-x C-b")     'buffer-menu)
+#+END_SRC
+** Hyrda Menus
+#+BEGIN_SRC emacs-lisp 
+(require 'hydra)
+#+END_SRC
+
+*** Buffer Actions
+#+BEGIN_SRC emacs-lisp
+(defhydra hydra-zoom (custom-bindings-map "C-c z")
+"zoom"
+  ("k" text-scale-increase "in")
+  ("j" text-scale-decrease "out"))
 #+END_SRC
 
 ** Bindings for functions defined [[sec:defuns][above]].
