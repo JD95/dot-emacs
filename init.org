@@ -81,6 +81,7 @@ installed. To ensure we install missing packages if they are missing.
    try                  ; Try out Emacs packages
    which-key            ; Display available keybindings in popup
    exec-path-from-shell
+   helpful
    
    ;; Editing
    company              ; Modular text completion framework
@@ -1115,11 +1116,8 @@ the echo area. Haskell has several indentation modes - I prefer using
   (add-to-list 'exec-path my-stack-path))
 
 (defun haskell-setup ()
-  (drag-stuff-mode)
-  (structured-haskell-mode nil)
-  (hindent-mode)
-  (intero-mode nil)
-  )
+  (structured-haskell-mode t)
+  (intero-mode t))
 
 (setq haskell-stylish-on-save t)
 (add-hook 'haskell-mode-hook #'haskell-setup)
@@ -1135,6 +1133,17 @@ the echo area. Haskell has several indentation modes - I prefer using
 
 (with-eval-after-load 'intero
   (flycheck-add-next-checker 'intero '(warning . haskell-hlint)))
+#+END_SRC
+
+I use [[https://hackage.haskell.org/package/brittany][brittany]] for formatting my haskell buffers. This function lets me format the current buffer. 
+
+#+BEGIN_SRC emacs-lisp
+(defun brittany-file ()
+  (interactive)
+  (shell-command
+   (concat
+    "brittany --write-mode=inplace "
+    (buffer-file-name (window-buffer (minibuffer-selected-window))))))
 #+END_SRC
 ** Idris
 #+BEGIN_SRC emacs-lisp
