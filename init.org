@@ -1352,13 +1352,14 @@ Set the default todo keywords
   '(
 	("TODO" . (:foreground "red"))
 	("PROGRESSING" . (:foreground "orange"))
-        ("HOLD" . (:foreground "yellow"))
+	("DEVELOPING" . (:foreground "DarkOrange"))
+  ("HOLD" . (:foreground "yellow"))
 	("FAILED" . (:foreground "grey"))
   ("ANSWERED" . (:foreground "green"))
    ))
 
 (setq org-todo-keywords
-      '((sequence "TODO" "PROGRESSING" "HOLD" "|" "DONE" "ANSWERED" "FAILED")))
+      '((sequence "TODO" "PROGRESSING" "DEVELOPING" "HOLD" "|" "DONE" "ANSWERED" "FAILED")))
 #+END_SRC
 
 Generates a sequence of todo items based on a sequence of numbers
