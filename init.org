@@ -42,6 +42,15 @@ of init.org on the initial load. Subsequent updates to the file can be
 achieved using =update-init-el= which is defined later.
 
 * Configurations
+** Prelude
+
+This settings will help make the rest of the config run smoother.
+
+Lexical scoping is faster than dynamic scoping.
+
+#+BEGIN_SRC emacs-lisp
+;;; -*- lexical-binding: t; -*-
+#+END_SRC
 
 ** Packages
 
@@ -81,7 +90,6 @@ installed. To ensure we install missing packages if they are missing.
    try                  ; Try out Emacs packages
    which-key            ; Display available keybindings in popup
    exec-path-from-shell
-   helpful
    
    ;; Editing
    company              ; Modular text completion framework
