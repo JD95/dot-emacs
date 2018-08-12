@@ -388,7 +388,6 @@ default.
            global-company-mode          ; Auto-completion everywhere
            global-git-gutter-mode       ; Show changes latest commit
            global-prettify-symbols-mode ; Greek letters should look greek
-           projectile-global-mode       ; Manage and navigate projects
            recentf-mode                 ; Recently opened files
            show-paren-mode              ; Highlight matching parentheses
            smooth-scrolling-mode
@@ -962,6 +961,21 @@ These are the configurations for evil mode editing.
 (evil-mode 1)
 (evil-magit-init)
 #+END_SRC
+** Projectile
+
+Use a custom program for projectile's grep
+
+#+BEGIN_SRC emacs-lisp
+(setq find-program (gethash "find" emacs-config))
+#+END_SRC 
+
+Enable projectile mode everywhere.
+
+#+BEGIN_SRC emacs-lisp
+(require 'projectile)
+(projectile-mode 1)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+#+END_SRC
 
 ** Helm
 
@@ -989,8 +1003,6 @@ near the end of the configuration).
         helm-grep-default-recurse-command
         "ack -H --no-group --no-color %e %p %f"))
 
-;;(set-face-attribute 'helm-selection nil :background "cyan")
-
 (helm-mode 1)
 (helm-projectile-on)
 (helm-adaptive-mode 1)
@@ -1005,7 +1017,6 @@ near the end of the configuration).
 (add-hook 'haskell-mode-hook
           (lambda () (setq-local helm-dash-docsets '("Haskell"))))
 #+END_SRC
-
 ** Hyrda
 #+BEGIN_SRC emacs-lisp 
 (require 'hydra)
@@ -1072,20 +1083,6 @@ _v_ariable
 ;; quit
 ("q" help-quit "quit"))
 (global-set-key (kbd "<f1>") #'hydra-help/body)
-#+END_SRC
-* Project Management
-** Projectile
-
-Use a custom program for projectile's grep
-
-#+BEGIN_SRC emacs-lisp
-(setq find-program (gethash "find" emacs-config))
-#+END_SRC 
-
-Enable projectile mode everywhere.
-
-#+BEGIN_SRC emacs-lisp
-(projectile-mode)
 #+END_SRC
 * Mode specific
 ** Compilation
