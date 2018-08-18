@@ -1091,23 +1091,21 @@ _v_ariable
    "
 Movement^^        ^Split^       	^Resize^
 ---------------------------------------------------
-_h_ ←       	_v_ertical    	_q_ X←
-_j_ ↓        	_x_ horizontal	_w_ X↓
-_k_ ↑        	_z_ undo      	_e_ X↑
-_l_ →        	_S_ave     	_r_ X→
-_d_lt Other 	_o_nly this	
+_h_ ←       	_v_ertical    	_H_ X←
+_j_ ↓        	_x_ horizontal	_J_ X↓
+_k_ ↑        	_S_ave     	_K_ X↑
+_l_ →        	_o_nly this   	_L_ X→
+_d_lt Other 		
 _SPC_ cancel	   		
 "
    ("h" windmove-left )
    ("j" windmove-down )
    ("k" windmove-up )
    ("l" windmove-right )
-   ("a" (lambda ()
-          (interactive)
-          (ace-window 1)
-          (add-hook 'ace-window-end-once-hook
-                    'hydra-window/body))
-       )
+   ("H" evil-window-decrease-width)
+   ("J" evil-window-decrease-height)
+   ("K" evil-window-increase-height)
+   ("L" evil-window-increase-width)
    ("v" (lambda ()
           (interactive)
           (split-window-right)
