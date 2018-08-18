@@ -1035,7 +1035,6 @@ This menu allows for zooming in and out of the current buffer.
 (global-set-key (kbd "<f2>") #'hydra-zoom/body)
 #+END_SRC
 
-
 *** help
 #+BEGIN_SRC emacs-lisp
 (defhydra hydra-help (:exit t)
@@ -1083,6 +1082,49 @@ _v_ariable
 ;; quit
 ("q" help-quit "quit"))
 (global-set-key (kbd "<f1>") #'hydra-help/body)
+#+END_SRC
+
+*** window
+
+#+BEGIN_SRC emacs-lisp
+(defhydra hydra-window ()
+   "
+Movement^^        ^Split^       	^Resize^
+---------------------------------------------------
+_h_ ←       	_v_ertical    	_q_ X←
+_j_ ↓        	_x_ horizontal	_w_ X↓
+_k_ ↑        	_z_ undo      	_e_ X↑
+_l_ →        	_S_ave     	_r_ X→
+_d_lt Other 	_o_nly this	
+_SPC_ cancel	   		
+"
+   ("h" windmove-left )
+   ("j" windmove-down )
+   ("k" windmove-up )
+   ("l" windmove-right )
+   ("a" (lambda ()
+          (interactive)
+          (ace-window 1)
+          (add-hook 'ace-window-end-once-hook
+                    'hydra-window/body))
+       )
+   ("v" (lambda ()
+          (interactive)
+          (split-window-right)
+          (windmove-right))
+       )
+   ("x" (lambda ()
+          (interactive)
+          (split-window-below)
+          (windmove-down))
+       )
+   ("S" save-buffer)
+   ("d" delete-window)
+   ("o" delete-other-windows)
+   ("SPC" nil)
+   )
+
+(define-key evil-window-map (kbd "C-w") 'hydra-window/body)
 #+END_SRC
 * Mode specific
 ** Compilation
