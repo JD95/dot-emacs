@@ -1527,12 +1527,33 @@ Helps sort sections
   (org-sort-entries nil ?o))
 #+END_SRC
 
+This function will help randomly select a todo in the current tree.
+
+#+BEGIN_SRC emacs-lisp
+(defun org-goto-random-subtree-todo ()
+  (interactive)
+  (org-back-to-heading t)
+  (let ((todos '())
+        (target 0))
+    ;; Gather todo headings
+    (org-map-tree
+     (lambda () (when (and
+                  (org-get-todo-state)
+                  (not (equal "ANSWERED" (org-get-todo-state))))
+             (setq todos (cons (point) todos)))))
+    ;; Randomly select one
+    (goto-char
+     (nth (random (- (length todos) 1)) todos))))
+#+END_SRC
+
+
 #+BEGIN_SRC emacs-lisp
 (require 'org-habit)
 (setq org-habit-graph-column 60)
 (setq org-habit-preceding-days 14)
 (setq org-habit-following-days 3)
 #+END_SRC
+
 *** Org Export
 
 Sometimes I want to use the same org file to export into different sources,
