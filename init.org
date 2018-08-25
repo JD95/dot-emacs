@@ -52,6 +52,7 @@ Lexical scoping is faster than dynamic scoping.
 
 #+BEGIN_SRC emacs-lisp
 ;;; -*- lexical-binding: t; -*-
+(setq lexical-binding t)
 #+END_SRC
 
 ** Packages
@@ -1454,20 +1455,40 @@ Helps sort sections
 This function will help randomly select a todo in the current tree.
 
 #+BEGIN_SRC emacs-lisp
-(defun org-goto-random-subtree-todo ()
+
+(defun org-goto-random-subtree (todo-pred &optional depth)
   (interactive)
   (org-back-to-heading t)
   (let ((todos '())
-        (target 0))
+        (target 0)
+        (top-level (org-current-level)))
     ;; Gather todo headings
     (org-map-tree
      (lambda () (when (and
-                  (org-get-todo-state)
-                  (not (equal "ANSWERED" (org-get-todo-state))))
+                  (if depth
+                      (<= (org-current-level) (+ top-level depth))
+                      t)
+                  (funcall todo-pred))
              (setq todos (cons (point) todos)))))
     ;; Randomly select one
     (goto-char
-     (nth (random (- (length todos) 1)) todos))))
+     (nth (random (- (length todos) 1)) todos)))
+)
+
+(defun at-todo (exclude-states)
+  (and (org-get-todo-state)
+       (member (org-get-todo-state) exclude-states)))
+
+(defun org-goto-random-subtree-todo ()
+  (interactive)
+  (org-goto-random-subtree
+   (lambda () (at-todo '("TODO" "DEVELOPING")))))
+
+(defun org-goto-random-subtree-todo-below ()
+  (interactive)
+  (org-goto-random-subtree
+    (lambda () (at-todo '("TODO" "DEVELOPING")))
+    1))
 #+END_SRC
 *** source blocks 
 
