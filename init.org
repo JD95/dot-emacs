@@ -2,6 +2,7 @@
 #+AUTHOR: Jeff Dwyer
 
 #+STARTUP: hidestars
+#+STARTUP: indent
 #+BABEL: :cache yes
 #+LATEX_HEADER: \usepackage{parskip}
 #+LATEX_HEADER: \usepackage{inconsolata}
@@ -1310,55 +1311,7 @@ function to a key!
                (local-set-key (kbd "C-c b") 'insert-markdown-inline-math-block)) t)
 #+END_SRC
 ** org
-
-When editing org-files with source-blocks, we want the source blocks to
-be themed as they would in their native mode.
-
-#+BEGIN_SRC emacs-lisp
-(setq org-src-fontify-natively t
-      org-src-tab-acts-natively t
-      org-confirm-babel-evaluate nil
-      org-edit-src-content-indentation 0)
-#+END_SRC
-
-This is quite an ugly fix for allowing code markup for expressions like
-="this string"=, because the quotation marks causes problems.
-
-#+BEGIN_SRC emacs-lisp
-(eval-after-load "org"
-  '(progn
-     (require 'ob-shell)
-     (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n,")
-     (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist))))
-#+END_SRC
-
-Enable [[https://github.com/spegoraro/org-alert][org-alert]]
-
-#+BEGIN_SRC emacs-lisp
-;;(require 'org-alert)
-;;(setq alert-default-style 'libnotify)
-#+END_SRC
-Ensure that .org files are opened with org-mode
-
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-#+END_SRC
-
-Setup evil org mode.
-
-#+BEGIN_SRC emacs-lisp
-(require 'evil-org)
-(add-hook 'org-mode-hook 'evil-org-mode)
-(evil-org-set-key-theme '(navigation insert textobjects additional))
-#+END_SRC
-
-Babel Config
-
-#+BEGIN_SRC emacs-lisp
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((dot . t)))
-#+END_SRC
+*** editing 
 
 Use aspell if present, mainly useful on windows.
 
@@ -1383,15 +1336,173 @@ Shortens url links in org mode
     (insert (format "[[%s][%s]]" url (truncate-string-to-width url (if arg (prefix-numeric-value arg) 40) nil nil "...")))))
 #+END_SRC
 
+*** evil org
+
 #+BEGIN_SRC emacs-lisp
-(define-key custom-bindings-map (kbd "C-c c")       'org-capture)
-(define-key custom-bindings-map (kbd "C-c t")
-  (lambda () (interactive) (org-agenda nil "n")))
-(define-key custom-bindings-map (kbd "C-c l")       'org-store-link)
-(define-key custom-bindings-map (kbd "C-c a")       'org-agenda)
+(require 'evil-org)
+(add-hook 'org-mode-hook 'evil-org-mode)
+(evil-org-set-key-theme '(navigation insert textobjects additional))
 #+END_SRC
 
-*** Org Pdf
+*** file associations
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+#+END_SRC
+*** agenda
+**** schedule
+
+Don't delay for scheduled tasks
+
+#+BEGIN_SRC emacs-lisp
+(setq org-scheduled-delay-days 0)
+#+END_SRC
+
+**** habits
+
+#+BEGIN_SRC emacs-lisp
+(require 'org-habit)
+(setq org-habit-graph-column 60)
+(setq org-habit-preceding-days 14)
+(setq org-habit-following-days 3)
+#+END_SRC
+
+**** todo states
+
+#+BEGIN_SRC emacs-lisp
+(setq org-todo-keyword-faces
+  '(
+        ("TODO" . (:foreground "red"))
+        ("PROGRESSING" . (:foreground "orange"))
+        ("DEVELOPING" . (:foreground "DarkOrange"))
+  ("HOLD" . (:foreground "yellow"))
+        ("FAILED" . (:foreground "grey"))
+  ("ANSWERED" . (:foreground "green"))
+   ))
+
+(setq org-todo-keywords
+      '((sequence
+         "TODO(t)" "PROGRESSING(p)" "DEVELOPING(v)" "HOLD(h)"
+         "|" "DONE(d)" "ANSWERED(a)" "FAILED(f)")))
+#+END_SRC
+
+
+Sets priority color faces
+
+#+BEGIN_SRC emacs-lisp
+(setq org-priority-faces '(
+                           (?0 . (:foreground "green"))
+                           (?1 . (:foreground "green yellow" :weight 'bold))
+                           (?2 . (:foreground "yellow"))
+                           (?3 . (:foreground "gold"))
+                           (?4 . (:foreground "orange"))
+                           (?5 . (:foreground "chocolate"))
+                           (?6 . (:foreground "firebrick"))
+                           (?7 . (:foreground "brown"))
+                           (?8 . (:foreground "plum"))
+                           (?9 . (:foreground "DarkOrchid4"))
+                           ))
+#+END_SRC
+
+**** todo editing
+
+These functions helps clear out done tasks in an org file
+
+#+BEGIN_SRC emacs-lisp
+(defun org-map-tasks (action state)
+  (org-map-entries
+    (lambda ()
+      (funcall action)
+      (setq org-map-continue-from (outline-previous-heading)))
+    state 'file))
+
+(defun org-archive-done-tasks ()
+  (interactive)
+  (org-map-tasks 'org-archive-subtree "/DONE"))
+
+(defun org-cut-done-tasks ()
+  (interactive)
+  (org-map-tasks 'org-cut-subtree "/DONE"))
+#+END_SRC
+
+Generates a sequence of todo items based on a sequence of numbers
+
+#+BEGIN_SRC emacs-lisp
+(defun org-todo-sequence ()
+  "Creates a list of todo items ending with numbers from start to end"
+  (interactive)
+  (let* ((item (read-string "todo item: "))
+         (start (string-to-number (read-string "start index: ")))
+         (end (string-to-number (read-string "end index: ")))
+         (todo-item (concat "* TODO " item))
+         (line-item (lambda (i) (concat todo-item " " (number-to-string i) "\n")))
+         (items (mapcar line-item (number-sequence start end))))
+    (mapc 'insert items)))
+#+END_SRC
+
+Helps sort sections
+
+#+BEGIN_SRC emacs-lisp
+(defun org-sort-alpha-todo ()
+  (interactive)
+  (org-sort-entries nil ?a)
+  (org-sort-entries nil ?o))
+#+END_SRC
+
+**** todo navigation
+
+This function will help randomly select a todo in the current tree.
+
+#+BEGIN_SRC emacs-lisp
+(defun org-goto-random-subtree-todo ()
+  (interactive)
+  (org-back-to-heading t)
+  (let ((todos '())
+        (target 0))
+    ;; Gather todo headings
+    (org-map-tree
+     (lambda () (when (and
+                  (org-get-todo-state)
+                  (not (equal "ANSWERED" (org-get-todo-state))))
+             (setq todos (cons (point) todos)))))
+    ;; Randomly select one
+    (goto-char
+     (nth (random (- (length todos) 1)) todos))))
+#+END_SRC
+*** source blocks 
+
+When editing org-files with source-blocks, we want the source blocks to
+be themed as they would in their native mode.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t
+      org-src-tab-acts-natively t
+      org-confirm-babel-evaluate nil
+      org-edit-src-content-indentation 0)
+#+END_SRC
+
+This is quite an ugly fix for allowing code markup for expressions like
+="this string"=, because the quotation marks causes problems.
+
+#+BEGIN_SRC emacs-lisp
+(eval-after-load "org"
+  '(progn
+     (require 'ob-shell)
+     (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n,")
+     (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist))))
+#+END_SRC
+
+*** alerts
+
+Enable [[https://github.com/spegoraro/org-alert][org-alert]]
+
+#+BEGIN_SRC emacs-lisp
+;;(require 'org-alert)
+;;(setq alert-default-style 'libnotify)
+#+END_SRC
+Ensure that .org files are opened with org-mode
+
+*** pdf
 
 Org mode does currently not support synctex (which enables you to jump from
 a point in your TeX-file to the corresponding point in the pdf), and it
@@ -1415,7 +1526,14 @@ in the exported pdf (given that the pdf-file exists), using pdf-tools.
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-'") 'org-sync-pdf))
 #+END_SRC
-*** Org Babel
+
+*** babel
+
+#+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((dot . t)))
+#+END_SRC
 
 This allows for the execution of literate sh files.
 
@@ -1437,124 +1555,7 @@ This allows for the execution of literate sh files.
 )
 #+END_SRC
 
-#+RESULTS:
-: org-tangle-and-run-sh
-
-*** Org Agenda
-
-Don't delay for scheduled tasks
-
-#+BEGIN_SRC emacs-lisp
-(setq org-scheduled-delay-days 0)
-#+END_SRC
-
-These functions helps clear out done tasks in an org file
-
-#+BEGIN_SRC emacs-lisp
-(defun org-map-tasks (action state)
-  (org-map-entries
-    (lambda ()
-      (funcall action)
-      (setq org-map-continue-from (outline-previous-heading)))
-    state 'file))
-
-(defun org-archive-done-tasks ()
-  (interactive)
-  (org-map-tasks 'org-archive-subtree "/DONE"))
-
-(defun org-cut-done-tasks ()
-  (interactive)
-  (org-map-tasks 'org-cut-subtree "/DONE"))
-#+END_SRC
-
-Set the default todo keywords
-
-#+BEGIN_SRC emacs-lisp
-(setq org-todo-keyword-faces
-  '(
-        ("TODO" . (:foreground "red"))
-        ("PROGRESSING" . (:foreground "orange"))
-        ("DEVELOPING" . (:foreground "DarkOrange"))
-  ("HOLD" . (:foreground "yellow"))
-        ("FAILED" . (:foreground "grey"))
-  ("ANSWERED" . (:foreground "green"))
-   ))
-
-(setq org-todo-keywords
-      '((sequence
-         "TODO(t)" "PROGRESSING(p)" "DEVELOPING(v)" "HOLD(h)"
-         "|" "DONE(d)" "ANSWERED(a)" "FAILED(f)")))
-#+END_SRC
-
-Generates a sequence of todo items based on a sequence of numbers
-
-#+BEGIN_SRC emacs-lisp
-(defun org-todo-sequence ()
-  "Creates a list of todo items ending with numbers from start to end"
-  (interactive)
-  (let* ((item (read-string "todo item: "))
-         (start (string-to-number (read-string "start index: ")))
-         (end (string-to-number (read-string "end index: ")))
-         (todo-item (concat "* TODO " item))
-         (line-item (lambda (i) (concat todo-item " " (number-to-string i) "\n")))
-         (items (mapcar line-item (number-sequence start end))))
-    (mapc 'insert items)))
-#+END_SRC
-
-Sets priority color faces
-
-#+BEGIN_SRC emacs-lisp
-(setq org-priority-faces '(
-                           (?0 . (:foreground "green"))
-                           (?1 . (:foreground "green yellow" :weight 'bold))
-                           (?2 . (:foreground "yellow"))
-                           (?3 . (:foreground "gold"))
-                           (?4 . (:foreground "orange"))
-                           (?5 . (:foreground "chocolate"))
-                           (?6 . (:foreground "firebrick"))
-                           (?7 . (:foreground "brown"))
-                           (?8 . (:foreground "plum"))
-                           (?9 . (:foreground "DarkOrchid4"))
-                           ))
-#+END_SRC
-
-Helps sort sections
-
-#+BEGIN_SRC emacs-lisp
-(defun org-sort-alpha-todo ()
-  (interactive)
-  (org-sort-entries nil ?a)
-  (org-sort-entries nil ?o))
-#+END_SRC
-
-This function will help randomly select a todo in the current tree.
-
-#+BEGIN_SRC emacs-lisp
-(defun org-goto-random-subtree-todo ()
-  (interactive)
-  (org-back-to-heading t)
-  (let ((todos '())
-        (target 0))
-    ;; Gather todo headings
-    (org-map-tree
-     (lambda () (when (and
-                  (org-get-todo-state)
-                  (not (equal "ANSWERED" (org-get-todo-state))))
-             (setq todos (cons (point) todos)))))
-    ;; Randomly select one
-    (goto-char
-     (nth (random (- (length todos) 1)) todos))))
-#+END_SRC
-
-
-#+BEGIN_SRC emacs-lisp
-(require 'org-habit)
-(setq org-habit-graph-column 60)
-(setq org-habit-preceding-days 14)
-(setq org-habit-following-days 3)
-#+END_SRC
-
-*** Org Export
+*** export
 
 Sometimes I want to use the same org file to export into different sources,
 but not include all of the content. For example, if I'm exporting into a
@@ -1614,7 +1615,7 @@ by adding advice to the various export commands to ignore certain tags.
 (advice-add 'org-twbs-export-to-html-and-browse
             :around #'org-twbs-set-export-options)
 #+END_SRC
-*** Latex
+*** latex
 
 =.tex=-files should be associated with =latex-mode= instead of
 =tex-mode=.
@@ -1641,11 +1642,11 @@ subsystem.
       "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
       "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""))
 #+END_SRC
-*** Org Ref
+*** ref
 #+BEGIN_SRC emacs-lisp
 (require 'org-ref)
 #+END_SRC
-*** Templates
+*** templates
 **** latex
 
 #+begin_src emacs-lisp
@@ -1703,6 +1704,15 @@ subsystem.
      "#+latex_header: \\usepackage{setspace}"
      ""
   )))
+#+END_SRC
+*** keybindings
+
+#+BEGIN_SRC emacs-lisp
+(define-key custom-bindings-map (kbd "C-c c")       'org-capture)
+(define-key custom-bindings-map (kbd "C-c t")
+  (lambda () (interactive) (org-agenda nil "n")))
+(define-key custom-bindings-map (kbd "C-c l")       'org-store-link)
+(define-key custom-bindings-map (kbd "C-c a")       'org-agenda)
 #+END_SRC
 ** purescript
 #+BEGIN_SRC emacs-lisp
