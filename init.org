@@ -1359,6 +1359,11 @@ Don't delay for scheduled tasks
 (setq org-scheduled-delay-days 0)
 #+END_SRC
 
+Hide all tags on agenda view
+#+BEGIN_SRC emacs-lisp
+(setq org-agenda-hide-tags-regexp ".*")
+#+END_SRC
+
 **** habits
 
 #+BEGIN_SRC emacs-lisp
@@ -1553,7 +1558,9 @@ in the exported pdf (given that the pdf-file exists), using pdf-tools.
 #+BEGIN_SRC emacs-lisp
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((dot . t)))
+ '((dot . t)
+   (ledger . t)
+))
 #+END_SRC
 
 This allows for the execution of literate sh files.
