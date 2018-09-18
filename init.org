@@ -1193,11 +1193,13 @@ the echo area. Haskell has several indentation modes - I prefer using
   (structured-haskell-mode t)
   (intero-mode t))
 
+(setq haskell-mode-stylish-haskell-path "/home/bmphrasing/.local/bin/stylish-haskell")
 (setq haskell-stylish-on-save t)
 (add-hook 'haskell-mode-hook #'haskell-setup)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
 
 (require 'shm)
+(setq shm-program-name "/home/bmphrasing/.local/bin/structured-haskell-mode")
 (eval-after-load 'haskell-mode
   '(progn
        (define-key haskell-mode-map (kbd "M-<up>") 'drag-stuff-up)
@@ -1368,7 +1370,7 @@ Hide all tags on agenda view
 
 #+BEGIN_SRC emacs-lisp
 (require 'org-habit)
-(setq org-habit-graph-column 60)
+(setq org-habit-graph-column 40)
 (setq org-habit-preceding-days 14)
 (setq org-habit-following-days 3)
 #+END_SRC
@@ -1560,6 +1562,9 @@ in the exported pdf (given that the pdf-file exists), using pdf-tools.
  'org-babel-load-languages
  '((dot . t)
    (ledger . t)
+   (emacs-lisp . t)
+   (bash . t)
+   (sh . t)
 ))
 #+END_SRC
 
