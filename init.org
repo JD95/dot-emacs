@@ -106,6 +106,7 @@ installed. To ensure we install missing packages if they are missing.
 
    ;; Themes
    gotham-theme
+   solarized-theme
 
    ;; Package Management
    use-package
@@ -463,7 +464,9 @@ Argument MODE Not sure."
 Change the color-theme to =gotham=.
 
 #+BEGIN_SRC emacs-lisp
-(load-theme 'gotham t)
+(if (display-graphic-p)
+  (load-theme 'gotham t)
+  (load-theme 'solarized t))
 #+END_SRC
 
 Use the [[ https://github.com/tonsky/FiraCode][Fira Code]] font if it's installed on the system.
@@ -1558,14 +1561,15 @@ in the exported pdf (given that the pdf-file exists), using pdf-tools.
 *** babel
 
 #+BEGIN_SRC emacs-lisp
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((dot . t)
-   (ledger . t)
-   (emacs-lisp . t)
-   (bash . t)
-   (sh . t)
-))
+(ignore-errors
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((dot . t)
+     (ledger . t)
+     (emacs-lisp . t)
+     (bash . t)
+     (sh . t)
+  )))
 #+END_SRC
 
 This allows for the execution of literate sh files.
