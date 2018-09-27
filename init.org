@@ -227,7 +227,6 @@ using the =Command=-key as the =Meta=-key.
   (when (fboundp 'mac-auto-operator-composition-mode)
     (mac-auto-operator-composition-mode 1)))
 #+END_SRC
-
 *** Linux
 
 Settings specific for linux installs. Like macOS, =exec-path-from-shell= will
@@ -1513,11 +1512,11 @@ This is quite an ugly fix for allowing code markup for expressions like
 ="this string"=, because the quotation marks causes problems.
 
 #+BEGIN_SRC emacs-lisp
-(eval-after-load "org"
+(ignore-errors (eval-after-load "org"
   '(progn
      (require 'ob-shell)
      (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n,")
-     (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist))))
+     (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist)))))
 #+END_SRC
 
 *** alerts
@@ -1558,14 +1557,13 @@ in the exported pdf (given that the pdf-file exists), using pdf-tools.
 *** babel
 
 #+BEGIN_SRC emacs-lisp
+(ignore-errors 
 (org-babel-do-load-languages
- 'org-babel-load-languages
- '((dot . t)
-   (ledger . t)
-   (emacs-lisp . t)
-   (bash . t)
-   (sh . t)
-))
+   'org-babel-load-languages
+   '((dot . t)
+     (ledger . t)
+     (emacs-lisp . t)
+     (sh . t))))
 #+END_SRC
 
 This allows for the execution of literate sh files.
