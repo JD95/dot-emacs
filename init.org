@@ -84,125 +84,75 @@ The configuration assumes that the packages listed below are
 installed. To ensure we install missing packages if they are missing.
 
 #+BEGIN_SRC emacs-lisp
+(eval-when-compile
+  (require 'use-package))
 
 (setq package-selected-packages
- '(
-   ;; System
-   auto-compile         ; automatically compile Emacs Lisp libraries
-   idle-require         ; load elisp libraries while Emacs is idle
-   try                  ; Try out Emacs packages
-   which-key            ; Display available keybindings in popup
-   exec-path-from-shell
+ '(use-package))
 
-   ;; Editing
-   company              ; Modular text completion framework
-   drag-stuff           ; Drag stuff around in Emacs
-   pdf-tools            ; Emacs support library for PDF files
-   paredit              ; minor mode for editing parentheses
-   multiple-cursors     ; Multiple cursors for Emacs
-   focus                ; Dim color of text in surrounding sections
-   diminish             ; Diminished modes from modeline
-   expand-region        ; Increase selected region by semantic units
+(package-initialize)
+(unless package-archive-contents
+    (package-refresh-contents))
+(package-install-selected-packages)
 
-   ;; Themes
-   gotham-theme
-   solarized-theme
+; automatically compile Emacs Lisp libraries
+(use-package auto-compile
+  :ensure t)
+; load elisp libraries while Emacs is idle
+(use-package idle-require
+  :ensure t)
+; Try out Emacs packages
+(use-package try
+  :ensure t)           
+(use-package which-key
+  :ensure t)
+(use-package exec-path-from-shell
+  :ensure t)
+; Modular text completion framework
+(use-package company
+  :ensure t)
+; Emacs support library for PDF files
+(use-package pdf-tools
+  :ensure t)
+; minor mode for editing parentheses
+(use-package paredit
+  :ensure t)
+(use-package focus                ; Dim color of text in surrounding sections
+  :ensure t)
+; Diminished modes from modeline
+(use-package diminish
+  :ensure t)
+; Increase selected region by semantic units
+(use-package expand-region
+  :ensure t)
+(use-package gotham-theme 
+  :ensure t)
+(use-package solarized-theme
+  :ensure t)
+(use-package define-word          ; display the definition of word at point
+  :ensure t)
+(use-package avy
+  :ensure t)
+(use-package smooth-scrolling
+  :ensure t)
+(use-package git-gutter-fringe
+  :ensure t)
 
-   ;; Package Management
-   use-package
-   define-word          ; display the definition of word at point
+(use-package markdown-mode
+  :ensure t)
+(use-package yaml-mode
+  :ensure t)
 
-   ;; Navigation
-   avy
-   smooth-scrolling
-   evil
-   evil-magit
-   evil-org
-   evil-tutor
-   helm                 ; Incremental and narrowing framework
-   helm-ag              ; the silver searcher with helm interface
-   helm-company         ; Helm interface for company-mode
-   helm-projectile      ; Helm integration for Projectile
-   helm-swoop           ; Efficiently hopping squeezed lines
-   hydra
-
-   ;; Project Management
-   projectile           ; Manage and navigate projects in Emacs easily
-   git-gutter-fringe    ; Fringe version of git-gutter.el
-   magit                ; control Git from Emacs
-   flycheck
-
-   ;; Planning
-   org-alert
-
-   ;; Writing
-   org                  ; Outline-based notes management and organizer
-   org-ref              ; citations bibliographies in org-mode
-   ox-reveal
-   ox-twbs
-
-   ;; Docker
-   ;;dockerfile-mode
-
-   ;; Windows
-   powershell
-
-   ;; Haskell
-   haskell-mode         ; A Haskell editing mode
-   intero
-   hlint-refactor
-   shm
-
-   ;; Idris
-   idris-mode
-   helm-idris
-
-   ;; Purescript
-   purescript-mode
-   psc-ide
-
-   ;; Coq
-   company-coq
-
-   ;; Elisp
-   slime                ; Superior Lisp Interaction Mode for Emacs
-   elmacro
-   lispy
-   evil-lispy
-
-   ;; Rust
-   rust-mode
-   racer
-   flycheck-rust
-   cargo
-
-   ;; Python
-   elpy
-   py-autopep8
-
-   ;; Javascript
-   js2-mode             ; Improved JavaScript editing mode
-
-   ;; Markdown
-   markdown-mode        ; Emacs Major mode for Markdown-formatted files
-
-   ;; YAML
-   yaml-mode
-
-   ;; Solidity
-   solidity-mode
-   company-solidity
-   ))
+(use-package lsp-mode
+  :ensure t)
+(use-package lsp-ui
+  :ensure t)
 
 (ignore-errors ;; This package is only relevant for Mac OS X.
   (when (memq window-system '(mac ns))
         (push 'exec-path-from-shell packages)
         (push 'reveal-in-osx-finder packages)))
 
-(package-initialize)
-(unless package-archive-contents
-    (package-refresh-contents))
-(package-install-selected-packages)
 #+END_SRC
 
 Some packages need to be installed manually, so we add a custom folder to the load path
@@ -387,7 +337,6 @@ default.
            column-number-mode           ; Show column number in mode line
            delete-selection-mode        ; Replace selected text
            dirtrack-mode                ; directory tracking in *shell*
-           drag-stuff-global-mode       ; Drag stuff around
            global-company-mode          ; Auto-completion everywhere
            global-git-gutter-mode       ; Show changes latest commit
            global-prettify-symbols-mode ; Greek letters should look greek
@@ -594,6 +543,19 @@ or haskell modules.
          (template (apply (template-make-lambda ,symbols ,exp) values)))
      (mapc #'insert-with-newline template)))
 #+end_src
+
+* Language Server 
+#+BEGIN_SRC emacs-lisp
+(require 'lsp-mode)
+(require 'lsp-ui)
+
+(lsp-define-stdio-client
+  lsp-prog-major-mode
+  "language-id"
+  (lambda () default-directory)
+  ("hie-8.4.3.exe"))
+(add-hook 'lsp-mode-hook #'lsp-ui-mode)
+#+END_SRC
 * User Functions
 
 This updates the compiled init.el file with any changes made to this file.
@@ -884,11 +846,13 @@ Evaluate the =calendar-show-week= function.
 These are the configurations for evil mode editing.
 
 #+BEGIN_SRC emacs-lisp
+(use-package evil
+  :ensure t)
+
 (setq evil-want-abbrev-expand-on-insert-exit nil)
 (setq evil-want-integration nil)
 (require 'evil)
 (evil-mode 1)
-(evil-magit-init)
 #+END_SRC
 ** expand-region
 #+BEGIN_SRC emacs-lisp
@@ -971,6 +935,19 @@ Note that some changes in bindings are located in the key bindings (found
 near the end of the configuration).
 
 #+BEGIN_SRC emacs-lisp
+(use-package helm 
+  :ensure t)
+(use-package helm-ag
+  :ensure t)
+(use-package helm-company
+  :ensure t)
+(use-package helm-projectile
+  :ensure t)
+(use-package helm-swoop
+  :ensure t)
+(use-package hydra
+  :ensure t)
+
 (require 'helm)
 (require 'helm-config)
 
@@ -1131,6 +1108,9 @@ _SPC_ cancel
 ** magit
 
 #+BEGIN_SRC emacs-lisp
+(use-package evil-magit
+  :ensure t)
+(evil-magit-init)
 (define-key custom-bindings-map (kbd "C-c m") 'magit-status)
 #+END_SRC
 ** multiple-cursors
@@ -1150,6 +1130,15 @@ Use a custom program for projectile's grep
 Enable projectile mode everywhere.
 
 #+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :ensure t)
+(use-package git-gutter-fringe
+  :ensure t)
+(use-package magit
+  :ensure t)
+(use-package flycheck
+  :ensure t)
+
 (require 'projectile)
 (projectile-mode 1)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
@@ -1168,15 +1157,18 @@ accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
 #+END_SRC
 ** coq
 #+BEGIN_SRC emacs-lisp
-(ignore-errors
-  (load (gethash "coq-proof-site-location" emacs-config)))
+  ;; (use-package company-coq
+  ;;   :ensure t)
 
-(defun coq-setup ()
-  (interactive)
-  (company-coq-mode)
-  (buffer-face-mode))
+  (ignore-errors
+    (load (gethash "coq-proof-site-location" emacs-config)))
 
-(add-hook 'coq-mode-hook #'coq-setup)
+  (defun coq-setup ()
+    (interactive)
+    (company-coq-mode)
+    (buffer-face-mode))
+
+  (add-hook 'coq-mode-hook #'coq-setup)
 #+END_SRC
 ** haskell
 
@@ -1185,43 +1177,21 @@ the echo area. Haskell has several indentation modes - I prefer using
 =haskell-indent=.
 
 #+BEGIN_SRC emacs-lisp
-(setq stack-location (gethash "haskell-stack-location" emacs-config))
+(use-package haskell-mode
+  :ensure t)
+(use-package intero
+  :ensure t)
+(use-package hlint-refactor
+  :ensure t)
+(use-package shm
+  :ensure t)
+(use-package lsp-haskell
+  :ensure t)
 
-(let ((my-stack-path (expand-file-name stack-location)))
-  (setenv "PATH" (concat my-stack-path path-separator (getenv "PATH")))
-  (add-to-list 'exec-path my-stack-path))
-
-(defun haskell-setup ()
-  (structured-haskell-mode t)
-  (intero-mode t))
-
-(setq haskell-mode-stylish-haskell-path "/home/bmphrasing/.local/bin/stylish-haskell")
-(setq haskell-stylish-on-save t)
-(add-hook 'haskell-mode-hook #'haskell-setup)
-(add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
-
-(require 'shm)
-(setq shm-program-name "/home/bmphrasing/.local/bin/structured-haskell-mode")
-(eval-after-load 'haskell-mode
-  '(progn
-       (define-key haskell-mode-map (kbd "M-<up>") 'drag-stuff-up)
-           (define-key haskell-mode-map (kbd "M-<down>") 'drag-stuff-down)
-           (define-key shm-map (kbd "C-c C-s") 'shm/case-split)
-           ))
-
-(with-eval-after-load 'intero
-  (flycheck-add-next-checker 'intero '(warning . haskell-hlint)))
-#+END_SRC
-
-I use [[https://hackage.haskell.org/package/brittany][brittany]] for formatting my haskell buffers. This function lets me format the current buffer.
-
-#+BEGIN_SRC emacs-lisp
-(defun brittany-file ()
-  (interactive)
-  (shell-command
-   (concat
-    "brittany --write-mode=inplace "
-    (buffer-file-name (window-buffer (minibuffer-selected-window))))))
+(require 'lsp-haskell)
+(add-hook 'haskell-mode-hook #'lsp-haskell-enable)
+(add-hook 'haskell-mode-hook #'flycheck-mode)
+(setq lsp-haskell-process-path-hie "hie-wrapper")
 #+END_SRC
 *** Templates
 
@@ -1237,21 +1207,37 @@ I use [[https://hackage.haskell.org/package/brittany][brittany]] for formatting 
 #+END_SRC
 ** idris
 #+BEGIN_SRC emacs-lisp
+(use-package idris-mode
+  :ensure t)
+(use-package helm-idris
+  :ensure t)
+
 (add-to-list 'exec-path (gethash "idris-location" emacs-config))
 #+END_SRC
 
 ** lisp
 
+#+BEGIN_SRC emacs-lisp
+(use-package slime
+  :ensure t)
+(use-package elmacro
+  :ensure t)
+(use-package lispy
+  :ensure t)
+(use-package evil-lispy
+  :ensure t)
+#+END_SRC
+
 I use =Paredit= when editing lisp code, we enable this for all lisp-modes.
 
 #+BEGIN_SRC emacs-lisp
-   (dolist (mode '(ielm-mode
-                   lisp-mode
-                   emacs-lisp-mode
-                   lisp-interaction-mode
-                   scheme-mode))
-     ;; add paredit-mode to all mode-hooks
-     (add-hook (intern (concat (symbol-name mode) "-hook")) 'paredit-mode))
+(dolist (mode '(ielm-mode
+                lisp-mode
+                emacs-lisp-mode
+                lisp-interaction-mode
+                scheme-mode))
+  ;; add paredit-mode to all mode-hooks
+  (add-hook (intern (concat (symbol-name mode) "-hook")) 'paredit-mode))
 #+END_SRC
 
 *** Emacs Lisp
@@ -1316,6 +1302,22 @@ function to a key!
                (local-set-key (kbd "C-c b") 'insert-markdown-inline-math-block)) t)
 #+END_SRC
 ** org
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-alert
+  :ensure t)
+(use-package org
+  :ensure t)
+(use-package org-ref
+  :ensure t)
+(use-package ox-reveal
+  :ensure t)
+(use-package ox-twbs
+  :ensure t)
+(use-package evil-org
+  :ensure t)
+#+END_SRC
+
 *** editing 
 
 Use aspell if present, mainly useful on windows.
@@ -1751,6 +1753,11 @@ subsystem.
 #+END_SRC
 ** purescript
 #+BEGIN_SRC emacs-lisp
+(use-package purescript-mode
+  :ensure t)
+(use-package psc-ide
+  :ensure t)
+
 (require 'psc-ide)
 
 (defun purescript-setup ()
@@ -1823,6 +1830,11 @@ subsystem.
 #+END_SRC
 ** python
 #+BEGIN_SRC emacs-lisp
+(use-package elpy
+  :ensure t)
+(use-package py-autopep8
+  :ensure t)
+
 (elpy-enable)
 
 (when (require 'flycheck nil t)
@@ -1850,9 +1862,25 @@ subsystem.
      "    pass"
      )))
 #+END_SRC
+** javascript
+#+BEGIN_SRC emacs-lisp
+(use-package js2-mode
+  :ensure t)
+#+END_SRC
 ** rust
 
 #+BEGIN_SRC emacs-lisp
+(use-package rust-mode
+  :ensure t)
+(use-package racer
+  :ensure t)
+(use-package flycheck-rust
+  :ensure t)
+(use-package flycheck-rust
+  :ensure t)
+(use-package cargo
+  :ensure t)
+
 (require 'rust-mode)
 
 (defun rust-mode-setup ()
