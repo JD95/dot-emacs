@@ -84,9 +84,6 @@ The configuration assumes that the packages listed below are
 installed. To ensure we install missing packages if they are missing.
 
 #+BEGIN_SRC emacs-lisp
-(eval-when-compile
-  (require 'use-package))
-
 (setq package-selected-packages
  '(use-package))
 
@@ -94,6 +91,9 @@ installed. To ensure we install missing packages if they are missing.
 (unless package-archive-contents
     (package-refresh-contents))
 (package-install-selected-packages)
+
+(eval-when-compile
+  (require 'use-package))
 
 ; automatically compile Emacs Lisp libraries
 (use-package auto-compile
@@ -1316,6 +1316,8 @@ function to a key!
   :ensure t)
 (use-package evil-org
   :ensure t)
+
+(setq org-modules '(org-habit))
 #+END_SRC
 
 *** editing 
