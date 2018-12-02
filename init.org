@@ -1180,22 +1180,15 @@ the echo area. Haskell has several indentation modes - I prefer using
 (use-package haskell-mode
   :ensure t)
 
-(if (string-equal system-type 'windows-nt)
-  (progn
-    (use-package intero
-      :ensure t)
-    (use-package hlint-refactor
-      :ensure t)
-    (use-package shm
-      :ensure t)
+(progn
+  (use-package intero
+    :ensure t)
+  (use-package hlint-refactor
+    :ensure t)
+  (use-package shm
+    :ensure t)
 
-    (add-hook 'haskell-mode-hook #'intero-mode))
-  (progn
-    (use-package lsp-haskell
-      :ensure t)
-    (require 'lsp-haskell)
-    (add-hook 'haskell-mode-hook #'lsp-haskell-enable)
-    (setq lsp-haskell-process-path-hie "hie-wrapper")))
+  (add-hook 'haskell-mode-hook #'intero-mode))
 
 (add-hook 'haskell-mode-hook #'flycheck-mode)
 #+END_SRC
@@ -1576,7 +1569,7 @@ in the exported pdf (given that the pdf-file exists), using pdf-tools.
      (ledger . t)
      (emacs-lisp . t)
      (bash . t)
-     (sh . t)
+     (shell . t)
   )))
 #+END_SRC
 
