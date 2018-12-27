@@ -143,11 +143,6 @@ installed. To ensure we install missing packages if they are missing.
 (use-package yaml-mode
   :ensure t)
 
-(use-package lsp-mode
-  :ensure t)
-(use-package lsp-ui
-  :ensure t)
-
 (ignore-errors ;; This package is only relevant for Mac OS X.
   (when (memq window-system '(mac ns))
         (push 'exec-path-from-shell packages)
@@ -544,18 +539,6 @@ or haskell modules.
      (mapc #'insert-with-newline template)))
 #+end_src
 
-* Language Server 
-#+BEGIN_SRC emacs-lisp
-(require 'lsp-mode)
-(require 'lsp-ui)
-
-(lsp-define-stdio-client
-  lsp-prog-major-mode
-  "language-id"
-  (lambda () default-directory)
-  ("hie-8.4.3.exe"))
-(add-hook 'lsp-mode-hook #'lsp-ui-mode)
-#+END_SRC
 * User Functions
 
 This updates the compiled init.el file with any changes made to this file.
@@ -641,6 +624,22 @@ Note the weekly scope of the command's precision.")
   (insert (format-time-string current-time-format (current-time))))
 #+END_SRC
 
+** Formulas
+#+BEGIN_SRC emacs-lisp
+(defun average (xs) (/ (apply '+ xs) (float (length xs))))
+(defun average-slope (xs) (cond ((eq xs nil) 0)
+                                ((eq 1 (length xs)) (car xs))
+                           (t (average (zipWith (lambda (x y) (- y x)) xs (cdr xs))))))
+#+END_SRC
+** Lists
+#+BEGIN_SRC emacs-lisp
+(defun zipWith (f xs ys)
+  (if (or (eq xs nil) (eq ys nil))
+     '() 
+    (cons (funcall f (car xs) (car ys)) (zipWith f (cdr xs) (cdr ys)))))
+(defun zip (xs ys) (zipWith #'list xs ys))
+(defun pairs (xs) (zip xs (cdr xs)))
+#+END_SRC
 ** Searching
 
 Often I want to find other occurrences of a word I'm at, or more
