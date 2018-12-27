@@ -707,6 +707,31 @@ This is useful when pasting text from websites or word.
         (goto-char point)
       (message "No non-ascii characters."))))
 #+END_SRC
+
+** Sorting 
+#+BEGIN_SRC emacs-lisp
+(defun sort-words-in-region (start end)
+  "Sort the words in a given region (START and END) and return them as a list."
+   (sort (split-string (buffer-substring-no-properties start end)) #'string<))
+
+(defun sort-words-sorted (start end)
+  "Sort the words in a given region (START and END) and return them as a string."
+  (mapconcat 'identity (sort-words-in-region start end) " "))
+
+;;;###autoload
+(defun sort-words (start end)
+  "Sort words in region alphabetically.
+Then insert them replacing the existing region.
+START and END are boundries of the selected region."
+  (interactive "r")
+  (save-excursion
+    (save-restriction
+      (narrow-to-region start end)
+      (let ((words (sort-words-sorted (point-min) (point-max))))
+        (delete-region (point-min) (point-max))
+        (goto-char (point-min))
+        (insert words)))))
+#+END_SRC
 ** Themes 
 
 When interactively changing the theme (using =M-x load-theme=), the
@@ -1190,6 +1215,8 @@ the echo area. Haskell has several indentation modes - I prefer using
 
   (add-hook 'haskell-mode-hook #'intero-mode))
 
+(setq haskell-stylish-on-save t)
+(setq haskell-mode-stylish-haskell-path "brittany")
 (add-hook 'haskell-mode-hook #'flycheck-mode)
 #+END_SRC
 *** Templates
