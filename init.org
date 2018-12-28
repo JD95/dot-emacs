@@ -627,9 +627,10 @@ Note the weekly scope of the command's precision.")
 ** Formulas
 #+BEGIN_SRC emacs-lisp
 (defun average (xs) (/ (apply '+ xs) (float (length xs))))
-(defun average-slope (xs) (cond ((eq xs nil) 0)
-                                ((eq 1 (length xs)) (car xs))
-                           (t (average (zipWith (lambda (x y) (- y x)) xs (cdr xs))))))
+(defun average-slope (xs) 
+  (if (<=(length xs) 1) 
+       0 
+       (average (zipWith (lambda (x y) (- y x)) xs (cdr xs)))))
 #+END_SRC
 ** Lists
 #+BEGIN_SRC emacs-lisp
