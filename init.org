@@ -143,11 +143,6 @@ installed. To ensure we install missing packages if they are missing.
 (use-package yaml-mode
   :ensure t)
 
-(use-package lsp-mode
-  :ensure t)
-(use-package lsp-ui
-  :ensure t)
-
 (ignore-errors ;; This package is only relevant for Mac OS X.
   (when (memq window-system '(mac ns))
         (push 'exec-path-from-shell packages)
@@ -549,18 +544,6 @@ or haskell modules.
      (mapc #'insert-with-newline template)))
 #+end_src
 
-* Language Server 
-#+BEGIN_SRC emacs-lisp
-(require 'lsp-mode)
-(require 'lsp-ui)
-
-(lsp-define-stdio-client
-  lsp-prog-major-mode
-  "language-id"
-  (lambda () default-directory)
-  ("hie-8.4.3.exe"))
-(add-hook 'lsp-mode-hook #'lsp-ui-mode)
-#+END_SRC
 * User Functions
 
 This updates the compiled init.el file with any changes made to this file.
@@ -646,6 +629,23 @@ Note the weekly scope of the command's precision.")
   (insert (format-time-string current-time-format (current-time))))
 #+END_SRC
 
+** Formulas
+#+BEGIN_SRC emacs-lisp
+(defun average (xs) (/ (apply '+ xs) (float (length xs))))
+(defun average-slope (xs) 
+  (if (<=(length xs) 1) 
+       0 
+       (average (zipWith (lambda (x y) (- y x)) xs (cdr xs)))))
+#+END_SRC
+** Lists
+#+BEGIN_SRC emacs-lisp
+(defun zipWith (f xs ys)
+  (if (or (eq xs nil) (eq ys nil))
+     '() 
+    (cons (funcall f (car xs) (car ys)) (zipWith f (cdr xs) (cdr ys)))))
+(defun zip (xs ys) (zipWith #'list xs ys))
+(defun pairs (xs) (zip xs (cdr xs)))
+#+END_SRC
 ** Searching
 
 Often I want to find other occurrences of a word I'm at, or more
@@ -711,6 +711,31 @@ This is useful when pasting text from websites or word.
     (if point
         (goto-char point)
       (message "No non-ascii characters."))))
+#+END_SRC
+
+** Sorting 
+#+BEGIN_SRC emacs-lisp
+(defun sort-words-in-region (start end)
+  "Sort the words in a given region (START and END) and return them as a list."
+   (sort (split-string (buffer-substring-no-properties start end)) #'string<))
+
+(defun sort-words-sorted (start end)
+  "Sort the words in a given region (START and END) and return them as a string."
+  (mapconcat 'identity (sort-words-in-region start end) " "))
+
+;;;###autoload
+(defun sort-words (start end)
+  "Sort words in region alphabetically.
+Then insert them replacing the existing region.
+START and END are boundries of the selected region."
+  (interactive "r")
+  (save-excursion
+    (save-restriction
+      (narrow-to-region start end)
+      (let ((words (sort-words-sorted (point-min) (point-max))))
+        (delete-region (point-min) (point-max))
+        (goto-char (point-min))
+        (insert words)))))
 #+END_SRC
 ** Themes 
 
@@ -1198,6 +1223,8 @@ the echo area. Haskell has several indentation modes - I prefer using
 
   (add-hook 'haskell-mode-hook #'intero-mode))
 
+(setq haskell-stylish-on-save t)
+(setq haskell-mode-stylish-haskell-path "brittany")
 (add-hook 'haskell-mode-hook #'flycheck-mode)
 #+END_SRC
 *** Templates
@@ -1225,8 +1252,6 @@ the echo area. Haskell has several indentation modes - I prefer using
 ** lisp
 
 #+BEGIN_SRC emacs-lisp
-(use-package slime
-  :ensure t)
 (use-package elmacro
   :ensure t)
 (use-package lispy
