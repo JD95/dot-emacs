@@ -502,6 +502,11 @@ and short prefix length.
                              company-sort-by-backend-importance))
 #+END_SRC
 
+*** Browser
+#+BEGIN_SRC emacs-lisp
+(setq browse-url-browser-function 'browse-url-generic
+  browse-url-generic-program "vivaldi")
+#+END_SRC
 * Custom Bindings Map
 
 Inspired by [[http://stackoverflow.com/questions/683425/globally-override-key-binding-in-emacs][this StackOverflow post]] I keep a =custom-bindings-map= that
@@ -1179,6 +1184,9 @@ the echo area. Haskell has several indentation modes - I prefer using
 #+BEGIN_SRC emacs-lisp
 (use-package haskell-mode
   :ensure t)
+
+(setq haskell-stylish-on-save t)
+(setq haskell-mode-stylish-haskell-path "brittany")
 
 (progn
   (use-package intero
