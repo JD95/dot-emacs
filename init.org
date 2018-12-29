@@ -1224,8 +1224,6 @@ the echo area. Haskell has several indentation modes - I prefer using
 ** lisp
 
 #+BEGIN_SRC emacs-lisp
-(use-package slime
-  :ensure t)
 (use-package elmacro
   :ensure t)
 (use-package lispy
