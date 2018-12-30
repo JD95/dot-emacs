@@ -1423,13 +1423,14 @@ Hide all tags on agenda view
         ("DEVELOPING" . (:foreground "DarkOrange"))
   ("HOLD" . (:foreground "yellow"))
         ("FAILED" . (:foreground "grey"))
+        ("CANCELED" . (:foreground "grey"))
   ("ANSWERED" . (:foreground "green"))
    ))
 
 (setq org-todo-keywords
       '((sequence
          "TODO(t)" "PROGRESSING(p)" "DEVELOPING(v)" "HOLD(h)"
-         "|" "DONE(d)" "ANSWERED(a)" "FAILED(f)")))
+         "|" "DONE(d)" "ANSWERED(a)" "FAILED(f)" "CANCELED(c)")))
 #+END_SRC
 
 
