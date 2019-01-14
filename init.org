@@ -59,7 +59,7 @@ Lexical scoping is faster than dynamic scoping.
 
 Managing extensions for Emacs is simplified using =package= which is
 built in to Emacs 24 and newer. To load downloaded packages we need to
-initialize =package=. =cl= is a library that contains many functions from
+initialize =packenableage=. =cl= is a library that contains many functions from
 Common Lisp, and comes in handy quite often, so we want to make sure it's
 loaded, along with =package=, which is obviously needed.
 
@@ -124,8 +124,6 @@ installed. To ensure we install missing packages if they are missing.
   :ensure t)
 ; Increase selected region by semantic units
 (use-package expand-region
-  :ensure t)
-(use-package gotham-theme 
   :ensure t)
 (use-package solarized-theme
   :ensure t)
@@ -407,8 +405,11 @@ Argument MODE Not sure."
 Change the color-theme to =gotham=.
 
 #+BEGIN_SRC emacs-lisp
+(use-package color-theme-sanityinc-tomorrow 
+  :ensure t)
+
 (if (display-graphic-p)
-  (load-theme 'gotham t)
+  (load-theme 'color-theme-sanityinc-tomorrow-night t)
   (load-theme 'solarized t))
 #+END_SRC
 
