@@ -141,6 +141,9 @@ installed. To ensure we install missing packages if they are missing.
 (use-package yaml-mode
   :ensure t)
 
+(use-package auto-compile
+  :esnure t)
+
 (ignore-errors ;; This package is only relevant for Mac OS X.
   (when (memq window-system '(mac ns))
         (push 'exec-path-from-shell packages)
@@ -151,6 +154,14 @@ installed. To ensure we install missing packages if they are missing.
 Some packages need to be installed manually, so we add a custom folder to the load path
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'load-path "~/.emacs.d/lisp/")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(setq load-prefer-newer t)
+(package-initialize)
+(require 'auto-compile)
+(auto-compile-on-load-mode)
+(auto-compile-on-save-mode)
 #+END_SRC
 
 ** System
@@ -1336,7 +1347,6 @@ function to a key!
                (local-set-key (kbd "C-c b") 'insert-markdown-inline-math-block)) t)
 #+END_SRC
 ** org
-
 #+BEGIN_SRC emacs-lisp
 (use-package org-alert
   :ensure t)
@@ -1377,6 +1387,23 @@ Shortens url links in org mode
     (bounds (bounds-of-thing-at-point 'url)))
     (kill-region (car bounds) (cdr bounds))
     (insert (format "[[%s][%s]]" url (truncate-string-to-width url (if arg (prefix-numeric-value arg) 40) nil nil "...")))))
+#+END_SRC
+
+Customizes the structure templates
+
+#+BEGIN_SRC emacs-lisp
+(require 'org-tempo)
+(setq org-structure-template-alist
+  '(("a" . "export ascii")
+    ("c" . "center")
+    ("C" . "comment")
+    ("e" . "example")
+    ("E" . "export")
+    ("h" . "export html")
+    ("l" . "export latex")
+    ("q" . "quote")
+    ("s" . "src")
+    ("v" . "verse")))
 #+END_SRC
 
 *** evil org
