@@ -1557,12 +1557,12 @@ This function will help randomly select a todo in the current tree.
 (defun org-goto-random-subtree-todo ()
   (interactive)
   (org-goto-random-subtree
-   (lambda () (at-todo '("TODO" "DEVELOPING")))))
+   (lambda () (at-todo '("TODO" "DEVELOPING" "PROGRESSING")))))
 
 (defun org-goto-random-subtree-todo-below ()
   (interactive)
   (org-goto-random-subtree
-    (lambda () (at-todo '("TODO" "DEVELOPING")))
+    (lambda () (at-todo '("TODO" "DEVELOPING" "PROGRESSING")))
     1))
 #+END_SRC
 *** source blocks 
