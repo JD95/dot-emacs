@@ -217,7 +217,7 @@ but is not a high priority.
 *** Machine Dependent Settings
 
 I pull out any machine specific settings like paths or keys and put them in
-a config.json file which is not tracked by version control.
+a settings file which is not tracked by version control.
 
 #+BEGIN_SRC emacs-lisp
 (load-file "~/.emacs.d/settings.el")
@@ -479,7 +479,7 @@ New in Emacs 24.4 is the =prettify-symbols-mode=! It's neat.
 
 *** PDF Tools
 
-PDF Tools]] makes a huge improvement on the built-in [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Document-View.html][doc-view-mode]]; the only
+[[PDF Tools]] makes a huge improvement on the built-in [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Document-View.html][doc-view-mode]]; the only
 drawback is the =pdf-tools-install= (which has to be executed before the
 package can be used) takes a couple of /seconds/ to execute. Instead of
 running it at init-time, we'll run it whenever a PDF is opened. Note that
@@ -506,6 +506,9 @@ and short prefix length.
 #+END_SRC
 
 *** Browser
+
+Sometimes emacs will be unable to find the browser from the path, so the path to the browser is set from settings.
+
 #+BEGIN_SRC emacs-lisp
 (setq browse-url-browser-function 'browse-url-generic
   browse-url-generic-program browser-path)
