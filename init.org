@@ -142,7 +142,7 @@ installed. To ensure we install missing packages if they are missing.
   :ensure t)
 
 (use-package auto-compile
-  :esnure t)
+  :ensure t)
 
 (ignore-errors ;; This package is only relevant for Mac OS X.
   (when (memq window-system '(mac ns))
@@ -513,6 +513,7 @@ Sometimes emacs will be unable to find the browser from the path, so the path to
 (setq browse-url-browser-function 'browse-url-generic
   browse-url-generic-program browser-path)
 #+END_SRC
+
 * Custom Bindings Map
 
 Inspired by [[http://stackoverflow.com/questions/683425/globally-override-key-binding-in-emacs][this StackOverflow post]] I keep a =custom-bindings-map= that
@@ -1196,6 +1197,24 @@ accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
 #+BEGIN_SRC emacs-lisp
 (add-hook 'compilation-filter-hook 'comint-truncate-buffer)
 #+END_SRC
+** elfeed
+
+I'm going to use elfeed to create content feeds for sites like youtube
+- http://pragmaticemacs.com/emacs/read-your-rss-feeds-in-emacs-with-elfeed/
+
+#+begin_src emacs-lisp
+(use-package elfeed-org
+  :ensure t
+  :config
+  (elfeed-org)
+  (setq rmh-elfeed-org-files (list "c:/Users/jeffr/Dropbox/Orgzly/content-feed.org")))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package elfeed
+  :ensure t)
+#+end_src
+
 ** coq
 #+BEGIN_SRC emacs-lisp
   ;; (use-package company-coq
@@ -1403,7 +1422,6 @@ Customizes the structure templates
     ("s" . "src")
     ("v" . "verse")))
 #+END_SRC
-
 *** evil org
 
 #+BEGIN_SRC emacs-lisp

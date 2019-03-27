@@ -21,3 +21,4 @@ config.json
 /eshell/.#history
 /eshell/history
 /tramp
+/transient/history.el
