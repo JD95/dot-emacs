@@ -32,7 +32,7 @@ mv ~/.emacs ~/.emacs-bak
 git clone https://gitlab.com/JD95/dot-emacs.git
 rm -rf ~/.emacs.d
 mv ~/dot-emacs ~/.emacs.d
-cp ~/.emacs.d/default-config.json ~/.emacs.d/config.json
+cp ~/.emacs.d/default-settings.el ~/.emacs.d/settings.el
 #+END_SRC
 
 On first run it should install a bunch of packages (this might take a
@@ -220,12 +220,7 @@ I pull out any machine specific settings like paths or keys and put them in
 a config.json file which is not tracked by version control.
 
 #+BEGIN_SRC emacs-lisp
-(require 'json)
-(let* ((json-object-type 'hash-table)
-       (json-array-type 'list)
-       (json-key-type 'string)
-       (json (json-read-file "~/.emacs.d/config.json")))
-  (setq emacs-config json))
+(load-file "~/.emacs.d/settings.el")
 #+END_SRC
 
 *** Sane defaults
@@ -513,10 +508,7 @@ and short prefix length.
 *** Browser
 #+BEGIN_SRC emacs-lisp
 (setq browse-url-browser-function 'browse-url-generic
-  browse-url-generic-program 
-  (if (eq system-type "windows-nt") 
-      "%appdata%/../Vivaldi/vivaldi.exe" 
-      "vivaldi"))
+  browse-url-generic-program browser-path)
 #+END_SRC
 
 * Custom Bindings Map
@@ -1171,7 +1163,7 @@ _SPC_ cancel
 Use a custom program for projectile's grep
 
 #+BEGIN_SRC emacs-lisp
-(setq find-program (gethash "find" emacs-config))
+(setq find-program find-location)
 #+END_SRC
 
 Enable projectile mode everywhere.
@@ -1226,7 +1218,7 @@ I'm going to use elfeed to create content feeds for sites like youtube
   ;;   :ensure t)
 
   (ignore-errors
-    (load (gethash "coq-proof-site-location" emacs-config)))
+    (load coq-proof-site-location))
 
   (defun coq-setup ()
     (interactive)
@@ -1281,7 +1273,7 @@ the echo area. Haskell has several indentation modes - I prefer using
 (use-package helm-idris
   :ensure t)
 
-(add-to-list 'exec-path (gethash "idris-location" emacs-config))
+(add-to-list 'exec-path idris-location)
 #+END_SRC
 
 ** lisp
