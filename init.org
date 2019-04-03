@@ -614,6 +614,20 @@ buffer, including the minibuffer and mode line.
 (define-key custom-bindings-map (kbd "C-c C--") 'global-scale-down)
 #+END_SRC
 
+** Classes
+
+This macro allows for the concise creation of classes a la "Let Over Lambda".
+
+#+begin_src emacs-lisp
+(defmacro class (name members &rest methods)
+  `(defun ,name () (let ,members
+     (lambda (msg &rest inputs)
+       (let ((slot ,(append '(pcase msg) methods)))
+         (if (functionp slot)
+             (apply slot inputs)
+             slot))))))
+#+end_src
+
 ** Date and Time
 
 A utility for inserting the current date.
