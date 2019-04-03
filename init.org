@@ -1187,6 +1187,26 @@ Enable projectile mode everywhere.
 #+END_SRC
 
 * Major Modes 
+** bash
+*** Templates
+#+begin_src emacs-lisp
+(defun template-new-bash-script()
+  (interactive)
+  (template-new-template
+   ()
+   `("#!/bin/sh"
+     "USAGE=\"$(basename \"$0\") <inputs>"
+     ""
+     "where:"
+     "  <inputs> has some description\""
+     ""
+     "if [ \"$#\" == \"4\" ]; then "
+     "  echo \"Hello\""
+     "else"
+     "  echo \"$USAGE\""
+     "fi"
+    )))
+#+end_src
 ** compilation
 
 I often run ~latexmk -pdf -pvc~ in a compilation buffer, which recompiles
