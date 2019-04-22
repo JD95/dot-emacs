@@ -1496,38 +1496,38 @@ Hide all tags on agenda view
 
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keyword-faces
-  '(
-        ("TODO" . (:foreground "red"))
-        ("PROGRESSING" . (:foreground "orange"))
-        ("DEVELOPING" . (:foreground "DarkOrange"))
-  ("HOLD" . (:foreground "yellow"))
-        ("FAILED" . (:foreground "grey"))
-        ("CANCELED" . (:foreground "grey"))
-  ("ANSWERED" . (:foreground "green"))
-   ))
+  '(("TODO" . (:foreground "red"))
+    ("PROGRESSING" . (:foreground "orange"))
+    ("DEVELOPING" . (:foreground "DarkOrange"))
+    ("HOLD" . (:foreground "yellow"))
+    ("FAILED" . (:foreground "grey"))
+    ("CANCELED" . (:foreground "grey"))
+    ("ANSWERED" . (:foreground "green"))))
 
 (setq org-todo-keywords
-      '((sequence
-         "TODO(t)" "PROGRESSING(p)" "DEVELOPING(v)" "HOLD(h)"
-         "|" "DONE(d)" "ANSWERED(a)" "FAILED(f)" "CANCELED(c)")))
+  '((sequence
+    "TODO(t)" "PROGRESSING(p)" "DEVELOPING(v)" "HOLD(h)"
+    "|" "DONE(d)" "ANSWERED(a)" "FAILED(f)" "CANCELED(c)")))
 #+END_SRC
-
 
 Sets priority color faces
 
 #+BEGIN_SRC emacs-lisp
-(setq org-priority-faces '(
-                           (?0 . (:foreground "green"))
-                           (?1 . (:foreground "green yellow" :weight 'bold))
-                           (?2 . (:foreground "yellow"))
-                           (?3 . (:foreground "gold"))
-                           (?4 . (:foreground "orange"))
-                           (?5 . (:foreground "chocolate"))
-                           (?6 . (:foreground "firebrick"))
-                           (?7 . (:foreground "brown"))
-                           (?8 . (:foreground "plum"))
-                           (?9 . (:foreground "DarkOrchid4"))
-                           ))
+(setq org-priority-faces 
+  '((?A . (:foreground "green")) 
+    (?B . (:foreground "green yellow" :weight 'bold)) 
+    (?C . (:foreground "yellow"))
+    (?D . (:foreground "gold"))
+    (?E . (:foreground "orange"))
+    (?F . (:foreground "chocolate"))
+    (?G . (:foreground "firebrick"))
+    (?H . (:foreground "brown"))
+    (?I . (:foreground "plum"))
+    (?J . (:foreground "DarkOrchid4"))))
+
+(setq org-highest-priority ?A)
+(setq org-lowest-priority ?Z)
+(setq org-default-priority ?Z)
 #+END_SRC
 
 **** todo editing
@@ -1572,6 +1572,7 @@ Helps sort sections
 (defun org-sort-alpha-todo ()
   (interactive)
   (org-sort-entries nil ?a)
+  (org-sort-entries nil ?p)
   (org-sort-entries nil ?o))
 #+END_SRC
 
