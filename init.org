@@ -921,7 +921,8 @@ Flyspell offers on-the-fly spell checking. We can enable flyspell for all
 text-modes with this snippet.
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'text-mode-hook 'turn-on-flyspell)
+(when config-use-flyspell 
+  (add-hook 'text-mode-hook 'turn-on-flyspell))
 #+END_SRC
 
 To use flyspell for programming there is =flyspell-prog-mode=, that only
@@ -929,7 +930,8 @@ enables spell checking for comments and strings. We can enable it for all
 programming modes using the =prog-mode-hook=.
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
+(when config-use-flyspell 
+  (add-hook 'prog-mode-hook 'flyspell-prog-mode))
 #+END_SRC
 
 When working with several languages, we should be able to cycle through
@@ -1164,10 +1166,10 @@ _SPC_ cancel
 ** magit
 
 #+BEGIN_SRC emacs-lisp
-(use-package evil-magit
-  :ensure t)
-(evil-magit-init)
-(define-key custom-bindings-map (kbd "C-c m") 'magit-status)
+(when config-use-magit 
+  (use-package evil-magit :ensure t)
+  (evil-magit-init)
+  (define-key custom-bindings-map (kbd "C-c m") 'magit-status))
 #+END_SRC
 ** multiple-cursors
 #+BEGIN_SRC emacs-lisp
@@ -1237,23 +1239,22 @@ I'm going to use elfeed to create content feeds for sites like youtube
 - http://pragmaticemacs.com/emacs/read-your-rss-feeds-in-emacs-with-elfeed/
 
 #+begin_src emacs-lisp
-(use-package elfeed-org
-  :ensure t
-  :config
-  (elfeed-org)
-  (setq rmh-elfeed-org-files (list "c:/Users/jeffr/Dropbox/Orgzly/content-feed.org")))
+(when config-use-elfeed
+  (use-package elfeed-org
+    :ensure t
+    :config
+    (elfeed-org)
+    (setq rmh-elfeed-org-files (list "c:/Users/jeffr/Dropbox/Orgzly/content-feed.org"))))
 #+end_src
 
 #+begin_src emacs-lisp
-(use-package elfeed
-  :ensure t)
+(when config-use-elfeed
+  (use-package elfeed :ensure t))
 #+end_src
 
 ** coq
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package company-coq
-  ;;   :ensure t)
-
+(when config-use-coq 
   (ignore-errors
     (load coq-proof-site-location))
 
@@ -1262,7 +1263,7 @@ I'm going to use elfeed to create content feeds for sites like youtube
     (company-coq-mode)
     (buffer-face-mode))
 
-  (add-hook 'coq-mode-hook #'coq-setup)
+  (add-hook 'coq-mode-hook #'coq-setup))
 #+END_SRC
 ** haskell
 
@@ -1271,25 +1272,26 @@ the echo area. Haskell has several indentation modes - I prefer using
 =haskell-indent=.
 
 #+BEGIN_SRC emacs-lisp
-(use-package haskell-mode
-  :ensure t)
-
-(setq haskell-stylish-on-save t)
-(setq haskell-mode-stylish-haskell-path "brittany")
-
-(progn
-  (use-package intero
+(when config-use-haskell
+  (use-package haskell-mode
     :ensure t)
-  (use-package hlint-refactor
-    :ensure t)
-  (use-package shm
-    :ensure t)
-
-  (add-hook 'haskell-mode-hook #'intero-mode))
-
-(setq haskell-stylish-on-save t)
-(setq haskell-mode-stylish-haskell-path "brittany")
-(add-hook 'haskell-mode-hook #'flycheck-mode)
+  
+  (setq haskell-stylish-on-save t)
+  (setq haskell-mode-stylish-haskell-path "brittany")
+  
+  (progn
+    (use-package intero
+      :ensure t)
+    (use-package hlint-refactor
+      :ensure t)
+    (use-package shm
+      :ensure t)
+  
+    (add-hook 'haskell-mode-hook #'intero-mode))
+  
+  (setq haskell-stylish-on-save t)
+  (setq haskell-mode-stylish-haskell-path "brittany")
+  (add-hook 'haskell-mode-hook #'flycheck-mode))
 #+END_SRC
 *** Templates
 
@@ -1305,12 +1307,10 @@ the echo area. Haskell has several indentation modes - I prefer using
 #+END_SRC
 ** idris
 #+BEGIN_SRC emacs-lisp
-(use-package idris-mode
-  :ensure t)
-(use-package helm-idris
-  :ensure t)
-
-(add-to-list 'exec-path idris-location)
+(when config-use-idris
+  (use-package idris-mode :ensure t)
+  (use-package helm-idris :ensure t)
+  (add-to-list 'exec-path idris-location))
 #+END_SRC
 
 ** lisp
@@ -1868,21 +1868,22 @@ subsystem.
 #+END_SRC
 ** purescript
 #+BEGIN_SRC emacs-lisp
-(use-package purescript-mode
-  :ensure t)
-(use-package psc-ide
-  :ensure t)
-
-(require 'psc-ide)
-
-(defun purescript-setup ()
-  (psc-ide-mode)
-  (company-mode)
-  (flycheck-mode)
-  (turn-on-purescript-indentation)
-  )
-
-(add-hook 'purescript-mode-hook #'purescript-setup)
+(when config-use-purescript
+  (use-package purescript-mode
+    :ensure t)
+  (use-package psc-ide
+    :ensure t)
+  
+  (require 'psc-ide)
+  
+  (defun purescript-setup ()
+    (psc-ide-mode)
+    (company-mode)
+    (flycheck-mode)
+    (turn-on-purescript-indentation)
+    )
+  
+  (add-hook 'purescript-mode-hook #'purescript-setup))
 #+END_SRC
 *** Templates
 
@@ -1945,24 +1946,25 @@ subsystem.
 #+END_SRC
 ** python
 #+BEGIN_SRC emacs-lisp
-(use-package elpy
-  :ensure t)
-(use-package py-autopep8
-  :ensure t)
-
-(elpy-enable)
-
-(when (require 'flycheck nil t)
-  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-  (add-hook 'elpy-mode-hook 'flycheck-mode))
-
-(setq py-autopep8-options '("--max-line-length=100"))
-
-;; Highlight character at "fill-column" position.
-(add-hook 'python-mode-hook
-          (lambda () (interactive)
-            (set-variable 'py-indent-offset 4)
-            (set-variable 'indent-tabs-mode nil)))
+(when config-use-python
+  (use-package elpy
+    :ensure t)
+  (use-package py-autopep8
+    :ensure t)
+  
+  (elpy-enable)
+  
+  (when (require 'flycheck nil t)
+    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+    (add-hook 'elpy-mode-hook 'flycheck-mode))
+  
+  (setq py-autopep8-options '("--max-line-length=100"))
+  
+  ;; Highlight character at "fill-column" position.
+  (add-hook 'python-mode-hook
+            (lambda () (interactive)
+              (set-variable 'py-indent-offset 4)
+              (set-variable 'indent-tabs-mode nil))))
 #+END_SRC
 *** Templates
 
@@ -1979,43 +1981,45 @@ subsystem.
 #+END_SRC
 ** javascript
 #+BEGIN_SRC emacs-lisp
-(use-package js2-mode
-  :ensure t)
+(when config-use-javascript
+  (use-package js2-mode :ensure t))
 #+END_SRC
 ** nix
 #+BEGIN_SRC emacs-lisp
-(use-package nix-mode
-  :ensure t)
+(when config-use-nix
+  (use-package nix-mode
+    :ensure t))
 #+END_SRC
 ** rust
 
 #+BEGIN_SRC emacs-lisp
-(use-package rust-mode
-  :ensure t)
-(use-package racer
-  :ensure t)
-(use-package flycheck-rust
-  :ensure t)
-(use-package flycheck-rust
-  :ensure t)
-(use-package cargo
-  :ensure t)
-
-(require 'rust-mode)
-
-(defun rust-mode-setup ()
-  (cargo-minor-mode nil))
-
-(defun racer-mode-setup ()
-  (eldoc-mode))
-
-(add-hook 'rust-mode-hook #'rust-mode-setup)
-
-(define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
-(define-key rust-mode-map (kbd "C-?") #'racer-describe)
-(setq company-tooltip-align-annotations t)
-
-(setq rust-format-on-save t)
+(when config-use-rust
+  (use-package rust-mode
+    :ensure t)
+  (use-package racer
+    :ensure t)
+  (use-package flycheck-rust
+    :ensure t)
+  (use-package flycheck-rust
+    :ensure t)
+  (use-package cargo
+    :ensure t)
+  
+  (require 'rust-mode)
+  
+  (defun rust-mode-setup ()
+    (cargo-minor-mode nil))
+  
+  (defun racer-mode-setup ()
+    (eldoc-mode))
+  
+  (add-hook 'rust-mode-hook #'rust-mode-setup)
+  
+  (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+  (define-key rust-mode-map (kbd "C-?") #'racer-describe)
+  (setq company-tooltip-align-annotations t)
+  
+  (setq rust-format-on-save t))
 #+END_SRC
 
 ** shell
@@ -2080,11 +2084,6 @@ most shell and REPL's is derived from.
 
 #+BEGIN_SRC emacs-lisp
    (add-hook 'comint-mode-hook (lambda () (local-set-key (kbd "C-l") 'clear-comint)))
-#+END_SRC
-** solidity
-#+BEGIN_SRC emacs-lisp
-;;(require 'solidity-mode)
-(setq solidity-comment-style 'slash)
 #+END_SRC
 
 * Finalize Settings 
