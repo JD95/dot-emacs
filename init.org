@@ -1456,6 +1456,12 @@ Customizes the structure templates
     ("s" . "src")
     ("v" . "verse")))
 #+END_SRC
+
+Prevents editing invisible text
+
+#+begin_src emacs-lisp
+(setq org-catch-invisible-edits 'error)
+#+end_src
 *** evil org
 
 #+BEGIN_SRC emacs-lisp
