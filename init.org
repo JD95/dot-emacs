@@ -1443,7 +1443,6 @@ Shortens url links in org mode
 Customizes the structure templates
 
 #+BEGIN_SRC emacs-lisp
-(require 'org-tempo)
 (setq org-structure-template-alist
   '(("a" . "export ascii")
     ("c" . "center")
