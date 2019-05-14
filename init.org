@@ -1773,6 +1773,28 @@ by adding advice to the various export commands to ignore certain tags.
 (advice-add 'org-twbs-export-to-html-and-browse
             :around #'org-twbs-set-export-options)
 #+END_SRC
+
+
+This function will render the give org file as html and then insert the result into the current buffer. This is useful for embedding the contents of other org files.
+
+#+begin_src emacs-lisp
+(defun render-org-twbs (org-file)
+  "Render the given org file as html using twbs."
+  (interactive "f\nf")
+  (unless (string= "org" (file-name-extension org-file))
+    (error "INFILE must be an org file."))
+  (let ((current-buffers (buffer-list))
+        ;; Checking if the file is already open
+        (open (find-buffer-visiting org-file))
+        ;; Load the file into a buffer
+        (org-file-buffer (find-file-noselect org-file))
+        )
+    (insert (with-current-buffer (org-twbs-export-as-html)
+              (with-current-buffer "*Org HTML Export*" (buffer-string))))
+    (kill-buffer "*Org HTML Export*")
+    ;; Don't kill the buffer if it was open previously
+    (unless open (kill-buffer org-file-buffer))))
+#+end_src
 *** latex
 
 =.tex=-files should be associated with =latex-mode= instead of
