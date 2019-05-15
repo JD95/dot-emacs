@@ -1782,17 +1782,16 @@ This function will render the give org file as html and then insert the result i
   (interactive "f\nf")
   (unless (string= "org" (file-name-extension org-file))
     (error "INFILE must be an org file."))
-  (let ((current-buffers (buffer-list))
-        ;; Checking if the file is already open
+  (let* (;; Checking if the file is already open
         (open (find-buffer-visiting org-file))
         ;; Load the file into a buffer
         (org-file-buffer (find-file-noselect org-file))
-        )
-    (insert (with-current-buffer (org-twbs-export-as-html)
-              (with-current-buffer "*Org HTML Export*" (buffer-string))))
+        (result (with-current-buffer org-file-buffer (org-twbs-export-as-html nil nil t t)
+                  (with-current-buffer "*Org HTML Export*" (buffer-string)))))
     (kill-buffer "*Org HTML Export*")
     ;; Don't kill the buffer if it was open previously
-    (unless open (kill-buffer org-file-buffer))))
+    (unless open (kill-buffer org-file-buffer))
+    result))
 #+end_src
 *** latex
 
