@@ -1460,6 +1460,8 @@ Prevents editing invisible text
 
 #+begin_src emacs-lisp
 (setq org-catch-invisible-edits 'error)
+(setq org-src-preserve-indentation nil) 
+(setq org-edit-src-content-indentation 0)
 #+end_src
 *** evil org
 
@@ -1580,6 +1582,10 @@ Helps sort sections
   (org-sort-entries nil ?p)
   (org-sort-entries nil ?o))
 #+END_SRC
+
+#+begin_src emacs-lisp
+(setq org-hierarchical-todo-statistics nil)
+#+end_src
 
 **** todo navigation
 
