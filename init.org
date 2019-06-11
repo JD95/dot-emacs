@@ -1537,6 +1537,10 @@ Sets priority color faces
 (setq org-default-priority ?Z)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+(setq org-log-into-drawer 'LOGBOOK)
+#+END_SRC
+
 **** todo editing
 
 These functions helps clear out done tasks in an org file
