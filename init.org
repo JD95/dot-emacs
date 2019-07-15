@@ -1463,6 +1463,8 @@ Prevents editing invisible text
 
 #+begin_src emacs-lisp
 (setq org-catch-invisible-edits 'error)
+(setq org-src-preserve-indentation nil) 
+(setq org-edit-src-content-indentation 0)
 #+end_src
 *** evil org
 
@@ -1539,6 +1541,10 @@ Sets priority color faces
 (setq org-log-into-drawer 'LOGBOOK)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+(setq org-log-into-drawer 'LOGBOOK)
+#+END_SRC
+
 **** todo editing
 
 These functions helps clear out done tasks in an org file
@@ -1584,6 +1590,10 @@ Helps sort sections
   (org-sort-entries nil ?p)
   (org-sort-entries nil ?o))
 #+END_SRC
+
+#+begin_src emacs-lisp
+(setq org-hierarchical-todo-statistics nil)
+#+end_src
 
 **** todo navigation
 
@@ -1776,6 +1786,40 @@ by adding advice to the various export commands to ignore certain tags.
 (advice-add 'org-twbs-export-to-html-and-browse
             :around #'org-twbs-set-export-options)
 #+END_SRC
+
+
+This function will render the given org file as html and then insert the result into the current buffer. This is useful for embedding the contents of other org files.
+
+#+begin_src emacs-lisp
+(defun render-org-twbs (org-file)
+  "Render the given org file as html using twbs."
+
+  (interactive "f\nf")
+
+  (unless (string= "org" (file-name-extension org-file))
+    (error "INFILE must be an org file."))
+
+  (let* ;; Check if the file is already open
+        ((open (find-buffer-visiting org-file))
+
+        ;; Load the file into a buffer
+        (org-file-buffer (find-file-noselect org-file))
+
+        ;; Switch to temp buffers to render contents of org file
+        (result (with-current-buffer org-file-buffer 
+                  ;; Temporarily use the org-file-buffer and render
+                  (org-twbs-export-as-html nil nil t t)
+                  (with-current-buffer "*Org HTML Export*" 
+                     ;; Temporarily switch and get result of render
+                     (buffer-string)))))
+
+    (kill-buffer "*Org HTML Export*")
+
+    ;; Don't kill the buffer if it was open previously
+    (unless open (kill-buffer org-file-buffer))
+
+    result))
+#+end_src
 *** latex
 
 =.tex=-files should be associated with =latex-mode= instead of
