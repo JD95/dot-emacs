@@ -1405,14 +1405,17 @@ function to a key!
   :ensure t)
 (use-package org-ref
   :ensure t)
-(use-package ox-reveal
-  :ensure t)
 (use-package ox-twbs
   :ensure t)
 (use-package evil-org
   :ensure t)
 
 (setq org-modules '(org-habit))
+
+(defun org-clear-elc-files () 
+  (interactive)
+  (let ((org-folder (car (file-expand-wildcards "~/.emacs.d/elpa/org-*")))) 
+    (mapc 'delete-file (directory-files org-folder t ".*\.elc"))))
 #+END_SRC
 
 *** editing 
@@ -1533,6 +1536,7 @@ Sets priority color faces
 (setq org-highest-priority ?A)
 (setq org-lowest-priority ?Z)
 (setq org-default-priority ?Z)
+(setq org-log-into-drawer 'LOGBOOK)
 #+END_SRC
 
 **** todo editing
