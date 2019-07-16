@@ -1412,10 +1412,11 @@ function to a key!
 
 (setq org-modules '(org-habit))
 
-(defun org-clear-elc-files () 
+(defun org-recompile-elc-files () 
   (interactive)
   (let ((org-folder (car (file-expand-wildcards "~/.emacs.d/elpa/org-*")))) 
-    (mapc 'delete-file (directory-files org-folder t ".*\.elc"))))
+    (mapc 'delete-file (directory-files org-folder t ".*\.elc"))
+    (byte-recompile-directory org-folder 0 t)))
 #+END_SRC
 
 *** editing 
