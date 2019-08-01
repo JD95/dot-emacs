@@ -1544,6 +1544,7 @@ Sets priority color faces
 
 #+BEGIN_SRC emacs-lisp
 (setq org-log-into-drawer 'LOGBOOK)
+(setq org-todo-heirarchical-statistics nill)
 #+END_SRC
 
 **** todo editing
