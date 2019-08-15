@@ -73,7 +73,6 @@ Packages can be fetched from different mirrors, [[http://melpa.milkbox.net/#/][m
 archive and is well maintained.
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
 (add-to-list 'package-archives '("elpa" . "http://tromey.com/elpa/"))
 (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
@@ -1538,16 +1537,32 @@ Sets priority color faces
 
 #+BEGIN_SRC emacs-lisp
 (setq org-priority-faces 
-  '((?A . (:foreground "green")) 
-    (?B . (:foreground "green yellow" :weight 'bold)) 
-    (?C . (:foreground "yellow"))
-    (?D . (:foreground "gold"))
-    (?E . (:foreground "orange"))
-    (?F . (:foreground "chocolate"))
-    (?G . (:foreground "firebrick"))
-    (?H . (:foreground "brown"))
-    (?I . (:foreground "plum"))
-    (?J . (:foreground "DarkOrchid4"))))
+  '((?A . (:foreground "#00FFFF")) 
+    (?B . (:foreground "#00F1E8" :weight 'bold)) 
+    (?C . (:foreground "#00E3D1"))
+    (?D . (:foreground "#00D5B9"))
+    (?E . (:foreground "#00C7A2"))
+    (?F . (:foreground "#00B98B"))
+    (?G . (:foreground "#00AC74"))
+    (?H . (:foreground "#009E5D"))
+    (?I . (:foreground "#009046"))
+    (?J . (:foreground "#00822E"))
+    (?K . (:foreground "#007417"))
+    (?L . (:foreground "#006600"))
+    (?M . (:foreground "#055D00"))
+    (?N . (:foreground "#095300"))
+    (?O . (:foreground "#0E4A00"))
+    (?P . (:foreground "#134100"))
+    (?Q . (:foreground "#173800"))
+    (?R . (:foreground "#1C2E00"))
+    (?S . (:foreground "#202500"))
+    (?T . (:foreground "#251C00"))
+    (?U . (:foreground "#2A1300"))
+    (?V . (:foreground "#2E0900"))
+    (?W . (:foreground "#330000"))
+    (?X . (:foreground "#220000"))
+    (?Y . (:foreground "#110000"))
+    (?Z . (:foreground "#000000"))))
 
 (setq org-highest-priority ?A)
 (setq org-lowest-priority ?Z)
@@ -1557,7 +1572,7 @@ Sets priority color faces
 
 #+BEGIN_SRC emacs-lisp
 (setq org-log-into-drawer 'LOGBOOK)
-(setq org-todo-heirarchical-statistics nill)
+(setq org-todo-heirarchical-statistics nil)
 #+END_SRC
 
 **** todo editing
@@ -1615,7 +1630,6 @@ Helps sort sections
 This function will help randomly select a todo in the current tree.
 
 #+BEGIN_SRC emacs-lisp
-
 (defun org-goto-random-subtree (todo-pred &optional depth)
   (interactive)
   (org-back-to-heading t)
