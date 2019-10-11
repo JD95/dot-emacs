@@ -1483,6 +1483,23 @@ Prevents editing invisible text
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 #+END_SRC
 *** agenda
+
+These org-edna functions change only the time on a schedule or deadline.
+#+begin_src emacs-lisp
+(defun org-edna-set-time (type last-entry args)
+  (let* ((new-time (nth 0 args))
+         (prev-ts (org-edna--get-planning-info type))
+         (time-val (split-string new-time ":"))
+         (ts (org-read-date-analyze prev-ts nil '(nil nil nil nil nil nil))))
+    (setcar (nthcdr 2 ts) (string-to-number (nth 0 time-val)))
+    (setcar (nthcdr 1 ts) (string-to-number (nth 1 time-val)))
+    (org--deadline-or-schedule nil type
+       (format-time-string "%F %R" (apply 'encode-time (mapcar (lambda (e) (or e 0)) ts))))))
+
+(defun org-edna-action/schedule-time! (last-entry &rest args) (org-edna-set-time 'scheduled last-entry args))
+(defun org-edna-action/deadline-time! (last-entry &rest args) (org-edna-set-time 'deadline last-entry args))
+#+end_src
+
 **** schedule
 
 Don't delay for scheduled tasks
