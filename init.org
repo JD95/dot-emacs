@@ -1293,15 +1293,13 @@ the echo area. Haskell has several indentation modes - I prefer using
   (setq haskell-mode-stylish-haskell-path "brittany")
   
   (progn
-    ;; (use-package intero
-    ;;  :ensure t)
     (use-package hlint-refactor
       :ensure t)
     (use-package shm
       :ensure t)))
   
-    ;; (add-hook 'haskell-mode-hook #'intero-mode))
-    ;; (add-hook 'haskell-mode-hook #'flycheck-mode))
+  (setq haskell-stylish-on-save t)
+  (setq haskell-mode-stylish-haskell-path "brittany")
 #+END_SRC
 *** Templates
 
