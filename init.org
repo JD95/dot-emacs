@@ -337,7 +337,6 @@ default.
            dirtrack-mode                ; directory tracking in *shell*
            global-company-mode          ; Auto-completion everywhere
            global-git-gutter-mode       ; Show changes latest commit
-           global-prettify-symbols-mode ; Greek letters should look greek
            recentf-mode                 ; Recently opened files
            show-paren-mode              ; Highlight matching parentheses
            smooth-scrolling-mode
@@ -464,16 +463,6 @@ I smuggled some configurations from [[https://github.com/torenord/.emacs.d/][tor
              (git-gutter:modified . "#c0c")))
   (set-face-foreground (car p) (cdr p))
   (set-face-background (car p) (cdr p)))
-#+END_SRC
-
-New in Emacs 24.4 is the =prettify-symbols-mode=! It's neat.
-
-#+BEGIN_SRC emacs-lisp
-(setq-default prettify-symbols-alist '(("lambda" . ?λ)
-                                       ("delta" . ?Δ)
-                                       ("gamma" . ?Γ)
-                                       ("phi" . ?φ)
-                                       ("psi" . ?ψ)))
 #+END_SRC
 
 *** PDF Tools
@@ -612,6 +601,31 @@ buffer, including the minibuffer and mode line.
 (define-key custom-bindings-map (kbd "C-c C-+") 'global-scale-up)
 (define-key custom-bindings-map (kbd "C-c C--") 'global-scale-down)
 #+END_SRC
+
+#+begin_src emacs-lisp
+(defun modi/revert-all-file-buffers ()
+  "Refresh all open file buffers without confirmation.
+Buffers in modified (not yet saved) state in emacs will not be reverted. They
+will be reverted though if they were modified outside emacs.
+Buffers visiting files which do not exist any more or are no longer readable
+will be killed."
+  (interactive)
+  (dolist (buf (buffer-list))
+    (let ((filename (buffer-file-name buf)))
+      ;; Revert only buffers containing files, which are not modified;
+      ;; do not try to revert non-file buffers like *Messages*.
+      (when (and filename
+                 (not (buffer-modified-p buf)))
+        (if (file-readable-p filename)
+            ;; If the file exists and is readable, revert the buffer.
+            (with-current-buffer buf
+              (revert-buffer :ignore-auto :noconfirm :preserve-modes))
+          ;; Otherwise, kill the buffer.
+          (let (kill-buffer-query-functions) ; No query done when killing buffer
+            (kill-buffer buf)
+            (message "Killed non-existing/unreadable file buffer: %s" filename))))))
+  (message "Finished reverting buffers containing unmodified files."))
+#+end_src
 
 ** Classes
 
@@ -1279,18 +1293,15 @@ the echo area. Haskell has several indentation modes - I prefer using
   (setq haskell-mode-stylish-haskell-path "brittany")
   
   (progn
-    (use-package intero
-      :ensure t)
+    ;; (use-package intero
+    ;;  :ensure t)
     (use-package hlint-refactor
       :ensure t)
     (use-package shm
-      :ensure t))
+      :ensure t)))
   
     ;; (add-hook 'haskell-mode-hook #'intero-mode))
-  
-  (setq haskell-stylish-on-save t)
-  (setq haskell-mode-stylish-haskell-path "brittany")
-  (add-hook 'haskell-mode-hook #'flycheck-mode))
+    ;; (add-hook 'haskell-mode-hook #'flycheck-mode))
 #+END_SRC
 *** Templates
 
@@ -2062,13 +2073,13 @@ subsystem.
   (use-package py-autopep8
     :ensure t)
   
-  (elpy-enable)
+  ;;(elpy-enable)
   
-  (when (require 'flycheck nil t)
-    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-    (add-hook 'elpy-mode-hook 'flycheck-mode))
-  
-  (setq py-autopep8-options '("--max-line-length=100"))
+  ;;(when (require 'flycheck nil t)
+  ;;  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+  ;;  (add-hook 'elpy-mode-hook 'flycheck-mode))
+  ;;
+  ;;(setq py-autopep8-options '("--max-line-length=100"))
   
   ;; Highlight character at "fill-column" position.
   (add-hook 'python-mode-hook
