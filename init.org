@@ -1509,6 +1509,14 @@ These org-edna functions change only the time on a schedule or deadline.
 (defun org-edna-action/deadline-time! (last-entry &rest args) (org-edna-set-time 'deadline last-entry args))
 #+end_src
 
+#+begin_src emacs-lisp
+(setq org-agenda-custom-commands
+  '(("d" "Expired Deadlines" tags-todo
+     "+DEADLINE<\"<now>\"/TODO|PROGRESSING" 
+     nil 
+     nil)))
+#+end_src
+
 **** schedule
 
 Don't delay for scheduled tasks
