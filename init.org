@@ -2054,6 +2054,10 @@ subsystem.
      "    }"))
   )
 #+END_SRC
+** prolog
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+#+end_src
 ** python
 #+BEGIN_SRC emacs-lisp
 (when config-use-python
