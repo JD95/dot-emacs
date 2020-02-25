@@ -1366,11 +1366,13 @@ Enable projectile mode everywhere.
 (add-hook 'org-mode-hook (lambda () (set-input-method "Agda")))
 (agda-input-setup)
 
-(set-face-foreground 'agda2-highlight-datatype-face "dodger blue")
-(set-face-foreground 'agda2-highlight-primitive-type-face "dodger blue")
-(set-face-foreground 'agda2-highlight-primitive-face "dodger blue")
-(set-face-foreground 'agda2-highlight-function-face "dodger blue")
-(set-face-foreground 'agda2-highlight-postulate-face "dodger blue")
+(add-hook 'agda2-mode-hook 
+  (lambda ()
+    (set-face-foreground 'agda2-highlight-datatype-face "dodger blue")
+    (set-face-foreground 'agda2-highlight-primitive-type-face "dodger blue")
+    (set-face-foreground 'agda2-highlight-primitive-face "dodger blue")
+    (set-face-foreground 'agda2-highlight-function-face "dodger blue")
+    (set-face-foreground 'agda2-highlight-postulate-face "dodger blue")))
 #+end_src
 
 ** bash
