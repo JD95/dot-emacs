@@ -686,6 +686,135 @@ Note the weekly scope of the command's precision.")
 
 A [[https://en.wikipedia.org/wiki/Simple_linear_regression][single regressor]] is a linear regression with the fixed y intercept at the origin.
 
+#+begin_src emacs-lisp
+(defun orm-estimate-percent (reps)
+  (nth reps '(1.0 0.94 0.91 
+              0.883 0.86 0.833 
+              0.805 0.777 0.752 
+              0.733 0.72 0.673 
+              0.657 0.641 0.625)))
+
+(defun estimate-orm (reps weight)
+  (let ((orm% (orm-estimate-percent reps)))
+    (* (+ 1 (- 1 orm%)) weight)))
+
+
+(setq barbell-curl-ratio-grades
+      '((0.0 0.3)
+        (0.3 0.4)
+        (0.4 0.45)
+        (0.45 0.5)
+        (0.5 0.6)
+        (0.6 0.7)
+        (0.7 0.8)
+        (0.8 0.9)
+        (0.9 1.0)
+        (1.0 2.0)))
+
+(setq overhead-press-ratio-grades
+      '((0.0 0.4)
+        (0.4 0.6)
+        (0.6 0.675)
+        (0.675 0.75)
+        (0.75 0.825)
+        (0.825 0.9)
+        (0.9 1.0)
+        (1.0 1.1)
+        (1.1 1.2)
+        (1.2 2.0)))
+
+(setq deadlift-ratio-grades
+      '((0.0 0.8)
+        (0.8 1.4)
+        (1.4 1.55)
+        (1.55 1.70)
+        (1.70 2.1)
+        (2.1 2.5)
+        (2.5 2.75)
+        (2.75 3.0)
+        (3.0 3.15)
+        (3.15 4.0)))
+
+(setq squat-ratio-grades
+      '((0.0 0.7)
+        (0.7 1.0)
+        (1.0 1.25)
+        (1.25 1.50)
+        (1.50 1.75)
+        (1.75 2.0)
+        (2.0 2.25)
+        (2.25 2.5)
+        (2.5 2.7)
+        (2.7 4.0)))
+
+(setq bench-press-ratio-grades
+      '((0.0 0.7)
+        (0.7 0.9)
+        (0.9 1.0)
+        (1.0 1.1)
+        (1.1 1.3)
+        (1.3 1.5)
+        (1.5 1.7)
+        (1.7 1.9)
+        (1.9 2.0)
+        (2.0 4.0)))
+
+(defun grade-ratio (ranges ratio)
+  (let ((tested (seq-map-indexed
+                 (lambda (range i)
+                   (if (and (<= (nth 0 range) ratio)
+                            (< ratio (nth 1 range)))
+                       i nil))
+                 ranges)))
+
+    (car (seq-filter (lambda (x) x) tested))))
+
+(defun grade-movement (bodyweight weight reps ratio-grades)
+  (let* ((orm-est (estimate-orm reps weight)))
+    (grade-ratio ratio-grades (/ orm-est (float bodyweight)))))
+
+(setq movement-grade-labels
+      '("POOR"
+        "UNTRAINED"
+        "BEGINNER B"
+        "BEGINNER A"
+        "INTERMEDIATE B"
+        "INTERMEDIATE A"
+        "ADVANCED B"
+        "ADVANCED A"
+        "ELITE B"
+        "ELITE A"))
+#+end_src
+
+Functions for strength training and logging.
+
+ORM Estimates based on:
+#+NAME: OneRepMaxEstimate
+| Reps | Brzycki | Baechle | Remedios |   AVG |
+|------+---------+---------+----------+-------|
+|    1 |     1.0 |     1.0 |      1.0 |   1.0 |
+|    2 |    0.95 |    0.95 |     0.92 |  0.94 |
+|    3 |     0.9 |    0.93 |      0.9 |  0.91 |
+|    4 |    0.88 |     0.9 |     0.87 | 0.883 |
+|    5 |    0.86 |    0.87 |     0.85 |  0.86 |
+|    6 |    0.83 |    0.85 |     0.82 | 0.833 |
+|    7 |     0.8 |    0.83 |     0.79 | 0.805 |
+|    8 |    0.78 |     0.8 |     0.75 | 0.777 |
+|    9 |    0.76 |    0.77 |     0.73 | 0.752 |
+|   10 |    0.75 |    0.75 |      0.7 | 0.733 |
+|   11 |    0.72 |         |          |  0.72 |
+|   12 |     0.7 |    0.67 |     0.65 | 0.673 |
+|   13 |         |         |          | 0.657 |
+|   14 |         |         |          | 0.641 |
+|   15 |         |    0.65 |      0.6 | 0.625 |
+
+
+The grades are taken from VitruvianPhysique's video.   
+
+- https://www.youtube.com/watch?v=EVK5_yY7Qj8
+
+The AVG column is calculated, I think, by a linear regression on the averaged data points in the other columns.
+
 ** Lists
 #+BEGIN_SRC emacs-lisp
 (defun zipWith (f xs ys)
@@ -1226,6 +1355,24 @@ Enable projectile mode everywhere.
 #+END_SRC
 
 * Major Modes 
+** agda
+
+#+begin_src emacs-lisp
+(load-file (let ((coding-system-for-read 'utf-8))
+    (shell-command-to-string "agda-mode.exe locate")))
+
+(require 'agda-input)
+(add-hook 'text-mode-hook (lambda () (set-input-method "Agda")))
+(add-hook 'org-mode-hook (lambda () (set-input-method "Agda")))
+(agda-input-setup)
+
+(set-face-foreground 'agda2-highlight-datatype-face "dodger blue")
+(set-face-foreground 'agda2-highlight-primitive-type-face "dodger blue")
+(set-face-foreground 'agda2-highlight-primitive-face "dodger blue")
+(set-face-foreground 'agda2-highlight-function-face "dodger blue")
+(set-face-foreground 'agda2-highlight-postulate-face "dodger blue")
+#+end_src
+
 ** bash
 *** Templates
 #+begin_src emacs-lisp
