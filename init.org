@@ -1669,7 +1669,7 @@ These org-edna functions change only the time on a schedule or deadline.
 #+begin_src emacs-lisp
 (setq org-agenda-custom-commands
   '(("d" "Expired Deadlines" tags-todo
-     "+DEADLINE<\"<now>\"/TODO|PROGRESSING" 
+     "+DEADLINE<\"<today>\"/TODO|PROGRESSING" 
      nil 
      nil)))
 #+end_src
@@ -2228,6 +2228,10 @@ subsystem.
      "    }"))
   )
 #+END_SRC
+** prolog
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+#+end_src
 ** python
 #+BEGIN_SRC emacs-lisp
 (when config-use-python
