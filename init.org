@@ -65,31 +65,50 @@ loaded, along with =package=, which is obviously needed.
 
 #+BEGIN_SRC emacs-lisp
 (require 'cl)
-(require 'package)
-(package-initialize)
+;;(require 'package)
+;;(package-initialize)
 #+END_SRC
 
 Packages can be fetched from different mirrors, [[http://melpa.milkbox.net/#/][melpa]] is the largest
 archive and is well maintained.
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
-(add-to-list 'package-archives '("elpa" . "http://tromey.com/elpa/"))
-(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
-(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
+;; (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
+;; (add-to-list 'package-archives '("elpa" . "http://tromey.com/elpa/"))
+;; (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+;; (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
 #+END_SRC
+
+#+begin_src emacs-lisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
+                      
+#+end_src
 
 The configuration assumes that the packages listed below are
 installed. To ensure we install missing packages if they are missing.
 
 #+BEGIN_SRC emacs-lisp
-(setq package-selected-packages
- '(use-package))
-
-(package-initialize)
-(unless package-archive-contents
-    (package-refresh-contents))
-(package-install-selected-packages)
+;; (setq package-selected-packages
+;;  '(use-package))
+;; 
+;; (package-initialize)
+;; (unless package-archive-contents
+;;     (package-refresh-contents))
+;; (package-install-selected-packages)
 
 (eval-when-compile
   (require 'use-package))
@@ -156,8 +175,8 @@ Some packages need to be installed manually, so we add a custom folder to the lo
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(setq load-prefer-newer t)
-(package-initialize)
+;; (setq load-prefer-newer t)
+;; (package-initialize)
 (require 'auto-compile)
 (auto-compile-on-load-mode)
 (auto-compile-on-save-mode)
@@ -1569,7 +1588,16 @@ function to a key!
 (use-package org-alert
   :ensure t)
 (use-package org
-  :ensure t)
+  :ensure t
+:config
+(org-babel-do-load-languages 
+'org-babel-load-languages
+      '((dot . t)
+         (ledger . t)
+         (emacs-lisp . t)
+         (shell . t)))
+(setq org-startup-indented t)
+(org-reload))
 (use-package org-ref
   :ensure t)
 (use-package ox-twbs
@@ -1928,16 +1956,6 @@ in the exported pdf (given that the pdf-file exists), using pdf-tools.
 
 *** babel
 
-#+BEGIN_SRC emacs-lisp
-(ignore-errors
-  (org-babel-do-load-languages
-   '((dot . t)
-     (ledger . t)
-     (emacs-lisp . t)
-     (bash . t)
-     (shell . t)
-  )))
-#+END_SRC
 
 This allows for the execution of literate sh files.
 
