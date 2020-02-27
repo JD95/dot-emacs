@@ -1796,9 +1796,9 @@ Sets priority color faces
     (?Y . (:foreground "#110000"))
     (?Z . (:foreground "#000000"))))
 
-(setq org-highest-priority ?A)
-(setq org-lowest-priority ?Z)
-(setq org-default-priority ?Z)
+(setq org-priority-highest ?A)
+(setq org-priority-lowest ?Z)
+(setq org-priority-default ?Z)
 (setq org-log-into-drawer 'LOGBOOK)
 #+END_SRC
 
