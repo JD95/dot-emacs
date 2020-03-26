@@ -2170,6 +2170,22 @@ subsystem.
 (define-key custom-bindings-map (kbd "C-c l")       'org-store-link)
 (define-key custom-bindings-map (kbd "C-c a")       'org-agenda)
 #+END_SRC
+*** zettlekausten
+
+A utility for adding tags to zettlekausten notes
+
+#+begin_src emacs-lisp
+(defun org-zettlekausten-add-tag ()
+  (interactive)
+  (save-window-excursion
+    (append-to-file (concat "\nfile:../" (buffer-name)) nil
+                    (let* ((tag-file-buffer (helm-find-files-1
+                                             (concat (file-name-directory (buffer-file-name)) "tags/")))
+                           (name (buffer-file-name tag-file-buffer))
+                           )
+                      (kill-buffer tag-file-buffer)
+                      name))))
+#+end_src
 ** purescript
 #+BEGIN_SRC emacs-lisp
 (when config-use-purescript
