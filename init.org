@@ -2196,6 +2196,15 @@ Search the zettelkausten using grep
     (lgrep query "*.org" org-zettelkausten-dir)))
 #+end_src
 
+Create new Zettelkausten note
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-new-note ()
+  (interactive)
+  (find-file (concat org-zettelkausten-dir "/"
+                     (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org")))
+#+end_src
+
 ** purescript
 #+BEGIN_SRC emacs-lisp
 (when config-use-purescript
