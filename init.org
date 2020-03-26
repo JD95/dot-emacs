@@ -2186,6 +2186,16 @@ A utility for adding tags to zettlekausten notes
                       (kill-buffer tag-file-buffer)
                       name))))
 #+end_src
+
+Search the zettelkausten using grep
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-search ()
+  (interactive)
+  (let ((query (read-string "query: ")))
+    (lgrep query "*.org" org-zettelkausten-dir)))
+#+end_src
+
 ** purescript
 #+BEGIN_SRC emacs-lisp
 (when config-use-purescript
