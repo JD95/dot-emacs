@@ -2187,13 +2187,21 @@ A utility for adding tags to zettlekausten notes
                       name))))
 #+end_src
 
+A function to list all tags for a given note
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-list-tags ()
+  (interactive)
+  (lgrep (buffer-name) "*.org" (concat org-zettelkausten-dir "/tags")))
+#+end_src
+
+
 Search the zettelkausten using grep
 
 #+begin_src emacs-lisp
 (defun org-zettelkausten-search ()
-  (interactive)
-  (let ((query (read-string "query: ")))
-    (lgrep query "*.org" org-zettelkausten-dir)))
+  (interactive) 
+  (lgrep (read-string "query: ") "*.org" org-zettelkausten-dir))
 #+end_src
 
 Create new Zettelkausten note
