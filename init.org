@@ -209,6 +209,12 @@ be used to resolve environment variables from the shell.
 (when (eq window-system 'gnu/linux)
   (exec-path-from-shell-initialize))
 #+END_SRC
+*** Windows
+
+#+BEGIN_SRC emacs-lisp
+(when (eq window-system 'w32)
+  (grep-compute-defaults))
+#+END_SRC
 *** Require
 
 Some features are not loaded by default to minimize initialization time,
@@ -2175,7 +2181,7 @@ subsystem.
 A utility for adding tags to zettlekausten notes
 
 #+begin_src emacs-lisp
-(defun org-zettlekausten-add-tag ()
+(defun org-zettelkausten-add-tag ()
   (interactive)
   (save-window-excursion
     (append-to-file (concat "\nfile:../" (buffer-name)) nil
