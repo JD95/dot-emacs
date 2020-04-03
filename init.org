@@ -2193,7 +2193,7 @@ A utility for adding tags to zettlekausten notes
                       name))))
 #+end_src
 
-A function to list all tags for a given note
+List all tags for a given note
 
 #+begin_src emacs-lisp
 (defun org-zettelkausten-list-tags ()
@@ -2201,6 +2201,13 @@ A function to list all tags for a given note
   (lgrep (buffer-name) "*.org" (concat org-zettelkausten-dir "/tags")))
 #+end_src
 
+List all notes which link to this one
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-list-external-refs ()
+  (interactive)
+  (lgrep (buffer-name) "*.org" (concat org-zettelkausten-dir)))
+#+end_src
 
 Search the zettelkausten using grep
 
@@ -2217,6 +2224,21 @@ Create new Zettelkausten note
   (interactive)
   (find-file (concat org-zettelkausten-dir "/"
                      (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org")))
+#+end_src
+
+A hydra for quickly calling zettlekausten functions
+
+#+begin_src emacs-lisp
+(defhydra hydra-zettelkausten nil
+  "zettelkausten"
+  ("l" org-zettelkausten-list-tags "list tags")
+  ("e" org-zettelkausten-list-external-refs "list external refs")
+  ("t" org-zettelkausten-add-tag "add tag")
+  ("s" org-zettelkausten-search "search")
+  ("n" org-zettelkausten-new-note "new note"))
+
+
+(global-set-key (kbd "C-c z") #'hydra-zettelkausten/body)
 #+end_src
 
 ** purescript
