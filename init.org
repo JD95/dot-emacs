@@ -1671,6 +1671,14 @@ Prevents editing invisible text
 (setq org-src-preserve-indentation nil) 
 (setq org-edit-src-content-indentation 0)
 #+end_src
+
+This converts markdown style links into org-mode style links
+
+#+begin_src emacs-lisp
+(defun org-convert-markdown-links-to-org ()
+  (interactive)
+  (query-replace-regexp "\\[\\(\\(\\w+\\(\\s-\\|-\\|\\.\\)*\\)+\\)\\](\\(.*\\))" "[[\\2][\\1]]"))
+#+end_src
 *** evil org
 
 #+BEGIN_SRC emacs-lisp
@@ -2235,8 +2243,9 @@ A hydra for quickly calling zettlekausten functions
   ("e" org-zettelkausten-list-external-refs "list external refs")
   ("t" org-zettelkausten-add-tag "add tag")
   ("s" org-zettelkausten-search "search")
+  ("g" org-zettelkausten-grab-ref "grab ref")
+  ("u" org-zettelkausten-use-ref "use ref")
   ("n" org-zettelkausten-new-note "new note"))
-
 
 (global-set-key (kbd "C-c z") #'hydra-zettelkausten/body)
 #+end_src
