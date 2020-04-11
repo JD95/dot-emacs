@@ -2234,6 +2234,21 @@ Create new Zettelkausten note
                      (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org")))
 #+end_src
 
+
+Functions for referencing notes
+
+#+begin_src emacs-lisp
+(setq org-zettelkausten-ref nil)
+
+(defun org-zettelkausten-grab-ref ()
+  (interactive)
+  (setq org-zettelkausten-ref (buffer-name)))
+
+(defun org-zettelkausten-use-ref ()
+  (interactive)
+  (insert (concat "[[file:" org-zettelkausten-ref "]]")))
+#+end_src
+
 A hydra for quickly calling zettlekausten functions
 
 #+begin_src emacs-lisp
