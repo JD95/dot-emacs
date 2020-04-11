@@ -2209,6 +2209,21 @@ List all tags for a given note
   (lgrep (buffer-name) "*.org" (concat org-zettelkausten-dir "/tags")))
 #+end_src
 
+Add all tags currently listed in grep to the current note
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-copy-tags-from-grep ()
+  (interactive)
+  (mapc
+    (lambda (tag-file-name)
+      (append-to-file (concat "\nfile:../" (buffer-name)) nil
+                      (concat org-zettelkausten-dir "/tags/" tag-file-name)))
+    (apply #'append (with-current-buffer "*grep*"
+                      (s-match-strings-all
+                       (rx (and line-start (+ (or letter digit "-")) ".org"))
+                       (buffer-substring-no-properties (point-min) (point-max)))))))
+#+end_src
+
 List all notes which link to this one
 
 #+begin_src emacs-lisp
@@ -2257,6 +2272,7 @@ A hydra for quickly calling zettlekausten functions
   ("l" org-zettelkausten-list-tags "list tags")
   ("e" org-zettelkausten-list-external-refs "list external refs")
   ("t" org-zettelkausten-add-tag "add tag")
+  ("c" org-zettelkausten-copy-tags-from-grep "copy tags from grep")
   ("s" org-zettelkausten-search "search")
   ("g" org-zettelkausten-grab-ref "grab ref")
   ("u" org-zettelkausten-use-ref "use ref")
