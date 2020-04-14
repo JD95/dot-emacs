@@ -2189,16 +2189,29 @@ subsystem.
 A utility for adding tags to zettlekausten notes
 
 #+begin_src emacs-lisp
+(defun org-zettelkausten-pick-tag ()
+  (let* ((tag-file-buffer (helm-find-files-1
+                           (concat (file-name-directory (buffer-file-name)) "tags/")))
+         (name (buffer-file-name tag-file-buffer)))
+    (kill-buffer tag-file-buffer)
+    name))
+
+(defun org-zettelkausten-append-tag (tag-file-name buff-name link-text)
+  (append-to-file (concat "\n[[file:../" buff-name "][" link-text "]]") nil
+                  tag-file-name))
+
+(defun first-line-of-buffer-or-name ()
+  (let* ((text (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n"))
+         (first-line (car (delete "" text))))
+    (if (string= first-line "") (buffer-name) first-line)))
+
 (defun org-zettelkausten-add-tag ()
   (interactive)
   (save-window-excursion
-    (append-to-file (concat "\nfile:../" (buffer-name)) nil
-                    (let* ((tag-file-buffer (helm-find-files-1
-                                             (concat (file-name-directory (buffer-file-name)) "tags/")))
-                           (name (buffer-file-name tag-file-buffer))
-                           )
-                      (kill-buffer tag-file-buffer)
-                      name))))
+    (org-zettelkausten-append-tag 
+      (org-zettelkausten-pick-tag) 
+      (buffer-name) 
+      (first-line-of-buffer-or-name))))
 #+end_src
 
 List all tags for a given note
@@ -2214,10 +2227,11 @@ Add all tags currently listed in grep to the current note
 #+begin_src emacs-lisp
 (defun org-zettelkausten-copy-tags-from-grep ()
   (interactive)
-  (mapc
-    (lambda (tag-file-name)
-      (append-to-file (concat "\nfile:../" (buffer-name)) nil
-                      (concat org-zettelkausten-dir "/tags/" tag-file-name)))
+  (mapc (lambda (tag-file-name)
+          (org-zettelkausten-add-tag 
+           (concat org-zettelkausten-dir "/tags/" tag-file-name)
+           (buffer-name)
+           (first-line-of-buffer-or-name)))
     (apply #'append (with-current-buffer "*grep*"
                       (s-match-strings-all
                        (rx (and line-start (+ (or letter digit "-")) ".org"))
