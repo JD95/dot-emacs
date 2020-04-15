@@ -1698,10 +1698,13 @@ These org-edna functions change only the time on a schedule or deadline.
 
 #+begin_src emacs-lisp
 (setq org-agenda-custom-commands
-  '(("d" "Expired Deadlines" tags-todo
+  '(("!" "Expired Deadlines" tags-todo
      "+DEADLINE<\"<today>\"/TODO|PROGRESSING" 
      nil 
-     nil)))
+     nil)
+    ("d" "Scheduled or Deadline" agenda 
+     "+DEADLINE+SCHEDULED"
+     nil nil)))
 #+end_src
 
 **** schedule
