@@ -209,6 +209,12 @@ be used to resolve environment variables from the shell.
 (when (eq window-system 'gnu/linux)
   (exec-path-from-shell-initialize))
 #+END_SRC
+*** Windows
+
+#+BEGIN_SRC emacs-lisp
+(when (eq window-system 'w32)
+  (grep-compute-defaults))
+#+END_SRC
 *** Require
 
 Some features are not loaded by default to minimize initialization time,
@@ -1665,6 +1671,14 @@ Prevents editing invisible text
 (setq org-src-preserve-indentation nil) 
 (setq org-edit-src-content-indentation 0)
 #+end_src
+
+This converts markdown style links into org-mode style links
+
+#+begin_src emacs-lisp
+(defun org-convert-markdown-links-to-org ()
+  (interactive)
+  (query-replace-regexp "\\[\\(\\(\\w+\\(\\s-\\|-\\|\\.\\)*\\)+\\)\\](\\(.*\\))" "[[\\2][\\1]]"))
+#+end_src
 *** evil org
 
 #+BEGIN_SRC emacs-lisp
@@ -2173,6 +2187,117 @@ subsystem.
 (define-key custom-bindings-map (kbd "C-c l")       'org-store-link)
 (define-key custom-bindings-map (kbd "C-c a")       'org-agenda)
 #+END_SRC
+*** zettlekausten
+
+A utility for adding tags to zettlekausten notes
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-pick-tag ()
+  (let* ((tag-file-buffer (helm-find-files-1
+                           (concat (file-name-directory (buffer-file-name)) "tags/")))
+         (name (buffer-file-name tag-file-buffer)))
+    (kill-buffer tag-file-buffer)
+    name))
+
+(defun org-zettelkausten-append-tag (tag-file-name buff-name link-text)
+  (append-to-file (concat "\n[[file:../" buff-name "][" link-text "]]") nil
+                  tag-file-name))
+
+(defun first-line-of-buffer-or-name ()
+  (let* ((text (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n"))
+         (first-line (car (delete "" text))))
+    (if (string= first-line "") (buffer-name) first-line)))
+
+(defun org-zettelkausten-add-tag ()
+  (interactive)
+  (save-window-excursion
+    (org-zettelkausten-append-tag 
+      (org-zettelkausten-pick-tag) 
+      (buffer-name) 
+      (first-line-of-buffer-or-name))))
+#+end_src
+
+List all tags for a given note
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-list-tags ()
+  (interactive)
+  (lgrep (buffer-name) "*.org" (concat org-zettelkausten-dir "/tags")))
+#+end_src
+
+Add all tags currently listed in grep to the current note
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-copy-tags-from-grep ()
+  (interactive)
+  (mapc (lambda (tag-file-name)
+          (org-zettelkausten-append-tag 
+           (concat org-zettelkausten-dir "/tags/" tag-file-name)
+           (buffer-name)
+           (first-line-of-buffer-or-name)))
+    (apply #'append (with-current-buffer "*grep*"
+                      (s-match-strings-all
+                       (rx (and line-start (+ (or letter digit "-")) ".org"))
+                       (buffer-substring-no-properties (point-min) (point-max)))))))
+#+end_src
+
+List all notes which link to this one
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-list-external-refs ()
+  (interactive)
+  (lgrep (buffer-name) "*.org" (concat org-zettelkausten-dir)))
+#+end_src
+
+Search the zettelkausten using grep
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-search ()
+  (interactive) 
+  (lgrep (read-string "query: ") "*.org" org-zettelkausten-dir))
+#+end_src
+
+Create new Zettelkausten note
+
+#+begin_src emacs-lisp
+(defun org-zettelkausten-new-note ()
+  (interactive)
+  (find-file (concat org-zettelkausten-dir "/"
+                     (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org")))
+#+end_src
+
+
+Functions for referencing notes
+
+#+begin_src emacs-lisp
+(setq org-zettelkausten-ref nil)
+
+(defun org-zettelkausten-grab-ref ()
+  (interactive)
+  (setq org-zettelkausten-ref (buffer-name)))
+
+(defun org-zettelkausten-use-ref ()
+  (interactive)
+  (insert (concat "[[file:" org-zettelkausten-ref "]]")))
+#+end_src
+
+A hydra for quickly calling zettlekausten functions
+
+#+begin_src emacs-lisp
+(defhydra hydra-zettelkausten nil
+  "zettelkausten"
+  ("l" org-zettelkausten-list-tags "list tags")
+  ("e" org-zettelkausten-list-external-refs "list external refs")
+  ("t" org-zettelkausten-add-tag "add tag")
+  ("c" org-zettelkausten-copy-tags-from-grep "copy tags from grep")
+  ("s" org-zettelkausten-search "search")
+  ("g" org-zettelkausten-grab-ref "grab ref")
+  ("u" org-zettelkausten-use-ref "use ref")
+  ("n" org-zettelkausten-new-note "new note"))
+
+(global-set-key (kbd "C-c z") #'hydra-zettelkausten/body)
+#+end_src
+
 ** purescript
 #+BEGIN_SRC emacs-lisp
 (when config-use-purescript
