@@ -2228,7 +2228,7 @@ Add all tags currently listed in grep to the current note
 (defun org-zettelkausten-copy-tags-from-grep ()
   (interactive)
   (mapc (lambda (tag-file-name)
-          (org-zettelkausten-add-tag 
+          (org-zettelkausten-append-tag 
            (concat org-zettelkausten-dir "/tags/" tag-file-name)
            (buffer-name)
            (first-line-of-buffer-or-name)))
