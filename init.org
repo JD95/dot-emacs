@@ -2305,8 +2305,7 @@ A hydra for quickly calling zettlekausten functions
 --------------- ------------------------------------------------------
 _n_: New Note   _g_: Grab ref   _t_: Add Tag              _s_: Search
 _C_: New Convo  _u_: Use Ref    _l_: List Tags            _e_: Links to this Note
-_b_: Branch     ^ ^             ^ ^                       ^ ^ 
-^ ^             ^ ^             _C_: Copy Tags from Grep  ^ ^ 
+_b_: Branch     ^ ^             _C_: Copy Tags from Grep  ^ ^ 
 "
   ("n" org-zettelkausten-new-note)
   ("c" org-zettelkausten-conversation)
