@@ -473,7 +473,7 @@ is provided.
 (safe-diminish "paredit" 'paredit-mode "()")
 #+END_SRC
 
-git-gutter-fringe]] gives a great visual indication of where you've made
+git-gutter-fringe gives a great visual indication of where you've made
 changes since your last commit. There are several packages that performs
 this task; the reason I've ended up with =git-gutter-fringe= is that it
 reuses the (already present) fringe, saving a tiny bit of screen-estate.
@@ -2190,8 +2190,7 @@ A utility for adding tags to zettlekausten notes
 
 #+begin_src emacs-lisp
 (defun org-zettelkausten-pick-tag ()
-  (let* ((tag-file-buffer (helm-find-files-1
-                           (concat (file-name-directory (buffer-file-name)) "tags/")))
+  (let* ((tag-file-buffer (helm-find-files-1 (concat org-zettelkausten-dir "/tags/")))
          (name (buffer-file-name tag-file-buffer)))
     (kill-buffer tag-file-buffer)
     name))
@@ -2263,6 +2262,25 @@ Create new Zettelkausten note
                      (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org")))
 #+end_src
 
+#+begin_src emacs-lisp
+(defun org-zettelkausten-conversation () 
+  (interactive)
+  (helm-find-files-1 (concat org-zettelkausten-dir "/conversations/")))
+
+(defun org-zettelkausten-conversation-branch () 
+  (interactive)
+  (let* ((new-note-name (concat (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org"))
+         (new-note-path (concat org-zettelkausten-dir "/" new-note-name))
+         (new-note-link (concat "[[file:" new-note-name "]]"))
+         (curr-note-title (first-line-of-buffer-or-name))
+         (curr-note-link (concat "[[file:" (buffer-file-name) "][" curr-note-title "]]")))
+    (insert new-note-link)
+    (find-file new-note-path)
+    (insert (concat "\nprevious:\n" curr-note-link))))
+#+end_src
+
+#+RESULTS:
+: org-zettelkausten-conversation-branch
 
 Functions for referencing notes
 
@@ -2281,16 +2299,29 @@ Functions for referencing notes
 A hydra for quickly calling zettlekausten functions
 
 #+begin_src emacs-lisp
-(defhydra hydra-zettelkausten nil
-  "zettelkausten"
-  ("l" org-zettelkausten-list-tags "list tags")
-  ("e" org-zettelkausten-list-external-refs "list external refs")
-  ("t" org-zettelkausten-add-tag "add tag")
-  ("c" org-zettelkausten-copy-tags-from-grep "copy tags from grep")
-  ("s" org-zettelkausten-search "search")
-  ("g" org-zettelkausten-grab-ref "grab ref")
-  ("u" org-zettelkausten-use-ref "use ref")
-  ("n" org-zettelkausten-new-note "new note"))
+(defhydra hydra-zettelkausten (:hint nil) 
+  "
+^Notes^         ^Refs^         ^Tags^                    ^Search^
+--------------- ------------------------------------------------------
+_n_: New Note   _g_: Grab ref   _t_: Add Tag              _s_: Search
+_C_: New Convo  _u_: Use Ref    _l_: List Tags            _e_: Links to this Note
+_b_: Branch     ^ ^             ^ ^                       ^ ^ 
+^ ^             ^ ^             _C_: Copy Tags from Grep  ^ ^ 
+"
+  ("n" org-zettelkausten-new-note)
+  ("c" org-zettelkausten-conversation)
+  ("b" org-zettelkausten-conversation-branch)
+
+  ("t" org-zettelkausten-add-tag)
+  ("l" org-zettelkausten-list-tags) 
+  ("C" org-zettelkausten-copy-tags-from-grep)
+
+  ("s" org-zettelkausten-search) 
+  ("e" org-zettelkausten-list-external-refs)
+
+  ("g" org-zettelkausten-grab-ref)
+  ("u" org-zettelkausten-use-ref)
+)
 
 (global-set-key (kbd "C-c z") #'hydra-zettelkausten/body)
 #+end_src
@@ -2307,10 +2338,8 @@ A hydra for quickly calling zettlekausten functions
   
   (defun purescript-setup ()
     (psc-ide-mode)
-    (company-mode)
     (flycheck-mode)
-    (turn-on-purescript-indentation)
-    )
+    (turn-on-purescript-indentation))
   
   (add-hook 'purescript-mode-hook #'purescript-setup))
 #+END_SRC
