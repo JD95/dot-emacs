@@ -2274,16 +2274,13 @@ Create new Zettelkausten note
   (interactive)
   (let* ((new-note-name (concat (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org"))
          (new-note-path (concat org-zettelkausten-dir "/" new-note-name))
-         (new-note-link (concat "[[file:" new-note-name "]]"))
-         (curr-note-title (first-line-of-buffer-or-name))
-         (curr-note-link (concat "[[file:" (buffer-file-name) "][" curr-note-title "]]")))
+         (new-note-link (concat "[[file:" (file-relative-name new-note-path default-directory) "]]"))
+         (prev-note-title (first-line-of-buffer-or-name))
+         (prev-note-link (concat "[[file:" (file-relative-name (buffer-file-name) org-zettelkausten-dir) "][" prev-note-title "]]")))
     (insert new-note-link)
     (find-file new-note-path)
-    (insert (concat "\nprevious:\n" curr-note-link))))
+    (insert (concat "\nprevious:\n" prev-note-link))))
 #+end_src
-
-#+RESULTS:
-: org-zettelkausten-conversation-branch
 
 Functions for referencing notes
 
