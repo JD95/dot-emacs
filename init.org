@@ -1383,6 +1383,7 @@ Enable projectile mode everywhere.
 ** agda
 
 #+begin_src emacs-lisp
+(when config-use-agda 
 (load-file (let ((coding-system-for-read 'utf-8))
     (shell-command-to-string "agda-mode.exe locate")))
 
@@ -1398,6 +1399,7 @@ Enable projectile mode everywhere.
     (set-face-foreground 'agda2-highlight-primitive-face "dodger blue")
     (set-face-foreground 'agda2-highlight-function-face "dodger blue")
     (set-face-foreground 'agda2-highlight-postulate-face "dodger blue")))
+)
 #+end_src
 
 ** bash
@@ -2289,11 +2291,11 @@ Functions for referencing notes
 
 (defun org-zettelkausten-grab-ref ()
   (interactive)
-  (setq org-zettelkausten-ref (buffer-name)))
+  (setq org-zettelkausten-ref (buffer-file-name)))
 
 (defun org-zettelkausten-use-ref ()
   (interactive)
-  (insert (concat "[[file:" org-zettelkausten-ref "]]")))
+  (insert (concat "[[file:" (file-relative-name org-zettelkausten-ref default-directory) "]]")))
 #+end_src
 
 A hydra for quickly calling zettlekausten functions
@@ -2440,6 +2442,16 @@ _b_: Branch     ^ ^             _C_: Copy Tags from Grep  ^ ^
      "    pass"
      )))
 #+END_SRC
+** php
+
+#+begin_src emacs-lisp
+(when config-use-php 
+
+(use-package php-mode
+  :ensure t)
+
+)
+#+end_src
 ** javascript
 #+BEGIN_SRC emacs-lisp
 (when config-use-javascript
