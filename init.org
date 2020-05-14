@@ -1499,6 +1499,18 @@ the echo area. Haskell has several indentation modes - I prefer using
      ,(concat f " = undefined\n")
     )))
 #+END_SRC
+** html
+
+#+begin_src emacs-lisp
+(use-package web-mode
+  :ensure t)
+
+(add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html\\.twig\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+#+end_src
+
 ** idris
 #+BEGIN_SRC emacs-lisp
 (when config-use-idris
@@ -2276,7 +2288,12 @@ Create new Zettelkausten note
   (interactive)
   (let* ((new-note-name (concat (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org"))
          (new-note-path (concat org-zettelkausten-dir "/" new-note-name))
-         (new-note-link (concat "[[file:" (file-relative-name new-note-path default-directory) "]]"))
+         (new-note-desc (if (use-region-p)
+                              (progn 
+                                (kill-region (region-beginning) (region-end))
+                                (concat "][" (car kill-ring) "]]"))
+                              "]]"))
+         (new-note-link (concat "[[file:" (file-relative-name new-note-path default-directory) new-note-desc))
          (prev-note-title (first-line-of-buffer-or-name))
          (prev-note-link (concat "[[file:" (file-relative-name (buffer-file-name) org-zettelkausten-dir) "][" prev-note-title "]]")))
     (insert new-note-link)
