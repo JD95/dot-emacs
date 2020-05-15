@@ -2298,7 +2298,7 @@ Create new Zettelkausten note
          (prev-note-link (concat "[[file:" (file-relative-name (buffer-file-name) org-zettelkausten-dir) "][" prev-note-title "]]")))
     (insert new-note-link)
     (find-file new-note-path)
-    (insert (concat "\nprevious:\n" prev-note-link))))
+    (insert (concat (car kill-ring) "\n\nprevious:\n" prev-note-link))))
 #+end_src
 
 Functions for referencing notes
