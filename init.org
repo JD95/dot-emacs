@@ -1927,6 +1927,29 @@ This function will help randomly select a todo in the current tree.
     (lambda () (at-todo '("TODO" "DEVELOPING" "PROGRESSING")))
     1))
 #+END_SRC
+*** links
+
+#+begin_src emacs-lisp
+(defun org-force-open-current-window ()
+  (interactive)
+  (let ((org-link-frame-setup (quote
+                               ((vm . vm-visit-folder)
+                                (vm-imap . vm-visit-imap-folder)
+                                (gnus . gnus)
+                                (file . find-file)
+                                (wl . wl)))
+                              ))
+    (org-open-at-point)))
+;; Depending on universal argument try opening link
+(defun org-open-maybe (&optional arg)
+  (interactive "P")
+  (if arg
+      (org-open-at-point)
+    (org-force-open-current-window)
+    )
+  )
+
+#+end_src
 *** source blocks 
 
 When editing org-files with source-blocks, we want the source blocks to
@@ -2200,6 +2223,8 @@ subsystem.
   (lambda () (interactive) (org-agenda nil "n")))
 (define-key custom-bindings-map (kbd "C-c l")       'org-store-link)
 (define-key custom-bindings-map (kbd "C-c a")       'org-agenda)
+;; Redefine file opening without clobbering universal argumnet
+(define-key org-mode-map "\C-c\C-o" 'org-open-maybe)
 #+END_SRC
 *** zettlekausten
 
