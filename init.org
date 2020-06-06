@@ -1700,6 +1700,24 @@ This converts markdown style links into org-mode style links
 (add-hook 'org-mode-hook 'evil-org-mode)
 (evil-org-set-key-theme '(navigation insert textobjects additional))
 #+END_SRC
+*** tags
+
+For when a parent heading needs to be broken up into it's children.
+Adds any inherited tags to the immediate children.
+#+begin_src emacs-lisp
+(defun org-apply-tags-to-children ()
+  (interactive)
+  (save-excursion
+    (org-back-to-heading t)
+    (let* ((parent-tags (org-get-tags (point) t))
+           (depth (+ 1 (org-current-level))))
+      (org-map-entries
+       (lambda ()
+         (when (<= (org-current-level) depth)
+           (org-set-tags (org-get-tags))))
+       nil
+       'tree))))
+#+end_src
 
 *** file associations
 
