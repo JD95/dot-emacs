@@ -1906,6 +1906,21 @@ Helps sort sections
 (setq org-hierarchical-todo-statistics nil)
 #+end_src
 
+Sets all immediate children of header to set deadline for sibling 1 day after completion
+#+begin_src emacs-lisp
+(defun org-set-daily-subtask-deadline ()
+  (interactive)
+  (save-excursion
+    (org-back-to-heading t)
+    (let* ((depth (+ 1 (org-current-level))))
+      (org-map-entries
+       (lambda ()
+         (when (<= (org-current-level) depth)
+           (org-set-property "TRIGGER" "next-sibling deadline!(\"++1d\")")))
+       nil
+       'tree))))
+#+end_src
+
 **** todo navigation
 
 This function will help randomly select a todo in the current tree.
