@@ -2264,13 +2264,13 @@ subsystem.
 A utility for adding tags to zettlekausten notes
 
 #+begin_src emacs-lisp
-(defun org-zettelkausten-pick-tag ()
-  (let* ((tag-file-buffer (helm-find-files-1 (concat org-zettelkausten-dir "/tags/")))
+(defun org-zettelkasten-pick-tag ()
+  (let* ((tag-file-buffer (helm-find-files-1 (concat org-zettelkasten-dir "/tags/")))
          (name (buffer-file-name tag-file-buffer)))
     (kill-buffer tag-file-buffer)
     name))
 
-(defun org-zettelkausten-append-tag (tag-file-name buff-name link-text)
+(defun org-zettelkasten-append-tag (tag-file-name buff-name link-text)
   (append-to-file (concat "\n[[file:../" buff-name "][" link-text "]]") nil
                   tag-file-name))
 
@@ -2279,11 +2279,11 @@ A utility for adding tags to zettlekausten notes
          (first-line (car (delete "" text))))
     (if (string= first-line "") (buffer-name) first-line)))
 
-(defun org-zettelkausten-add-tag ()
+(defun org-zettelkasten-add-tag ()
   (interactive)
   (save-window-excursion
-    (org-zettelkausten-append-tag 
-      (org-zettelkausten-pick-tag) 
+    (org-zettelkasten-append-tag 
+      (org-zettelkasten-pick-tag) 
       (buffer-name) 
       (first-line-of-buffer-or-name))))
 #+end_src
@@ -2291,19 +2291,19 @@ A utility for adding tags to zettlekausten notes
 List all tags for a given note
 
 #+begin_src emacs-lisp
-(defun org-zettelkausten-list-tags ()
+(defun org-zettelkasten-list-tags ()
   (interactive)
-  (lgrep (buffer-name) "*.org" (concat org-zettelkausten-dir "/tags")))
+  (lgrep (buffer-name) "*.org" (concat org-zettelkasten-dir "/tags")))
 #+end_src
 
 Add all tags currently listed in grep to the current note
 
 #+begin_src emacs-lisp
-(defun org-zettelkausten-copy-tags-from-grep ()
+(defun org-zettelkasten-copy-tags-from-grep ()
   (interactive)
   (mapc (lambda (tag-file-name)
-          (org-zettelkausten-append-tag 
-           (concat org-zettelkausten-dir "/tags/" tag-file-name)
+          (org-zettelkasten-append-tag 
+           (concat org-zettelkasten-dir "/tags/" tag-file-name)
            (buffer-name)
            (first-line-of-buffer-or-name)))
     (apply #'append (with-current-buffer "*grep*"
@@ -2315,37 +2315,37 @@ Add all tags currently listed in grep to the current note
 List all notes which link to this one
 
 #+begin_src emacs-lisp
-(defun org-zettelkausten-list-external-refs ()
+(defun org-zettelkasten-list-external-refs ()
   (interactive)
-  (lgrep (buffer-name) "*.org" (concat org-zettelkausten-dir)))
+  (lgrep (buffer-name) "*.org" (concat org-zettelkasten-dir)))
 #+end_src
 
-Search the zettelkausten using grep
+Search the zettelkasten using grep
 
 #+begin_src emacs-lisp
-(defun org-zettelkausten-search ()
+(defun org-zettelkasten-search ()
   (interactive) 
-  (lgrep (read-string "query: ") "*.org" org-zettelkausten-dir))
+  (lgrep (read-string "query: ") "*.org" org-zettelkasten-dir))
 #+end_src
 
-Create new Zettelkausten note
+Create new Zettelkasten note
 
 #+begin_src emacs-lisp
-(defun org-zettelkausten-new-note ()
+(defun org-zettelkasten-new-note ()
   (interactive)
-  (find-file (concat org-zettelkausten-dir "/"
+  (find-file (concat org-zettelkasten-dir "/"
                      (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org")))
 #+end_src
 
 #+begin_src emacs-lisp
-(defun org-zettelkausten-conversation () 
+(defun org-zettelkasten-conversation () 
   (interactive)
-  (helm-find-files-1 (concat org-zettelkausten-dir "/conversations/")))
+  (helm-find-files-1 (concat org-zettelkasten-dir "/conversations/")))
 
-(defun org-zettelkausten-conversation-branch () 
+(defun org-zettelkasten-conversation-branch () 
   (interactive)
   (let* ((new-note-name (concat (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org"))
-         (new-note-path (concat org-zettelkausten-dir "/" new-note-name))
+         (new-note-path (concat org-zettelkasten-dir "/" new-note-name))
          (new-note-desc (if (use-region-p)
                               (progn 
                                 (kill-region (region-beginning) (region-end))
@@ -2353,7 +2353,7 @@ Create new Zettelkausten note
                               "]]"))
          (new-note-link (concat "[[file:" (file-relative-name new-note-path default-directory) new-note-desc))
          (prev-note-title (first-line-of-buffer-or-name))
-         (prev-note-link (concat "[[file:" (file-relative-name (buffer-file-name) org-zettelkausten-dir) "][" prev-note-title "]]")))
+         (prev-note-link (concat "[[file:" (file-relative-name (buffer-file-name) org-zettelkasten-dir) "][" prev-note-title "]]")))
     (insert new-note-link)
     (find-file new-note-path)
     (insert (concat (car kill-ring) "\n\nprevious:\n" prev-note-link))))
@@ -2362,21 +2362,27 @@ Create new Zettelkausten note
 Functions for referencing notes
 
 #+begin_src emacs-lisp
-(setq org-zettelkausten-ref nil)
+(setq org-zettelkasten-ref nil)
 
-(defun org-zettelkausten-grab-ref ()
+(defun org-zettelkasten-grab-ref ()
   (interactive)
-  (setq org-zettelkausten-ref (buffer-file-name)))
+  (setq org-zettelkasten-ref (buffer-file-name)))
 
-(defun org-zettelkausten-use-ref ()
+(defun org-zettelkasten-use-ref ()
   (interactive)
-  (insert (concat "[[file:" (file-relative-name org-zettelkausten-ref default-directory) "]]")))
+  (let* ((link-end (if (use-region-p) 
+                         (progn 
+                            (kill-region (region-beginning) (region-end)) 
+                            (concat "][" (car kill-ring) "]]"))
+                       "]]")))
+    (insert (concat "[[file:" (file-relative-name org-zettelkasten-ref default-directory) link-end)))
+  )
 #+end_src
 
 A hydra for quickly calling zettlekausten functions
 
 #+begin_src emacs-lisp
-(defhydra hydra-zettelkausten (:hint nil) 
+(defhydra hydra-zettelkasten (:hint nil) 
   "
 ^Notes^         ^Refs^         ^Tags^                    ^Search^
 --------------- ------------------------------------------------------
@@ -2384,22 +2390,22 @@ _n_: New Note   _g_: Grab ref   _t_: Add Tag              _s_: Search
 _C_: New Convo  _u_: Use Ref    _l_: List Tags            _e_: Links to this Note
 _b_: Branch     ^ ^             _C_: Copy Tags from Grep  ^ ^ 
 "
-  ("n" org-zettelkausten-new-note)
-  ("c" org-zettelkausten-conversation)
-  ("b" org-zettelkausten-conversation-branch)
+  ("n" org-zettelkasten-new-note)
+  ("c" org-zettelkasten-conversation)
+  ("b" org-zettelkasten-conversation-branch)
 
-  ("t" org-zettelkausten-add-tag)
-  ("l" org-zettelkausten-list-tags) 
-  ("C" org-zettelkausten-copy-tags-from-grep)
+  ("t" org-zettelkasten-add-tag)
+  ("l" org-zettelkasten-list-tags) 
+  ("C" org-zettelkasten-copy-tags-from-grep)
 
-  ("s" org-zettelkausten-search) 
-  ("e" org-zettelkausten-list-external-refs)
+  ("s" org-zettelkasten-search) 
+  ("e" org-zettelkasten-list-external-refs)
 
-  ("g" org-zettelkausten-grab-ref)
-  ("u" org-zettelkausten-use-ref)
+  ("g" org-zettelkasten-grab-ref)
+  ("u" org-zettelkasten-use-ref)
 )
 
-(global-set-key (kbd "C-c z") #'hydra-zettelkausten/body)
+(global-set-key (kbd "C-c z") #'hydra-zettelkasten/body)
 #+end_src
 
 ** purescript
