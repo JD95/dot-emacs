@@ -1025,6 +1025,16 @@ are just present window configs generated from a macro.
  (delete-other-windows nil)
  (neotree-hide))
 
+(defun zettelkasten-workspace ()
+  "A workspace for editing the Zettelkasten"
+  (interactive)
+  (delete-other-windows nil)
+  (when (boundp 'zettelkasten-people-path)
+    (find-file zettelkasten-people-path))
+  (split-window-right 50)
+  (other-window 1)
+  (when (boundp 'zettelkasten-journal-path)
+    (find-file zettelkasten-journal-path)))
 #+END_SRC
 
 * Minor Modes 
@@ -1609,15 +1619,15 @@ function to a key!
   :ensure t)
 (use-package org
   :ensure t
-:config
-(org-babel-do-load-languages 
-'org-babel-load-languages
-      '((dot . t)
-         (ledger . t)
-         (emacs-lisp . t)
-         (shell . t)))
-(setq org-startup-indented t)
-(org-reload))
+  :config
+  (org-babel-do-load-languages 
+  'org-babel-load-languages
+        '((dot . t)
+           (ledger . t)
+           (emacs-lisp . t)
+           (shell . t)))
+  (setq org-startup-indented t)
+  (org-reload))
 (use-package org-ref
   :ensure t)
 (use-package ox-twbs
@@ -1698,6 +1708,7 @@ This converts markdown style links into org-mode style links
 #+BEGIN_SRC emacs-lisp
 (require 'evil-org)
 (add-hook 'org-mode-hook 'evil-org-mode)
+(add-hook 'org-mode-hook 'visual-line-mode)
 (evil-org-set-key-theme '(navigation insert textobjects additional))
 #+END_SRC
 *** tags
