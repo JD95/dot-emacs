@@ -1701,7 +1701,7 @@ This converts markdown style links into org-mode style links
 #+begin_src emacs-lisp
 (defun org-convert-markdown-links-to-org ()
   (interactive)
-  (query-replace-regexp "\\[\\(\\(\\w+\\(\\s-\\|-\\|\\.\\)*\\)+\\)\\](\\(.*\\))" "[[\\2][\\1]]"))
+  (query-replace-regexp "\\[\\(.+\\)\\](\\(.*\\))" "[[\\2][\\1]]" nil (region-beginning) (region-end)))
 #+end_src
 *** evil org
 
