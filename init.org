@@ -1034,7 +1034,11 @@ are just present window configs generated from a macro.
   (split-window-right 50)
   (other-window 1)
   (when (boundp 'zettelkasten-journal-path)
-    (find-file zettelkasten-journal-path)))
+    (find-file zettelkasten-journal-path))
+  (when (get-buffer "*Org Agenda*")
+    (split-window-right nil)
+    (other-window 1)
+    (switch-to-buffer (get-buffer "*Org Agenda*"))))
 #+END_SRC
 
 * Minor Modes 
