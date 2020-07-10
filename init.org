@@ -1446,25 +1446,6 @@ accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
 #+BEGIN_SRC emacs-lisp
 (add-hook 'compilation-filter-hook 'comint-truncate-buffer)
 #+END_SRC
-** elfeed
-
-I'm going to use elfeed to create content feeds for sites like youtube
-- http://pragmaticemacs.com/emacs/read-your-rss-feeds-in-emacs-with-elfeed/
-
-#+begin_src emacs-lisp
-(when config-use-elfeed
-  (use-package elfeed-org
-    :ensure t
-    :config
-    (elfeed-org)
-    (setq rmh-elfeed-org-files (list "c:/Users/jeffr/Dropbox/Orgzly/content-feed.org"))))
-#+end_src
-
-#+begin_src emacs-lisp
-(when config-use-elfeed
-  (use-package elfeed :ensure t))
-#+end_src
-
 ** coq
 #+BEGIN_SRC emacs-lisp
 (when config-use-coq 
@@ -1490,7 +1471,7 @@ the echo area. Haskell has several indentation modes - I prefer using
     :ensure t)
 
   (setq haskell-stylish-on-save t)
-  (setq haskell-mode-stylish-haskell-path "brittany")
+  (setq haskell-mode-stylish-haskell-path "ormolu")
   
   (progn
     (use-package hlint-refactor
