@@ -1469,8 +1469,6 @@ the echo area. Haskell has several indentation modes - I prefer using
 (when config-use-haskell
   (use-package haskell-mode
     :ensure t)
-
-  
   (progn
     (use-package hlint-refactor
       :ensure t)
@@ -1977,6 +1975,14 @@ This function will help randomly select a todo in the current tree.
   )
 
 #+end_src
+
+Prevent org mode from auto expanding relative paths.
+- This is needed for Zettelkasten to be portable
+
+#+begin_src emacs-lisp
+(setq org-link-file-path-type 'relative)
+#+end_src
+
 *** source blocks 
 
 When editing org-files with source-blocks, we want the source blocks to
@@ -2381,7 +2387,7 @@ A hydra for quickly calling zettlekausten functions
 ^Notes^         ^Refs^         ^Tags^                    ^Search^
 --------------- ------------------------------------------------------
 _n_: New Note   _g_: Grab ref   _t_: Add Tag              _s_: Search
-_C_: New Convo  _u_: Use Ref    _l_: List Tags            _e_: Links to this Note
+_c_: New Convo  _u_: Use Ref    _l_: List Tags            _e_: Links to this Note
 _b_: Branch     ^ ^             _C_: Copy Tags from Grep  ^ ^ 
 "
   ("n" org-zettelkasten-new-note)
