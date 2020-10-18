@@ -316,24 +316,18 @@ directory.
          `((".*" ,emacs-autosave-directory t)))
 #+END_SRC
 
-Set =utf-8= as preferred coding system.
-
-#+BEGIN_SRC emacs-lisp
-   (set-language-environment "UTF-8")
-#+END_SRC
-
 By default the =narrow-to-region= command is disabled and issues a
 warning, because it might confuse new users. I find it useful sometimes,
 and don't want to be warned.
 
 #+BEGIN_SRC emacs-lisp
-   (put 'narrow-to-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
 #+END_SRC
 
 Automaticly revert =doc-view=-buffers when the file changes on disk.
 
 #+BEGIN_SRC emacs-lisp
-   (add-hook 'doc-view-mode-hook 'auto-revert-mode)
+(add-hook 'doc-view-mode-hook 'auto-revert-mode)
 #+END_SRC
 
 *** Modes
@@ -443,15 +437,59 @@ Change the color-theme to =gotham=.
   (load-theme 'solarized t))
 #+END_SRC
 
-Use the [[ https://github.com/tonsky/FiraCode][Fira Code]] font if it's installed on the system.
-
 #+BEGIN_SRC emacs-lisp
-(cond ((member "Fira Code" (font-family-list))
-       (set-face-attribute 'default nil :font "Fira Code")
-       (set-frame-font "Fira Code" nil t)))
+(cond ((member "DejaVu Sans Mono" (font-family-list))
+       (set-face-attribute 'default nil :font "DejaVu Sans Mono")
+       (set-frame-font "DejaVu Sans Mono" nil t)))
+
+(use-package unicode-fonts :ensure t)
+(unicode-fonts-setup)
+
+;; Use this font if the current font can't render a symbol
+(set-fontset-font "fontset-default" 'unicode "DejaVu Sans")
 #+END_SRC
 
-Enable Fira Code ligatures
+For Language Fonts
+
+#+begin_src emacs-lisp
+(defvar emacs-english-font "DejaVu Sans Mono"
+  "The font for English.")
+
+(defvar emacs-cjk-font "Hiragino Sans GB W3"
+  "The font name for CJK.")
+
+(defvar emacs-font-size-pair '(15 . 18)
+  "Default font size pair for (english . chinese)")
+
+;; Needed to ensure that cjk characters don't misalign with
+;; latin letters
+(defvar emacs-font-size-pair-list
+  '(( 5 .  6) (10 . 12)
+    (13 . 16) (15 . 18) (17 . 20)
+    (19 . 22) (20 . 24) (21 . 26)
+    (24 . 28) (26 . 32) (28 . 34)
+    (30 . 36) (34 . 40) (36 . 44))
+  "This list is used to store matching (english . chinese) font-size.")
+
+(defun font-exist-p (fontname)
+  "Test if this font is exist or not."
+  (if (or (not fontname) (string= fontname ""))
+      nil
+    (if (not (x-list-fonts fontname)) nil t)))
+
+(defun set-font (english chinese size-pair)
+  "Setup emacs English and Chinese font on x window-system."
+
+  (if (font-exist-p english)
+      (set-frame-font (format "%s:pixelsize=%d" english (car size-pair)) t))
+
+  (if (font-exist-p chinese)
+      (dolist (charset '(kana han symbol cjk-misc bopomofo))
+        (set-fontset-font (frame-parameter nil 'font) charset
+                          (font-spec :family chinese :size (cdr size-pair))))))
+
+(set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
+#+end_src
 
 diminish.el allows you to hide or abbreviate their presence in the
 modeline. I rarely look at the modeline to find out what minor-modes are
@@ -1408,6 +1446,7 @@ Enable projectile mode everywhere.
 
 (add-hook 'agda2-mode-hook 
   (lambda ()
+    (interactive)
     (set-face-foreground 'agda2-highlight-datatype-face "dodger blue")
     (set-face-foreground 'agda2-highlight-primitive-type-face "dodger blue")
     (set-face-foreground 'agda2-highlight-primitive-face "dodger blue")
