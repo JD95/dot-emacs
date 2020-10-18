@@ -458,7 +458,7 @@ For Language Fonts
 (defvar emacs-cjk-font "Hiragino Sans GB W3"
   "The font name for CJK.")
 
-(defvar emacs-font-size-pair '(15 . 18)
+(defvar emacs-font-size-pair '(13 . 16)
   "Default font size pair for (english . chinese)")
 
 ;; Needed to ensure that cjk characters don't misalign with
