@@ -2318,6 +2318,10 @@ A utility for adding tags to zettlekausten notes
          (first-line (car (delete "" text))))
     (if (string= first-line "") (buffer-name) first-line)))
 
+(defun org-zettelkasten-buffer-name ()
+  (interactive)
+  (rename-buffer (first-line-of-buffer-or-name)))
+
 (defun org-zettelkasten-add-tag ()
   (interactive)
   (save-window-excursion
@@ -2424,14 +2428,16 @@ A hydra for quickly calling zettlekausten functions
 (defhydra hydra-zettelkasten (:hint nil) 
   "
 ^Notes^         ^Refs^         ^Tags^                    ^Search^
---------------- ------------------------------------------------------
+----------------------------------------------------------------------
 _n_: New Note   _g_: Grab ref   _t_: Add Tag              _s_: Search
 _c_: New Convo  _u_: Use Ref    _l_: List Tags            _e_: Links to this Note
 _b_: Branch     ^ ^             _C_: Copy Tags from Grep  ^ ^ 
+_r_: Rename Buffer
 "
   ("n" org-zettelkasten-new-note)
   ("c" org-zettelkasten-conversation)
   ("b" org-zettelkasten-conversation-branch)
+  ("r" org-zettelkasten-buffer-name)
 
   ("t" org-zettelkasten-add-tag)
   ("l" org-zettelkasten-list-tags) 
