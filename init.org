@@ -1595,6 +1595,13 @@ This advice makes =eval-last-sexp= (bound to =C-x C-e=) replace the sexp with th
         (forward-sexp))
     ad-do-it))
 #+END_SRC
+
+** lua
+
+#+begin_src emacs-lisp
+(use-package lua-mode
+  :ensure t)
+#+end_src
 ** markdown
 
 This makes =.md=-files open in =markdown-mode=.
@@ -2378,6 +2385,10 @@ Create new Zettelkasten note
   (interactive)
   (find-file (concat org-zettelkasten-dir "/"
                      (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org")))
+
+(defun org-zettelkasten-gen-id () 
+  (interactive)
+  (insert (format-time-string "%d%m%Y%H%M%S" (current-time))))
 #+end_src
 
 #+begin_src emacs-lisp
