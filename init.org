@@ -506,7 +506,6 @@ is provided.
 
 (safe-diminish "eldoc" 'eldoc-mode)
 (safe-diminish "flyspell" 'flyspell-mode)
-(safe-diminish "helm-mode" 'helm-mode)
 (safe-diminish "projectile" 'projectile-mode)
 (safe-diminish "paredit" 'paredit-mode "()")
 #+END_SRC
@@ -1115,17 +1114,6 @@ Evaluate the =calendar-show-week= function.
 #+BEGIN_SRC emacs-lisp
 (calendar-show-week t)
 #+END_SRC
-** compnay
-
-#+BEGIN_SRC emacs-lisp
-(define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
-(define-key company-active-map (kbd "C-n") 'company-select-next)
-(define-key company-active-map (kbd "C-p") 'company-select-previous)
-(define-key company-active-map (kbd "<tab>") 'company-complete)
-
-(define-key company-mode-map (kbd "C-:") 'helm-company)
-(define-key company-active-map (kbd "C-:") 'helm-company)
-#+END_SRC
 ** evil
 
 These are the configurations for evil mode editing.
@@ -1210,83 +1198,76 @@ Some keybindings for ease of use
 #+END_SRC
 ** git-gutter
 #+BEGIN_SRC emacs-lisp
+(use-package git-gutter-fringe
+  :ensure t)
+
 (define-key custom-bindings-map (kbd "M-g r") #'git-gutter:update-all-windows)
 #+END_SRC
-** helm
+** ivy
 
-~helm~ has a wonderful feature, being able to grep files by ~C-s~ anywhere,
-which is useful. [[http://beyondgrep.com/][ack]] is a great ~grep~-replacement, and is designed to
-search source code, so I want to use that if it's available.
-
-Note that some changes in bindings are located in the key bindings (found
-near the end of the configuration).
-
-#+BEGIN_SRC emacs-lisp
-(use-package helm 
-  :ensure t)
-(use-package helm-ag
-  :ensure t)
-(use-package helm-company
-  :ensure t)
-(use-package helm-projectile
-  :ensure t)
-(use-package helm-swoop
-  :ensure t)
-(use-package hydra
+#+begin_src emacs-lisp
+(use-package ivy
   :ensure t)
 
-(require 'helm)
-(require 'helm-config)
+(global-set-key (kbd "C-s") 'swiper-isearch)
+(global-set-key (kbd "M-x") 'counsel-M-x)
+(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+(global-set-key (kbd "M-y") 'counsel-yank-pop)
+(global-set-key (kbd "<f1> f") 'counsel-describe-function)
+(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+(global-set-key (kbd "<f1> l") 'counsel-find-library)
+(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+(global-set-key (kbd "<f2> j") 'counsel-set-variable)
+(global-set-key (kbd "C-x b") 'ivy-switch-buffer)
+(global-set-key (kbd "C-c v") 'ivy-push-view)
+(global-set-key (kbd "C-c V") 'ivy-pop-view)
+#+end_src
 
-(setq helm-split-window-in-side-p t
-      helm-M-x-fuzzy-match t
-      helm-buffers-fuzzy-matching t
-      helm-recentf-fuzzy-match t
-      helm-move-to-line-cycle-in-source t
-      projectile-completion-system 'helm)
+Use Prescient with Ivy. This adds memory to counsel selections, sorting the results based on usage history.
 
-(when (executable-find "ack")
-  (setq helm-grep-default-command
-        "ack -Hn --no-group --no-color %e %p %f"
-        helm-grep-default-recurse-command
-        "ack -H --no-group --no-color %e %p %f"))
+#+begin_src emacs-lisp
+(use-package prescient
+  :ensure t)
+(use-package ivy-prescient
+  :ensure t
+  :after counsel
+  :config 
+    (ivy-prescient-mode 1)
+    (prescient-persist-mode 1))
 
-(helm-mode 1)
-(helm-projectile-on)
-(helm-adaptive-mode 1)
-#+END_SRC
+(setq prescient-history-length 100)
+(setq prescient-frequency-decay 0.997)
+(setq prescient-frequency-threshold 0.5)
+(setq prescient-sort-length-enable t) 
+#+end_src
 
-#+BEGIN_SRC emacs-lisp
-  (define-key custom-bindings-map (kbd "C-c h")   #'helm-command-prefix)
-  (define-key custom-bindings-map (kbd "M-x")     'helm-M-x)
-  (define-key custom-bindings-map (kbd "M-y")     #'helm-show-kill-ring)
-  (define-key custom-bindings-map (kbd "C-x b")   #'helm-mini)
-  (define-key custom-bindings-map (kbd "C-x C-f") #'helm-find-files)
-  (define-key custom-bindings-map (kbd "C-c h d") #'helm-dash-at-point)
-  (define-key custom-bindings-map (kbd "C-c h o") #'helm-occur)
-  (define-key custom-bindings-map (kbd "C-c h g") #'helm-google-suggest)
-  (define-key custom-bindings-map (kbd "M-i")     #'helm-swoop)
-  (define-key custom-bindings-map (kbd "M-I")     #'helm-multi-swoop-all)
+There are several methods that can be used to filter prescient results:
+- literal: query is a literal sub-strings of the candidate
+- initalism: query is initials of the candidate
+- prefix: query is beginnings of parts of a candidate
+- anchored: parts of query are separated by capital letters, similar to prefix with no spaces
+- fuzzy: character of query exist in candidate in right order
+- regexp: the query is a regexp, find all matches
+#+begin_src emacs-lisp
+(setq ivy-prescient-enable-filtering t)
+(setq prescient-filter-method '(literal regexp fuzzy))
+#+end_src
 
-  (define-key helm-map (kbd "<tab>") #'helm-execute-persistent-action)
-  (define-key helm-map (kbd "C-i")   #'helm-execute-persistent-action)
-  (define-key helm-map (kbd "C-z")   #'helm-select-action)
-#+END_SRC
+However, we don't want this behavior on all selections. =ivy-prescient-sort-commands= allows us to specify either only the commands we want to use prescient with or which commands to ignore.
 
-*** Helm dash
+#+begin_src emacs-lisp
+(setq ivy-prescient-sort-commands 
+  '(:not ivy-switch-buffer))
+#+end_src
 
-#+BEGIN_SRC emacs-lisp
-(setq helm-dash-browser-func 'eww)
-(add-hook 'emacs-lisp-mode-hook
-          (lambda () (setq-local helm-dash-docsets '("Emacs Lisp"))))
-(add-hook 'haskell-mode-hook
-          (lambda () (setq-local helm-dash-docsets '("Haskell"))))
-#+END_SRC
 ** hyrda
 
 Allows for the creation of menus.
 
 #+BEGIN_SRC emacs-lisp
+(use-package hydra
+  :ensure t)
 (require 'hydra)
 #+END_SRC
 
@@ -1301,55 +1282,6 @@ This menu allows for zooming in and out of the current buffer.
   ("j" text-scale-decrease "out"))
 
 (global-set-key (kbd "<f2>") #'hydra-zoom/body)
-#+END_SRC
-
-*** help
-#+BEGIN_SRC emacs-lisp
-(defhydra hydra-help (:exit t)
-    ;; Better to exit after any command because otherwise helm gets in a
-    ;; mess, set hint to nil: written out manually.
-
-  "
-Describe        ^^Keys                    ^^Search                    ^^Documentation
----------------------------------------------------------------------------------------
-_f_unction        _k_eybinding              _a_propros                  _i_nfo
-_p_ackage         _w_here-is                _d_oc strings               _n_: man
-_m_ode            _b_: show all bindings    _s_: info by symbol         _h_elm-dash
-_v_ariable
-
-"
-;; Boring help commands...
-("e" view-echo-area-messages "messages")
-("l" view-lossage "lossage")
-("C" describe-coding-system "coding-system")
-("I" describe-input-method "input-method")
-
-;; Documentation
-("i" info nil)
-("n" helm-man-woman nil)
-("h" helm-dash)
-
-;; Keybinds
-("b" describe-bindings nil)
-("c" describe-key-briefly nil)
-("k" describe-key nil)
-("w" where-is nil)
-
-;; Search
-("a" apropos-command nil)
-("d" apropos-documentation nil)
-("s" info-lookup-symbol nil)
-
-;; Describe
-("f" describe-function nil)
-("p" describe-package nil)
-("m" describe-mode nil)
-("v" describe-variable nil)
-("y" describe-syntax nil)
-
-;; quit
-("q" help-quit "quit"))
-(global-set-key (kbd "<f1>") #'hydra-help/body)
 #+END_SRC
 
 *** window
@@ -1396,6 +1328,7 @@ _SPC_ cancel
 
 #+BEGIN_SRC emacs-lisp
 (when config-use-magit 
+  (use-package magit :ensure t)
   (use-package evil-magit :ensure t)
   (evil-magit-init)
   (define-key custom-bindings-map (kbd "C-c m") 'magit-status))
@@ -1419,16 +1352,13 @@ Enable projectile mode everywhere.
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
   :ensure t)
-(use-package git-gutter-fringe
-  :ensure t)
-(use-package magit
-  :ensure t)
-(use-package flycheck
+(use-package counsel-projectile
   :ensure t)
 
 (require 'projectile)
 (projectile-mode 1)
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+(counsel-projectile-mode)
 #+END_SRC
 
 * Major Modes 
@@ -1545,7 +1475,7 @@ the echo area. Haskell has several indentation modes - I prefer using
 #+BEGIN_SRC emacs-lisp
 (when config-use-idris
   (use-package idris-mode :ensure t)
-  (use-package helm-idris :ensure t)
+;;  (use-package helm-idris :ensure t)
   (add-to-list 'exec-path idris-location))
 #+END_SRC
 
@@ -2311,7 +2241,7 @@ A utility for adding tags to zettlekausten notes
 
 #+begin_src emacs-lisp
 (defun org-zettelkasten-pick-tag ()
-  (let* ((tag-file-buffer (helm-find-files-1 (concat org-zettelkasten-dir "/tags/")))
+  (let* ((tag-file-buffer (find-file (counsel-find-file (concat org-zettelkasten-dir "/tags/"))))
          (name (buffer-file-name tag-file-buffer)))
     (kill-buffer tag-file-buffer)
     name))
@@ -2394,7 +2324,7 @@ Create new Zettelkasten note
 #+begin_src emacs-lisp
 (defun org-zettelkasten-conversation () 
   (interactive)
-  (helm-find-files-1 (concat org-zettelkasten-dir "/conversations/")))
+  (counsel-find-file (concat org-zettelkasten-dir "/conversations/")))
 
 (defun org-zettelkasten-conversation-branch () 
   (interactive)
