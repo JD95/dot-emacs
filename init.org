@@ -65,18 +65,6 @@ loaded, along with =package=, which is obviously needed.
 
 #+BEGIN_SRC emacs-lisp
 (require 'cl)
-;;(require 'package)
-;;(package-initialize)
-#+END_SRC
-
-Packages can be fetched from different mirrors, [[http://melpa.milkbox.net/#/][melpa]] is the largest
-archive and is well maintained.
-
-#+BEGIN_SRC emacs-lisp
-;; (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
-;; (add-to-list 'package-archives '("elpa" . "http://tromey.com/elpa/"))
-;; (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
-;; (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
 #+END_SRC
 
 #+begin_src emacs-lisp
@@ -102,14 +90,6 @@ The configuration assumes that the packages listed below are
 installed. To ensure we install missing packages if they are missing.
 
 #+BEGIN_SRC emacs-lisp
-;; (setq package-selected-packages
-;;  '(use-package))
-;; 
-;; (package-initialize)
-;; (unless package-archive-contents
-;;     (package-refresh-contents))
-;; (package-install-selected-packages)
-
 (eval-when-compile
   (require 'use-package))
 
@@ -153,12 +133,10 @@ installed. To ensure we install missing packages if they are missing.
   :ensure t)
 (use-package git-gutter-fringe
   :ensure t)
-
 (use-package markdown-mode
   :ensure t)
 (use-package yaml-mode
   :ensure t)
-
 (use-package auto-compile
   :ensure t)
 
@@ -166,7 +144,6 @@ installed. To ensure we install missing packages if they are missing.
   (when (memq window-system '(mac ns))
         (push 'exec-path-from-shell packages)
         (push 'reveal-in-osx-finder packages)))
-
 #+END_SRC
 
 Some packages need to be installed manually, so we add a custom folder to the load path
@@ -175,8 +152,6 @@ Some packages need to be installed manually, so we add a custom folder to the lo
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-;; (setq load-prefer-newer t)
-;; (package-initialize)
 (require 'auto-compile)
 (auto-compile-on-load-mode)
 (auto-compile-on-save-mode)
@@ -254,18 +229,18 @@ These are what /I/ consider to be saner defaults.
 We can set variables to whatever value we'd like using =setq=.
 
 #+BEGIN_SRC emacs-lisp
-   (setq auto-revert-interval 1            ; Refresh buffers fast
-         custom-file (make-temp-file "")   ; Discard customization's
-         default-input-method "TeX"        ; Use TeX when toggling input method
-         echo-keystrokes 0.1               ; Show keystrokes asap
-         inhibit-startup-message t         ; No splash screen please
-         initial-scratch-message nil       ; Clean scratch buffer
-         recentf-max-saved-items 100       ; Show more recent files
-         ring-bell-function 'ignore        ; Quiet
-         sentence-end-double-space nil)    ; No double space
-   ;; Some mac-bindings interfere with Emacs bindings.
-   (when (boundp 'mac-pass-command-to-system)
-     (setq mac-pass-command-to-system nil))
+(setq auto-revert-interval 1            ; Refresh buffers fast
+      custom-file (make-temp-file "")   ; Discard customization's
+      default-input-method "TeX"        ; Use TeX when toggling input method
+      echo-keystrokes 0.1               ; Show keystrokes asap
+      inhibit-startup-message t         ; No splash screen please
+      initial-scratch-message nil       ; Clean scratch buffer
+      recentf-max-saved-items 100       ; Show more recent files
+      ring-bell-function 'ignore        ; Quiet
+      sentence-end-double-space nil)    ; No double space
+;; Some mac-bindings interfere with Emacs bindings.
+(when (boundp 'mac-pass-command-to-system)
+  (setq mac-pass-command-to-system nil))
 #+END_SRC
 
 Some variables are buffer-local, so changing them using =setq= will only
@@ -273,9 +248,9 @@ change them in a single buffer. Using =setq-default= we change the
 buffer-local variable's default value.
 
 #+BEGIN_SRC emacs-lisp
-   (setq-default indent-tabs-mode nil              ; Use spaces instead of tabs
-                 split-width-threshold 160         ; Split verticly by default
-                 split-height-threshold nil)       ; Split verticly by default
+(setq-default indent-tabs-mode nil              ; Use spaces instead of tabs
+              split-width-threshold 160         ; Split verticly by default
+              split-height-threshold nil)       ; Split verticly by default
 #+END_SRC
 
 The =load-path= specifies where Emacs should look for =.el=-files (or
@@ -284,36 +259,36 @@ extensions that have been installed manually (these are mostly my own
 projects).
 
 #+BEGIN_SRC emacs-lisp
-   (let ((default-directory (concat user-emacs-directory "site-lisp/")))
-     (when (file-exists-p default-directory)
-       (setq load-path
-             (append
-              (let ((load-path (copy-sequence load-path)))
-                (normal-top-level-add-subdirs-to-load-path)) load-path))))
+(let ((default-directory (concat user-emacs-directory "site-lisp/")))
+  (when (file-exists-p default-directory)
+    (setq load-path
+          (append
+           (let ((load-path (copy-sequence load-path)))
+             (normal-top-level-add-subdirs-to-load-path)) load-path))))
 #+END_SRC
 
 Answering /yes/ and /no/ to each question from Emacs can be tedious, a
 single /y/ or /n/ will suffice.
 
 #+BEGIN_SRC emacs-lisp
-   (fset 'yes-or-no-p 'y-or-n-p)
+(fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 
 To avoid file system clutter we put all auto saved files in a single
 directory.
 
 #+BEGIN_SRC emacs-lisp
-   (defvar emacs-autosave-directory
-     (concat user-emacs-directory "autosaves/")
-     "This variable dictates where to put auto saves. It is set to a
-     directory called autosaves located wherever your .emacs.d/ is
-     located.")
+(defvar emacs-autosave-directory
+  (concat user-emacs-directory "autosaves/")
+  "This variable dictates where to put auto saves. It is set to a
+  directory called autosaves located wherever your .emacs.d/ is
+  located.")
 
-   ;; Sets all files to be backed up and auto saved in a single directory.
-   (setq backup-directory-alist
-         `((".*" . ,emacs-autosave-directory))
-         auto-save-file-name-transforms
-         `((".*" ,emacs-autosave-directory t)))
+;; Sets all files to be backed up and auto saved in a single directory.
+(setq backup-directory-alist
+      `((".*" . ,emacs-autosave-directory))
+      auto-save-file-name-transforms
+      `((".*" ,emacs-autosave-directory t)))
 #+END_SRC
 
 By default the =narrow-to-region= command is disabled and issues a
@@ -330,7 +305,7 @@ Automaticly revert =doc-view=-buffers when the file changes on disk.
 (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 #+END_SRC
 
-*** Modes
+*** Mode Defaults
 
 There are some modes that are enabled by default that I don't find
 particularly useful. We create a list of these modes, and disable all of
@@ -369,60 +344,6 @@ default.
   (eval-after-load 'auto-compile
     '((auto-compile-on-save-mode 1))))  ; compile .el files on save
 #+END_SRC
-*** Encryption
-
-This fixes a problem using PGP encryption on windows
-
-#+BEGIN_SRC emacs-lisp
-(require 'epa-file)
-(epa-file-enable)
-
-(defun epg--list-keys-1 (context name mode)
-  "A fix for the epa bug.
-Argument CONTEXT Not sure.
-Argument NAME Not sure.
-Argument MODE Not sure."
-  (let ((args (append (if (epg-context-home-directory context)
-                          (list "--homedir"
-                                (epg-context-home-directory context)))
-                      '("--with-colons" "--no-greeting" "--batch"
-                        "--with-fingerprint" "--with-fingerprint")
-                      (unless (eq (epg-context-protocol context) 'CMS)
-                        '("--fixed-list-mode"))))
-        (list-keys-option (if (memq mode '(t secret))
-                              "--list-secret-keys"
-                            (if (memq mode '(nil public))
-                                "--list-keys"
-                              "--list-sigs")))
-        (coding-system-for-read 'binary)
-        keys string field index)
-    (if name
-        (progn
-          (unless (listp name)
-            (setq name (list name)))
-          (while name
-            (setq args (append args (list list-keys-option (car name)))
-                  name (cdr name))))
-      (setq args (append args (list list-keys-option))))
-    (with-temp-buffer
-      (apply #'call-process
-             (epg-context-program context)
-             nil (list t nil) nil args)
-      (goto-char (point-min))
-      (while (re-search-forward "^[a-z][a-z][a-z]:.*" nil t)
-        (setq keys (cons (make-vector 15 nil) keys)
-              string (match-string 0)
-              index 0
-              field 0)
-        (while (and (< field (length (car keys)))
-                    (eq index
-                        (string-match "\\([^:]+\\)?:" string index)))
-          (setq index (match-end 0))
-          (aset (car keys) field (match-string 1 string))
-          (setq field (1+ field))))
-      (nreverse keys))))
-#+END_SRC
-
 *** Visual
 
 Change the color-theme to =gotham=.
@@ -689,20 +610,6 @@ will be killed."
   (message "Finished reverting buffers containing unmodified files."))
 #+end_src
 
-** Classes
-
-This macro allows for the concise creation of classes a la "Let Over Lambda".
-
-#+begin_src emacs-lisp
-(defmacro class (name members &rest methods)
-  `(defun ,name () (let ,members
-     (lambda (msg &rest inputs)
-       (let ((slot ,(append '(pcase msg) methods)))
-         (if (functionp slot)
-             (apply slot inputs)
-             slot))))))
-#+end_src
-
 ** Date and Time
 
 A utility for inserting the current date.
@@ -747,135 +654,6 @@ Note the weekly scope of the command's precision.")
 #+end_src
 
 A [[https://en.wikipedia.org/wiki/Simple_linear_regression][single regressor]] is a linear regression with the fixed y intercept at the origin.
-
-#+begin_src emacs-lisp
-(defun orm-estimate-percent (reps)
-  (nth reps '(1.0 0.94 0.91 
-              0.883 0.86 0.833 
-              0.805 0.777 0.752 
-              0.733 0.72 0.673 
-              0.657 0.641 0.625)))
-
-(defun estimate-orm (reps weight)
-  (let ((orm% (orm-estimate-percent reps)))
-    (* (+ 1 (- 1 orm%)) weight)))
-
-
-(setq barbell-curl-ratio-grades
-      '((0.0 0.3)
-        (0.3 0.4)
-        (0.4 0.45)
-        (0.45 0.5)
-        (0.5 0.6)
-        (0.6 0.7)
-        (0.7 0.8)
-        (0.8 0.9)
-        (0.9 1.0)
-        (1.0 2.0)))
-
-(setq overhead-press-ratio-grades
-      '((0.0 0.4)
-        (0.4 0.6)
-        (0.6 0.675)
-        (0.675 0.75)
-        (0.75 0.825)
-        (0.825 0.9)
-        (0.9 1.0)
-        (1.0 1.1)
-        (1.1 1.2)
-        (1.2 2.0)))
-
-(setq deadlift-ratio-grades
-      '((0.0 0.8)
-        (0.8 1.4)
-        (1.4 1.55)
-        (1.55 1.70)
-        (1.70 2.1)
-        (2.1 2.5)
-        (2.5 2.75)
-        (2.75 3.0)
-        (3.0 3.15)
-        (3.15 4.0)))
-
-(setq squat-ratio-grades
-      '((0.0 0.7)
-        (0.7 1.0)
-        (1.0 1.25)
-        (1.25 1.50)
-        (1.50 1.75)
-        (1.75 2.0)
-        (2.0 2.25)
-        (2.25 2.5)
-        (2.5 2.7)
-        (2.7 4.0)))
-
-(setq bench-press-ratio-grades
-      '((0.0 0.7)
-        (0.7 0.9)
-        (0.9 1.0)
-        (1.0 1.1)
-        (1.1 1.3)
-        (1.3 1.5)
-        (1.5 1.7)
-        (1.7 1.9)
-        (1.9 2.0)
-        (2.0 4.0)))
-
-(defun grade-ratio (ranges ratio)
-  (let ((tested (seq-map-indexed
-                 (lambda (range i)
-                   (if (and (<= (nth 0 range) ratio)
-                            (< ratio (nth 1 range)))
-                       i nil))
-                 ranges)))
-
-    (car (seq-filter (lambda (x) x) tested))))
-
-(defun grade-movement (bodyweight weight reps ratio-grades)
-  (let* ((orm-est (estimate-orm reps weight)))
-    (grade-ratio ratio-grades (/ orm-est (float bodyweight)))))
-
-(setq movement-grade-labels
-      '("POOR"
-        "UNTRAINED"
-        "BEGINNER B"
-        "BEGINNER A"
-        "INTERMEDIATE B"
-        "INTERMEDIATE A"
-        "ADVANCED B"
-        "ADVANCED A"
-        "ELITE B"
-        "ELITE A"))
-#+end_src
-
-Functions for strength training and logging.
-
-ORM Estimates based on:
-#+NAME: OneRepMaxEstimate
-| Reps | Brzycki | Baechle | Remedios |   AVG |
-|------+---------+---------+----------+-------|
-|    1 |     1.0 |     1.0 |      1.0 |   1.0 |
-|    2 |    0.95 |    0.95 |     0.92 |  0.94 |
-|    3 |     0.9 |    0.93 |      0.9 |  0.91 |
-|    4 |    0.88 |     0.9 |     0.87 | 0.883 |
-|    5 |    0.86 |    0.87 |     0.85 |  0.86 |
-|    6 |    0.83 |    0.85 |     0.82 | 0.833 |
-|    7 |     0.8 |    0.83 |     0.79 | 0.805 |
-|    8 |    0.78 |     0.8 |     0.75 | 0.777 |
-|    9 |    0.76 |    0.77 |     0.73 | 0.752 |
-|   10 |    0.75 |    0.75 |      0.7 | 0.733 |
-|   11 |    0.72 |         |          |  0.72 |
-|   12 |     0.7 |    0.67 |     0.65 | 0.673 |
-|   13 |         |         |          | 0.657 |
-|   14 |         |         |          | 0.641 |
-|   15 |         |    0.65 |      0.6 | 0.625 |
-
-
-The grades are taken from VitruvianPhysique's video.   
-
-- https://www.youtube.com/watch?v=EVK5_yY7Qj8
-
-The AVG column is calculated, I think, by a linear regression on the averaged data points in the other columns.
 
 ** Lists
 #+BEGIN_SRC emacs-lisp
@@ -1673,6 +1451,9 @@ This converts markdown style links into org-mode style links
 For when a parent heading needs to be broken up into it's children.
 Adds any inherited tags to the immediate children.
 #+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-c") #'counsel-org-tag))
+
 (defun org-apply-tags-to-children ()
   (interactive)
   (save-excursion
@@ -2562,70 +2343,6 @@ _r_: Rename Buffer
   (setq rust-format-on-save t))
 #+END_SRC
 
-** shell
-
-Inspired by [[https://github.com/torenord/.emacs.d][torenord]], I maintain quick access to shell buffers with bindings
-~M-1~ to ~M-9~. In addition, the ~M-§~ (on an international English
-keyboard) is bound toggle between the last visited shell, and the last
-visited non-shell buffer. The following functions facilitate this, and are
-bound in the [[Key bindings]] section.
-
-#+BEGIN_SRC emacs-lisp
-   (lexical-let ((last-shell ""))
-     (defun toggle-shell ()
-       (interactive)
-       (cond ((string-match-p "^\\*shell<[1-9][0-9]*>\\*$" (buffer-name))
-              (goto-non-shell-buffer))
-             ((get-buffer last-shell) (switch-to-buffer last-shell))
-             (t (shell (setq last-shell "*shell<1>*")))))
-
-     (defun switch-shell (n)
-       (let ((buffer-name (format "*shell<%d>*" n)))
-         (setq last-shell buffer-name)
-         (cond ((get-buffer buffer-name)
-                (switch-to-buffer buffer-name))
-               (t (shell buffer-name)
-                  (rename-buffer buffer-name)))))
-
-     (defun goto-non-shell-buffer ()
-       (let* ((r "^\\*shell<[1-9][0-9]*>\\*$")
-              (shell-buffer-p (lambda (b) (string-match-p r (buffer-name b))))
-              (non-shells (cl-remove-if shell-buffer-p (buffer-list))))
-         (when non-shells
-           (switch-to-buffer (first non-shells))))))
-#+END_SRC
-
-Don't query whether or not the ~shell~-buffer should be killed, just kill
-it.
-
-#+BEGIN_SRC emacs-lisp
-   (defadvice shell (after kill-with-no-query nil activate)
-     (set-process-query-on-exit-flag (get-buffer-process ad-return-value) nil))
-#+END_SRC
-
-I'd like the =C-l= to work more like the standard terminal (which works
-like running =clear=), and resolve this by simply removing the
-buffer-content. Mind that this is not how =clear= works, it simply adds a
-bunch of newlines, and puts the prompt at the top of the window, so it
-does not remove anything. In Emacs removing stuff is less of a worry,
-since we can always undo!
-
-#+BEGIN_SRC emacs-lisp
-   (defun clear-comint ()
-     "Runs `comint-truncate-buffer' with the
-   `comint-buffer-maximum-size' set to zero."
-     (interactive)
-     (let ((comint-buffer-maximum-size 0))
-       (comint-truncate-buffer)))
-#+END_SRC
-
-The =clear-shell= should only be bound in =comint-mode=, which is a mode
-most shell and REPL's is derived from.
-
-#+BEGIN_SRC emacs-lisp
-   (add-hook 'comint-mode-hook (lambda () (local-set-key (kbd "C-l") 'clear-comint)))
-#+END_SRC
-
 * Finalize Settings 
 
 Lastly we need to activate the map by creating and activating the
@@ -2636,21 +2353,3 @@ Lastly we need to activate the map by creating and activating the
   "A mode that activates custom-bindings."
   t nil custom-bindings-map)
 #+END_SRC
-* License
-
-My Emacs configurations written in Org mode.
-
-Copyright (c) 2018 Jeff Dwyer
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
