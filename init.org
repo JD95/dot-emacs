@@ -531,6 +531,18 @@ or haskell modules.
 
 This updates the compiled init.el file with any changes made to this file.
 
+** Advice
+#+begin_src emacs-lisp 
+(defun always-true (&rest args) 1)
+
+(defun mk-y-or-n-p-always-true (old &rest args)
+    (progn
+      (advice-add 'y-or-n-p :override #'always-true)
+      (let ((result (apply old args)))
+        (advice-remove 'y-or-n-p #'always-true)
+        result)))
+#+end_src
+
 ** Buffer Control
 
 #+BEGIN_SRC emacs-lisp
@@ -1036,7 +1048,7 @@ However, we don't want this behavior on all selections. =ivy-prescient-sort-comm
 
 #+begin_src emacs-lisp
 (setq ivy-prescient-sort-commands 
-  '(:not ivy-switch-buffer))
+  '(:not ivy-switch-buffer swiper-isearch))
 #+end_src
 
 ** hyrda
@@ -1514,6 +1526,12 @@ Hide all tags on agenda view
 #+BEGIN_SRC emacs-lisp
 (setq org-agenda-hide-tags-regexp ".*")
 #+END_SRC
+
+Org has an annoying warning message a repeating task needs to be shifted more than 10 times it's interval. This will override the prompt to always return yes.
+
+#+begin_src emacs-lisp
+(advice-add 'org-auto-repeat-maybe :around #'mk-y-or-n-p-always-true)
+#+end_src
 
 **** habits
 
@@ -2180,14 +2198,8 @@ _r_: Rename Buffer
 (when config-use-purescript
   (use-package purescript-mode
     :ensure t)
-  (use-package psc-ide
-    :ensure t)
-  
-  (require 'psc-ide)
   
   (defun purescript-setup ()
-    (psc-ide-mode)
-    (flycheck-mode)
     (turn-on-purescript-indentation))
   
   (add-hook 'purescript-mode-hook #'purescript-setup))
