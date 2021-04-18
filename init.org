@@ -1464,7 +1464,7 @@ For when a parent heading needs to be broken up into it's children.
 Adds any inherited tags to the immediate children.
 #+begin_src emacs-lisp
 (with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-c C-c") #'counsel-org-tag))
+  (advice-add 'org-set-tags-command :override #'counsel-org-tag))
 
 (defun org-apply-tags-to-children ()
   (interactive)
