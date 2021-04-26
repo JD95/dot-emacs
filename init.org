@@ -1012,6 +1012,10 @@ Some keybindings for ease of use
 (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 (global-set-key (kbd "C-c v") 'ivy-push-view)
 (global-set-key (kbd "C-c V") 'ivy-pop-view)
+
+(setq ivy-re-builders-alist
+      '((swiper-isearch . ivy--regex)
+        (t             . ivy--regex-fuzzy)))
 #+end_src
 
 Use Prescient with Ivy. This adds memory to counsel selections, sorting the results based on usage history.
