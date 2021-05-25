@@ -170,7 +170,7 @@ using the =Command=-key as the =Meta=-key.
   (setq ns-pop-up-frames nil
         mac-option-modifier nil
         mac-command-modifier 'meta
-        x-select-enable-clipboard t)
+        select-enable-clipboard t)
   (exec-path-from-shell-initialize)
   (when (fboundp 'mac-auto-operator-composition-mode)
     (mac-auto-operator-composition-mode 1)))
@@ -582,7 +582,7 @@ buffer, including the minibuffer and mode line.
 
 (defun global-scale-internal (arg)
   (set-face-attribute 'default (selected-frame) :height arg)
-  (set-temporary-overlay-map
+  (set-transient-map
    (let ((map (make-sparse-keymap)))
      (define-key map (kbd "C-=") 'global-scale-up)
      (define-key map (kbd "C-+") 'global-scale-up)
@@ -849,8 +849,7 @@ are just present window configs generated from a macro.
  (defun single-window-workspace ()
  "Change to a single window workspace."
  (interactive)
- (delete-other-windows nil)
- (neotree-hide))
+ (delete-other-windows nil))
 
 (defun zettelkasten-workspace ()
   "A workspace for editing the Zettelkasten"
@@ -910,12 +909,18 @@ These are the configurations for evil mode editing.
 
 #+BEGIN_SRC emacs-lisp
 (use-package evil
-  :ensure t)
+  :ensure t
+  :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+  :config
+    (evil-mode 1))
 
-(setq evil-want-abbrev-expand-on-insert-exit nil)
-(setq evil-want-integration nil)
-(require 'evil)
-(evil-mode 1)
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
+    (evil-collection-init))
 #+END_SRC
 ** expand-region
 #+BEGIN_SRC emacs-lisp
@@ -1003,12 +1008,6 @@ Some keybindings for ease of use
 (global-set-key (kbd "M-x") 'counsel-M-x)
 (global-set-key (kbd "C-x C-f") 'counsel-find-file)
 (global-set-key (kbd "M-y") 'counsel-yank-pop)
-(global-set-key (kbd "<f1> f") 'counsel-describe-function)
-(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
-(global-set-key (kbd "<f1> l") 'counsel-find-library)
-(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-(global-set-key (kbd "<f2> j") 'counsel-set-variable)
 (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 (global-set-key (kbd "C-c v") 'ivy-push-view)
 (global-set-key (kbd "C-c V") 'ivy-pop-view)
@@ -1123,8 +1122,6 @@ _SPC_ cancel
 #+BEGIN_SRC emacs-lisp
 (when config-use-magit 
   (use-package magit :ensure t)
-  (use-package evil-magit :ensure t)
-  (evil-magit-init)
   (define-key custom-bindings-map (kbd "C-c m") 'magit-status))
 #+END_SRC
 ** multiple-cursors
@@ -1366,9 +1363,9 @@ function to a key!
 #+END_SRC
 ** org
 #+BEGIN_SRC emacs-lisp
-(use-package org-alert
-  :ensure t)
 (use-package org
+  :demand
+  :straight (org :tag "release_9.4.6")
   :ensure t
   :config
   (org-babel-do-load-languages 
@@ -1379,8 +1376,6 @@ function to a key!
            (shell . t)))
   (setq org-startup-indented t)
   (org-reload))
-(use-package org-ref
-  :ensure t)
 (use-package ox-twbs
   :ensure t)
 (use-package evil-org
@@ -1420,7 +1415,12 @@ Shortens url links in org mode
   (let ((url (thing-at-point 'url))
     (bounds (bounds-of-thing-at-point 'url)))
     (kill-region (car bounds) (cdr bounds))
-    (insert (format "[[%s][%s]]" url (truncate-string-to-width url (if arg (prefix-numeric-value arg) 40) nil nil "...")))))
+    (insert (format "[[%s][%s]]" url 
+      (truncate-string-to-width url 
+         (if arg 
+           (prefix-numeric-value arg) 
+           40) 
+       nil nil "...")))))
 #+END_SRC
 
 Customizes the structure templates
@@ -1518,6 +1518,12 @@ These org-edna functions change only the time on a schedule or deadline.
      nil nil)))
 #+end_src
 
+Needed to prevent bug with agenda where it will get an "Invalid search bound" error, causing the next todo marked through agenda to mark everything in the range from it to the last one as done.
+#+begin_src emacs-lisp
+(setq org-agenda-loop-over-headlines-in-active-region nil)
+(setq org-loop-over-headlines-in-active-region nil)
+#+end_src
+
 **** schedule
 
 Don't delay for scheduled tasks
@@ -1534,7 +1540,7 @@ Hide all tags on agenda view
 Org has an annoying warning message a repeating task needs to be shifted more than 10 times it's interval. This will override the prompt to always return yes.
 
 #+begin_src emacs-lisp
-(advice-add 'org-auto-repeat-maybe :around #'mk-y-or-n-p-always-true)
+;;(advice-add 'org-auto-repeat-maybe :around #'mk-y-or-n-p-always-true)
 #+end_src
 
 **** habits
@@ -1565,7 +1571,7 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
   :ensure t)
 
 (require 'org-edna)
-(org-edna-load)
+(org-edna-mode)
 #+end_src
 
 
@@ -1590,7 +1596,7 @@ Sets priority color faces
 #+BEGIN_SRC emacs-lisp
 (setq org-priority-faces 
   '((?A . (:foreground "#00FFFF")) 
-    (?B . (:foreground "#00F1E8" :weight 'bold)) 
+    (?B . (:foreground "#00F1E8")) 
     (?C . (:foreground "#00E3D1"))
     (?D . (:foreground "#00D5B9"))
     (?E . (:foreground "#00C7A2"))
@@ -1966,7 +1972,7 @@ subsystem.
 #+END_SRC
 *** ref
 #+BEGIN_SRC emacs-lisp
-(require 'org-ref)
+;; (require 'org-ref)
 #+END_SRC
 *** templates
 **** latex
@@ -2025,6 +2031,25 @@ subsystem.
      "#+latex_header: \\usepackage[margin=1.5in]{geometry}"
      "#+latex_header: \\usepackage{setspace}"
      ""
+  )))
+#+END_SRC
+
+**** Surveys
+#+BEGIN_SRC emacs-lisp
+(defun template-new-org-daily-survey ()
+  (interactive)
+  (template-new-template ()
+   '("Daily Survey"
+     ""
+     "* Today's Date?"
+     ""
+     "* Goals for Today?"
+     ""
+     "* Projected Obstacles?"
+     ""
+     "* Goals Achieved?"
+     ""
+     "* Unexpected Obstables?"
   )))
 #+END_SRC
 *** keybindings
@@ -2100,7 +2125,7 @@ List all notes which link to this one
 #+begin_src emacs-lisp
 (defun org-zettelkasten-list-external-refs ()
   (interactive)
-  (lgrep (buffer-name) "*.org" (concat org-zettelkasten-dir)))
+  (lgrep (file-name-nondirectory (buffer-file-name)) "*.org" (concat org-zettelkasten-dir)))
 #+end_src
 
 Search the zettelkasten using grep
@@ -2310,11 +2335,7 @@ _r_: Rename Buffer
 
 #+begin_src emacs-lisp
 (when config-use-php 
-
-(use-package php-mode
-  :ensure t)
-
-)
+  (use-package php-mode :ensure t))
 #+end_src
 ** javascript
 #+BEGIN_SRC emacs-lisp
@@ -2358,6 +2379,12 @@ _r_: Rename Buffer
   
   (setq rust-format-on-save t))
 #+END_SRC
+** z3
+
+#+begin_src emacs-lisp
+(use-package z3-mode
+  :ensure t)
+#+end_src
 
 * Finalize Settings 
 
