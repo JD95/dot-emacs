@@ -172,6 +172,7 @@ using the =Command=-key as the =Meta=-key.
         mac-command-modifier 'meta
         select-enable-clipboard t)
   (exec-path-from-shell-initialize)
+  (grep-compute-defaults)
   (when (fboundp 'mac-auto-operator-composition-mode)
     (mac-auto-operator-composition-mode 1)))
 #+END_SRC
@@ -2068,7 +2069,7 @@ subsystem.
 ;; Redefine file opening without clobbering universal argumnet
 (define-key org-mode-map "\C-c\C-o" 'org-open-maybe)
 #+END_SRC
-*** zettlekausten
+*** zettelkausten
 
 A utility for adding tags to zettlekausten notes
 
