@@ -481,8 +481,9 @@ and short prefix length.
 Sometimes emacs will be unable to find the browser from the path, so the path to the browser is set from settings.
 
 #+BEGIN_SRC emacs-lisp
-(setq browse-url-browser-function 'browse-url-generic
-  browse-url-generic-program browser-path)
+(when browser-path
+  (setq browse-url-browser-function 'browse-url-generic
+        browse-url-generic-program browser-path))
 #+END_SRC
 
 * Custom Bindings Map
@@ -999,6 +1000,9 @@ Some keybindings for ease of use
 (use-package ivy
   :ensure t)
 
+(use-package ivy-hydra
+  :ensure t)
+
 (global-set-key (kbd "C-s") 'swiper-isearch)
 (global-set-key (kbd "M-x") 'counsel-M-x)
 (global-set-key (kbd "C-x C-f") 'counsel-find-file)
@@ -1015,6 +1019,7 @@ Some keybindings for ease of use
 
 (setq ivy-re-builders-alist
       '((swiper-isearch . ivy--regex)
+        (counsel-projectile-find-file . ivy--regex)
         (t             . ivy--regex-fuzzy)))
 #+end_src
 
