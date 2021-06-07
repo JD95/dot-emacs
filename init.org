@@ -650,6 +650,26 @@ Note the weekly scope of the command's precision.")
   (insert (format-time-string current-time-format (current-time))))
 #+END_SRC
 
+#+begin_src emacs-lisp
+(defun current-date ()
+  (calendar-date-string
+    (calendar-current-date)
+    nil))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun start-of-week ()
+  (calendar-date-string
+   (calendar-gregorian-from-absolute
+    (calendar-dayname-on-or-before
+      0 ; Sunday
+      (calendar-absolute-from-gregorian (calendar-current-date))))))
+#+end_src
+#+begin_src emacs-lisp
+(defun current-month ()
+  (let ((dt (calendar-current-date)))
+    (format "%s %s" (calendar-month-name (nth 0 dt)) (nth 2 dt))))
+#+end_src
 ** Formulas
 #+begin_src emacs-lisp
 (defun linear-regression (xs ys)
@@ -1224,6 +1244,13 @@ accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
 
   (add-hook 'coq-mode-hook #'coq-setup))
 #+END_SRC
+** graphviz
+#+begin_src emacs-lisp
+(use-package graphviz-dot-mode
+  :ensure t
+  :config
+   (setq graphviz-dot-indent-width 4))
+#+end_src
 ** haskell
 
 =haskell-doc-mode= is similar to =eldoc=, it displays documentation in
@@ -2044,9 +2071,9 @@ subsystem.
 (defun template-new-org-daily-survey ()
   (interactive)
   (template-new-template ()
-   '("Daily Survey"
+   `(,(current-date)
      ""
-     "* Today's Date?"
+     "Daily Survey"
      ""
      "* Goals for Today?"
      ""
@@ -2054,7 +2081,47 @@ subsystem.
      ""
      "* Goals Achieved?"
      ""
-     "* Unexpected Obstables?"
+     "* Unexpected Obstacles?"
+  )))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(defun template-new-org-weekly-survey ()
+  (interactive)
+  (template-new-template ()
+   `(,(start-of-week)
+     ""
+     "Weekly Survey"
+     ""
+     "* Goals for Week?"
+     ""
+     "* Projected Obstacles?"
+     ""
+     "* Goals Achieved?"
+     ""
+     "* Unexpected Obstacles?"
+     ""
+     "* Changes for Next Week?"
+  )))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(defun template-new-org-monthly-survey ()
+  (interactive)
+  (template-new-template ()
+   `(,(current-month)
+     ""
+     "Monthly Survey"
+     ""
+     "* Goals for Month?"
+     ""
+     "* Projected Obstacles?"
+     ""
+     "* Goals Achieved?"
+     ""
+     "* Unexpected Obstacles?"
+     ""
+     "* Changes for Next Month?"
   )))
 #+END_SRC
 *** keybindings
