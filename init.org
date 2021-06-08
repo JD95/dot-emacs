@@ -1551,7 +1551,7 @@ These org-edna functions change only the time on a schedule or deadline.
     ("d" "Scheduled or Deadline" agenda 
      "+DEADLINE+SCHEDULED"
      nil nil)
-    ("u" "Upcoming" ((org-ql-block '(deadline :to 31))))))
+    ("u" "Upcoming" ((org-ql-block '(deadline :to 62))))))
 #+end_src
 
 Needed to prevent bug with agenda where it will get an "Invalid search bound" error, causing the next todo marked through agenda to mark everything in the range from it to the last one as done.
