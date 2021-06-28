@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: weekly-survey
+# key: <dw
+# --
+
+${`(start-of-week)`}
+
+Weekly Survey
+
+* Goals for Week?
+
+$0
+
+* Projected Obstacles?
+
+
+
+* Goals Achieved?
+
+
+
+* Encountered Obstacles?
+
+
+
+* Changes for Next Week?

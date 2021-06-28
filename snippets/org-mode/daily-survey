@@ -1,0 +1,34 @@
+# -*- mode: snippet -*-
+# name: daily-survey
+# key: <ds
+# --
+
+${`(current-date)`}
+
+Daily Survey
+
+* Goals for Today?
+
+$0
+
+* Projected Obstacles?
+
+
+
+* Goals Achieved?
+
+
+
+* Encountered Obstacles?
+
+
+
+* What did you eat today?
+
+
+
+* How much sleep did you get last night?
+Awake: 
+REM: 
+Light: 
+Deep: 

@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: reveal-presentation
+# key: <rp
+# --
+
+#+STARTUP: indent
+#+STARTUP: hidestar
+
+#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
+#+REVEAL_THEME: serif
+#+OPTIONS: num:nil timestamp:nil html-postamble:nil tags:nil toc:nil
+
+#+TITLE:  ${1:title}
+#+AUTHOR: ${2:author}
+#+DATE:  
+
+$0

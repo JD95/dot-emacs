@@ -503,32 +503,6 @@ defined.
 
 Defined here to allow bindings throughout the rest of the config
 
-* Templates
-
-This section sets up templates for files like org-mode reveal presentations
-or haskell modules.
-
-#+begin_src emacs-lisp
-(defun template-get-value (pair)
-  (read-string (nth 1 pair)))
-
-(defun template-get-values (pairs)
-  (mapcar #'template-get-value pairs))
-
-(defmacro template-make-lambda (symbols exp)
-  `(lambda ,(mapcar #'car symbols) ,exp))
-
-(defun insert-with-newline (value)
-  (interactive)
-  (insert value)
-  (insert "\n"))
-
-(defmacro template-new-template (symbols exp)
-  `(let* ((values (template-get-values (quote ,symbols)))
-         (template (apply (template-make-lambda ,symbols ,exp) values)))
-     (mapc #'insert-with-newline template)))
-#+end_src
-
 * User Functions
 
 This updates the compiled init.el file with any changes made to this file.
@@ -1183,6 +1157,15 @@ Enable projectile mode everywhere.
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 (counsel-projectile-mode)
 #+END_SRC
+** yasnippet
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :config
+    (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+    (yas-global-mode 1)
+)
+#+end_src
 
 * Major Modes 
 ** agda
@@ -1209,25 +1192,6 @@ Enable projectile mode everywhere.
 #+end_src
 
 ** bash
-*** Templates
-#+begin_src emacs-lisp
-(defun template-new-bash-script()
-  (interactive)
-  (template-new-template
-   ()
-   `("#!/bin/sh"
-     "USAGE=\"$(basename \"$0\") <inputs>"
-     ""
-     "where:"
-     "  <inputs> has some description\""
-     ""
-     "if [ \"$#\" == \"4\" ]; then "
-     "  echo \"Hello\""
-     "else"
-     "  echo \"$USAGE\""
-     "fi"
-    )))
-#+end_src
 ** compilation
 
 I often run ~latexmk -pdf -pvc~ in a compilation buffer, which recompiles
@@ -1276,18 +1240,6 @@ the echo area. Haskell has several indentation modes - I prefer using
   
   (setq haskell-stylish-on-save t)
   (setq haskell-mode-stylish-haskell-path "ormolu")
-#+END_SRC
-*** Templates
-
-#+BEGIN_SRC emacs-lisp
-(defun template-new-haskell-module ()
-  (interactive)
-  (template-new-template
-   ((module "module:") (f "function:"))
-   `(,(concat "module " module " where\n")
-     "\n"
-     ,(concat f " = undefined\n")
-    )))
 #+END_SRC
 ** html
 
@@ -2016,126 +1968,6 @@ subsystem.
 #+BEGIN_SRC emacs-lisp
 ;; (require 'org-ref)
 #+END_SRC
-*** templates
-**** latex
-
-#+begin_src emacs-lisp
-(defun template-new-org-latex ()
-  (interactive)
-  (template-new-template
-   ((title "title:") (author "author:") (date "date:"))
-   `(,(concat "#+title: " title)
-     ,(concat "#+author: " author)
-     ,(concat "#+date: " date)
-     "#+startup: hidestar"
-     "#+startup: indent"
-     "\n"
-     "# latex options"
-     "#+options: toc:nil"
-     "#+latex_header: \\usepackage[margin=1.5in]{geometry}"
-     "#+latex_header: \\usepackage{apacite}"
-     "#+latex_header: \\usepackage{setspace}"
-     )))
-#+end_src
-
-**** reveal
-
-#+BEGIN_SRC emacs-lisp
-(defun template-new-org-reveal-presentation ()
-  (interactive)
-  (template-new-template
-   ((title "title:") (author "author:") (date "date:"))
-   `("#+STARTUP: indent"
-     "#+STARTUP: hidestar"
-     ""
-     "#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/"
-     "#+REVEAL_THEME: serif"
-     "#+OPTIONS: num:nil timestamp:nil html-postamble:nil tags:nil toc:nil"
-     ""
-     ,(concat "#+TITLE: " title)
-     ,(concat "#+AUTHOR: " author)
-     ,(concat "#+DATE: " date)
-     )))
-#+END_SRC
-
-**** blogging
-#+BEGIN_SRC emacs-lisp
-(defun template-new-org-blog-post ()
-  (interactive)
-  (template-new-template
-    ((title "title:"))
-    `(,(concat "#+title: " title)
-     "#+startup: hidestar"
-     "#+startup: indent"
-     ""
-     "# latex options"
-     "#+options: toc:nil num:nil html-postamble:nil date:nil"
-     "#+latex_header: \\usepackage[margin=1.5in]{geometry}"
-     "#+latex_header: \\usepackage{setspace}"
-     ""
-  )))
-#+END_SRC
-
-**** Surveys
-#+BEGIN_SRC emacs-lisp
-(defun template-new-org-daily-survey ()
-  (interactive)
-  (template-new-template ()
-   `(,(current-date)
-     ""
-     "Daily Survey"
-     ""
-     "* Goals for Today?"
-     ""
-     "* Projected Obstacles?"
-     ""
-     "* Goals Achieved?"
-     ""
-     "* Encountered Obstacles?"
-     ""
-     "* What did you eat today?"
-  )))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(defun template-new-org-weekly-survey ()
-  (interactive)
-  (template-new-template ()
-   `(,(start-of-week)
-     ""
-     "Weekly Survey"
-     ""
-     "* Goals for Week?"
-     ""
-     "* Projected Obstacles?"
-     ""
-     "* Goals Achieved?"
-     ""
-     "* Encountered Obstacles?"
-     ""
-     "* Changes for Next Week?"
-  )))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(defun template-new-org-monthly-survey ()
-  (interactive)
-  (template-new-template ()
-   `(,(current-month)
-     ""
-     "Monthly Survey"
-     ""
-     "* Goals for Month?"
-     ""
-     "* Projected Obstacles?"
-     ""
-     "* Goals Achieved?"
-     ""
-     "* Encountered Obstacles?"
-     ""
-     "* Changes for Next Month?"
-  )))
-#+END_SRC
 *** keybindings
 
 #+BEGIN_SRC emacs-lisp
@@ -2317,65 +2149,6 @@ _r_: Rename Buffer
   
   (add-hook 'purescript-mode-hook #'purescript-setup))
 #+END_SRC
-*** Templates
-
-#+BEGIN_SRC emacs-lisp
-(defun template-new-purescript-halogen-component ()
-  "Generate a new purescript halogen component."
-  (interactive)
-  (template-new-template
-   ((name "name:"))
-   `(,(concat "module Component." name "(State(..),Query(..)," (downcase name) ") where\n")
-     ""
-     "import CSS"
-     "import CSS.Elements as CSS"
-     "import CSS.Geometry as CSS"
-     "import CSS.Selector as CSS"
-     "import CSS.Stylesheet as CSS"
-     "import CSS.TextAlign as CSS"
-     "import CSS.Size as CSS"
-     "import Control.Monad.Aff (Aff)"
-     "import DOM.HTmL.Indexed as D"
-     "import Data.Maybe (Maybe(..))"
-     "import Halogen as H"
-     "import Halogen.HTML as HH"
-     "import Halogen.HTML.CSS as HC"
-     "import Halogen.HTML.Events as HE"
-     "import Halogen.HTML.Properties as HP"
-     "import Halogen.Themes.Bootstrap3 as HC"
-     "import Network.HTTP.Affjax as AX"
-     "import Prelude (type (~>), Unit, Void, bind, const, discard, pure, ($))"
-     ""
-     "import Types as T"
-     ""
-     "data State = State"
-     ""
-     "data Query a = Input a"
-     ""
-     "data ChildQuery a = ChildInput a"
-     ""
-     "type Slot = Int"
-     ""
-     "render :: forall eff. State -> H.ParentHTML Query ChildQuery Slot (Aff (T.Effect eff))"
-     "render st = HH.div_ []"
-     ""
-     "initialState :: State"
-     "initialState = State"
-     ""
-     "eval :: forall eff. Query ~> H.ParentDSL State Query ChildQuery Slot Void (Aff (T.Effect eff))"
-     "eval = case _ of"
-     "  Input next -> pure next"
-     ""
-     ,(concat (downcase name) " :: forall eff. H.Component HH.HTML Query Unit Void (Aff (T.Effect eff))")
-     ,(concat (downcase name) " =")
-     "  H.parentComponent"
-     "    { initialState: const initialState"
-     "    , render"
-     "    , eval"
-     "    , receiver: const Nothing"
-     "    }"))
-  )
-#+END_SRC
 ** prolog
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
@@ -2401,19 +2174,6 @@ _r_: Rename Buffer
             (lambda () (interactive)
               (set-variable 'py-indent-offset 4)
               (set-variable 'indent-tabs-mode nil))))
-#+END_SRC
-*** Templates
-
-#+BEGIN_SRC emacs-lisp
-(defun template-new-python-sript ()
-  (interactive)
-  (template-new-template
-   ()
-   '("#!~/usr/bin/env python"
-     ""
-     "if __name__=='__main__':"
-     "    pass"
-     )))
 #+END_SRC
 ** php
 

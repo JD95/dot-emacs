@@ -1,0 +1,26 @@
+# -*- mode: snippet -*-
+# name: monthly-survey
+# key: <dm
+# --
+
+${`(current-month)`}
+
+Monthly Survey
+
+* Goals for Month?
+
+
+
+* Projected Obstacles?
+
+
+
+* Goals Achieved?
+
+
+
+* Encountered Obstacles?
+
+
+
+* Changes for Next Month?
