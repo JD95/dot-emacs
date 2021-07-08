@@ -1985,7 +1985,7 @@ A utility for adding tags to zettlekausten notes
 
 #+begin_src emacs-lisp
 (defun org-zettelkasten-pick-tag ()
-  (let* ((tag-file-buffer (find-file (counsel-find-file (concat org-zettelkasten-dir "/tags/"))))
+  (let* ((tag-file-buffer (find-file (counsel-find-file (concat org-zettelkasten-dir "/zettl-tags/"))))
          (name (buffer-file-name tag-file-buffer)))
     (kill-buffer tag-file-buffer)
     name))
@@ -2017,7 +2017,7 @@ List all tags for a given note
 #+begin_src emacs-lisp
 (defun org-zettelkasten-list-tags ()
   (interactive)
-  (lgrep (buffer-name) "*.org" (concat org-zettelkasten-dir "/tags")))
+  (lgrep (buffer-name) "*.org" (concat org-zettelkasten-dir "/zettl-tags")))
 #+end_src
 
 Add all tags currently listed in grep to the current note
@@ -2027,7 +2027,7 @@ Add all tags currently listed in grep to the current note
   (interactive)
   (mapc (lambda (tag-file-name)
           (org-zettelkasten-append-tag 
-           (concat org-zettelkasten-dir "/tags/" tag-file-name)
+           (concat org-zettelkasten-dir "/zettl-tags/" tag-file-name)
            (buffer-name)
            (first-line-of-buffer-or-name)))
     (apply #'append (with-current-buffer "*grep*"
