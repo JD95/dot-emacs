@@ -2,8 +2,6 @@
 
 (setq idris-location "")
 
-(setq coq-proof-site-location "")
-
 (setq haskell-stack-location "")
 
 (setq find-location "")
@@ -13,7 +11,6 @@
 (setq config-use-flyspell nil)
 (setq config-use-magit nil)
 (setq config-use-elfeed nil)
-(setq config-use-coq nil)
 (setq config-use-haskell nil)
 (setq config-use-idris nil)
 (setq config-use-purescript nil)

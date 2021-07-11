@@ -59,12 +59,12 @@ Lexical scoping is faster than dynamic scoping.
 
 Managing extensions for Emacs is simplified using =package= which is
 built in to Emacs 24 and newer. To load downloaded packages we need to
-initialize =packenableage=. =cl= is a library that contains many functions from
+initialize =packenableage=. =cl-lib= is a library that contains many functions from
 Common Lisp, and comes in handy quite often, so we want to make sure it's
 loaded, along with =package=, which is obviously needed.
 
 #+BEGIN_SRC emacs-lisp
-(require 'cl)
+(require 'cl-lib)
 #+END_SRC
 
 #+begin_src emacs-lisp
@@ -83,7 +83,6 @@ loaded, along with =package=, which is obviously needed.
 
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
-                      
 #+end_src
 
 The configuration assumes that the packages listed below are
@@ -139,11 +138,6 @@ installed. To ensure we install missing packages if they are missing.
   :ensure t)
 (use-package auto-compile
   :ensure t)
-
-(ignore-errors ;; This package is only relevant for Mac OS X.
-  (when (memq window-system '(mac ns))
-        (push 'exec-path-from-shell packages)
-        (push 'reveal-in-osx-finder packages)))
 #+END_SRC
 
 Some packages need to be installed manually, so we add a custom folder to the load path
@@ -167,10 +161,7 @@ using the =Command=-key as the =Meta=-key.
 
 #+BEGIN_SRC emacs-lisp
 (when (memq window-system '(mac ns))
-  (setq ns-pop-up-frames nil
-        mac-option-modifier nil
-        mac-command-modifier 'meta
-        select-enable-clipboard t)
+  (setq select-enable-clipboard t)
   (exec-path-from-shell-initialize)
   (grep-compute-defaults)
   (when (fboundp 'mac-auto-operator-composition-mode)
@@ -254,20 +245,6 @@ buffer-local variable's default value.
               split-height-threshold nil)       ; Split verticly by default
 #+END_SRC
 
-The =load-path= specifies where Emacs should look for =.el=-files (or
-Emacs lisp files). I have a directory called =site-lisp= where I keep all
-extensions that have been installed manually (these are mostly my own
-projects).
-
-#+BEGIN_SRC emacs-lisp
-(let ((default-directory (concat user-emacs-directory "site-lisp/")))
-  (when (file-exists-p default-directory)
-    (setq load-path
-          (append
-           (let ((load-path (copy-sequence load-path)))
-             (normal-top-level-add-subdirs-to-load-path)) load-path))))
-#+END_SRC
-
 Answering /yes/ and /no/ to each question from Emacs can be tedious, a
 single /y/ or /n/ will suffice.
 
@@ -306,6 +283,17 @@ Automaticly revert =doc-view=-buffers when the file changes on disk.
 (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 #+END_SRC
 
+*** Garbage Collection
+
+Run garbage collections when frame is not focused
+
+#+begin_src emacs-lisp
+(add-function :after after-focus-change-function
+  (defun me/garbage-collect-maybe ()
+    (unless (frame-focus-state)
+      (garbage-collect))))
+#+end_src
+
 *** Mode Defaults
 
 There are some modes that are enabled by default that I don't find
@@ -340,10 +328,6 @@ default.
 
 (auto-fill-mode -1)
 (remove-hook 'text-mode-hook #'turn-on-auto-fill)
-
-(when (version< emacs-version "24.4")
-  (eval-after-load 'auto-compile
-    '((auto-compile-on-save-mode 1))))  ; compile .el files on save
 #+END_SRC
 *** Visual
 
@@ -509,7 +493,7 @@ This updates the compiled init.el file with any changes made to this file.
 
 ** Advice
 #+begin_src emacs-lisp 
-(defun always-true (&rest args) 1)
+(defun always-true (&rest _args) 1)
 
 (defun mk-y-or-n-p-always-true (old &rest args)
     (progn
@@ -658,7 +642,7 @@ Note the weekly scope of the command's precision.")
     (/ prods (float sqrds))))
 
 (defun single-regressor (points)
-  (linear-regression (seq-map-indexed (lambda (x i) i) points) points))
+  (linear-regression (seq-map-indexed (lambda (_x i) i) points) points))
 #+end_src
 
 A [[https://en.wikipedia.org/wiki/Simple_linear_regression][single regressor]] is a linear regression with the fixed y intercept at the origin.
@@ -1202,19 +1186,6 @@ accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
 #+BEGIN_SRC emacs-lisp
 (add-hook 'compilation-filter-hook 'comint-truncate-buffer)
 #+END_SRC
-** coq
-#+BEGIN_SRC emacs-lisp
-(when config-use-coq 
-  (ignore-errors
-    (load coq-proof-site-location))
-
-  (defun coq-setup ()
-    (interactive)
-    (company-coq-mode)
-    (buffer-face-mode))
-
-  (add-hook 'coq-mode-hook #'coq-setup))
-#+END_SRC
 ** graphviz
 #+begin_src emacs-lisp
 (use-package graphviz-dot-mode
@@ -1254,11 +1225,9 @@ the echo area. Haskell has several indentation modes - I prefer using
 #+end_src
 
 ** idris
-#+BEGIN_SRC emacs-lisp
-(when config-use-idris
-  (use-package idris-mode :ensure t)
-;;  (use-package helm-idris :ensure t)
-  (add-to-list 'exec-path idris-location))
+#+BEGIN_SRC emacs-lisp :tangle (if config-use-idris "yes" "no")
+(use-package idris-mode :ensure t)
+(add-to-list 'exec-path idris-location)
 #+END_SRC
 
 ** lisp
@@ -1467,8 +1436,7 @@ Adds any inherited tags to the immediate children.
   (interactive)
   (save-excursion
     (org-back-to-heading t)
-    (let* ((parent-tags (org-get-tags (point) t))
-           (depth (+ 1 (org-current-level))))
+    (let* ((depth (+ 1 (org-current-level))))
       (org-map-entries
        (lambda ()
          (when (<= (org-current-level) depth)
@@ -1486,7 +1454,7 @@ Adds any inherited tags to the immediate children.
 
 These org-edna functions change only the time on a schedule or deadline.
 #+begin_src emacs-lisp
-(defun org-edna-set-time (type last-entry args)
+(defun org-edna-set-time (type _last-entry args)
   (let* ((new-time (nth 0 args))
          (prev-ts (org-edna--get-planning-info type))
          (time-val (split-string new-time ":"))
@@ -1701,7 +1669,6 @@ This function will help randomly select a todo in the current tree.
   (interactive)
   (org-back-to-heading t)
   (let ((todos '())
-        (target 0)
         (top-level (org-current-level)))
     ;; Gather todo headings
     (org-map-tree
@@ -2154,43 +2121,30 @@ _r_: Rename Buffer
 (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
 #+end_src
 ** python
-#+BEGIN_SRC emacs-lisp
-(when config-use-python
-  (use-package elpy
-    :ensure t)
-  (use-package py-autopep8
-    :ensure t)
-  
-  ;;(elpy-enable)
-  
-  ;;(when (require 'flycheck nil t)
-  ;;  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-  ;;  (add-hook 'elpy-mode-hook 'flycheck-mode))
-  ;;
-  ;;(setq py-autopep8-options '("--max-line-length=100"))
-  
-  ;; Highlight character at "fill-column" position.
-  (add-hook 'python-mode-hook
-            (lambda () (interactive)
-              (set-variable 'py-indent-offset 4)
-              (set-variable 'indent-tabs-mode nil))))
+#+BEGIN_SRC emacs-lisp :tangle (if config-use-python "yes" "no")
+(use-package elpy
+  :ensure t)
+(use-package py-autopep8
+  :ensure t)
+
+;; Highlight character at "fill-column" position.
+(add-hook 'python-mode-hook
+          (lambda () (interactive)
+            (set-variable 'py-indent-offset 4)
+            (set-variable 'indent-tabs-mode nil)))
 #+END_SRC
 ** php
 
-#+begin_src emacs-lisp
-(when config-use-php 
-  (use-package php-mode :ensure t))
+#+begin_src emacs-lisp :tangle (if config-use-php "yes" "no")
+(use-package php-mode :ensure t)
 #+end_src
 ** javascript
-#+BEGIN_SRC emacs-lisp
-(when config-use-javascript
-  (use-package js2-mode :ensure t))
+#+BEGIN_SRC emacs-lisp :tangle (if config-use-javascript "yes" "no")
+(use-package js2-mode :ensure t)
 #+END_SRC
 ** nix
-#+BEGIN_SRC emacs-lisp
-(when config-use-nix
-  (use-package nix-mode
-    :ensure t))
+#+BEGIN_SRC emacs-lisp :tangle (if config-use-nix "yes" "no")
+(use-package nix-mode :ensure t)
 #+END_SRC
 ** rust
 
@@ -2239,4 +2193,22 @@ Lastly we need to activate the map by creating and activating the
 (define-minor-mode custom-bindings-mode
   "A mode that activates custom-bindings."
   t nil custom-bindings-map)
+
+
 #+END_SRC
+
+Report some startup stats
+
+#+begin_src emacs-lisp
+(message "*** Emacs loaded in %s with %d garbage collections."
+     (format "%.2f seconds"
+             (float-time
+              (time-subtract after-init-time before-init-time))) gcs-done)
+
+#+end_src
+
+The GC threshold was increased in =early-init.el= so it is restored here
+
+#+begin_src emacs-lisp
+(setq gc-cons-threshold 800000)
+#+end_src
