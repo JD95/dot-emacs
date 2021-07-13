@@ -28,9 +28,11 @@ $0
 
 
 * How much sleep did you get last night?
-Awake: 
-REM: 
-Light: 
-Deep: 
+|       | Hours | Minutes |
+|-------+-------+---------|
+| Awake |       |         |
+| REM   |       |         |
+| Light |       |         |
+| Deep  |       |         |
 
 * Primary Lang. Anki Stats?
