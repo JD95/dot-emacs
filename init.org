@@ -997,7 +997,6 @@ Some keybindings for ease of use
 (global-set-key (kbd "M-x") 'counsel-M-x)
 (global-set-key (kbd "C-x C-f") 'counsel-find-file)
 (global-set-key (kbd "M-y") 'counsel-yank-pop)
-(global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 (global-set-key (kbd "C-c v") 'ivy-push-view)
 (global-set-key (kbd "C-c V") 'ivy-pop-view)
 
@@ -1120,6 +1119,15 @@ _SPC_ cancel
   (define-key custom-bindings-map (kbd "C-c a")  'mc/mark-all-like-this)
   (define-key custom-bindings-map (kbd "C-c n")  'mc/mark-next-like-this)
 #+END_SRC
+** perspective
+#+begin_src emacs-lisp
+(use-package perspective
+   :straight t
+   :init (persp-mode))
+(global-set-key (kbd "C-x b")  #'persp-counsel-switch-buffer)
+(global-set-key (kbd "C-x C-b") #'persp-list-buffers)
+(global-set-key (kbd "C-x k")  #'persp-kill-buffer*)
+#+end_src
 ** projectile
 
 Use a custom program for projectile's grep
