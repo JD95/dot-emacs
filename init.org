@@ -1201,24 +1201,27 @@ accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
   :config
    (setq graphviz-dot-indent-width 4))
 #+end_src
-** haskell
+** haskell 
 
 =haskell-doc-mode= is similar to =eldoc=, it displays documentation in
 the echo area. Haskell has several indentation modes - I prefer using
 =haskell-indent=.
 
-#+BEGIN_SRC emacs-lisp
-(when config-use-haskell
-  (use-package haskell-mode
-    :ensure t)
-  (progn
-    (use-package hlint-refactor
-      :ensure t)
-    (use-package shm
-      :ensure t)))
+#+BEGIN_SRC emacs-lisp :tangle (if config-use-haskell "yes" "no")
+(use-package haskell-mode
+  :ensure t)
   
-  (setq haskell-stylish-on-save t)
-  (setq haskell-mode-stylish-haskell-path "ormolu")
+(setq haskell-stylish-on-save t)
+(setq haskell-mode-stylish-haskell-path "ormolu")
+
+(defun my-haskell-mode-delete-trailing-whitespace ()
+  (when (eq major-mode 'haskell-mode)
+    (delete-trailing-whitespace)))
+
+(add-hook 'haskell-mode-hook
+  (lambda ()
+   (setq show-trailing-whitespace t)
+   (add-hook 'before-save-hook #'my-haskell-mode-delete-trailing-whitespace nil 'local)))
 #+END_SRC
 ** html
 
@@ -1759,6 +1762,20 @@ This is quite an ugly fix for allowing code markup for expressions like
      (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n,")
      (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist)))))
 #+END_SRC
+
+Make blocks more distinct
+
+#+begin_src emacs-lisp
+(setq org-fontify-quote-and-verse-blocks t)
+(custom-set-faces
+ '(org-block-begin-line
+   ((t (:foreground "#D6D6D6" :background "#2e373b"))))
+ '(org-block
+   ((t (:foreground "#70acc2"))))
+ '(org-block-end-line
+   ((t (:foreground "#D6D6D6" :background "#2e373b"))))
+ )
+#+end_src
 
 *** alerts
 
