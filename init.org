@@ -1497,6 +1497,12 @@ Needed to prevent bug with agenda where it will get an "Invalid search bound" er
 (setq org-loop-over-headlines-in-active-region nil)
 #+end_src
 
+Highlight the current line in agenda view
+
+#+begin_src emacs-lisp
+(add-hook 'org-agenda-finalize-hook #'hl-line-mode)
+#+end_src
+
 **** schedule
 
 Don't delay for scheduled tasks
@@ -1553,15 +1559,17 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
   '(("TODO" . (:foreground "red"))
     ("PROGRESSING" . (:foreground "orange"))
     ("DEVELOPING" . (:foreground "DarkOrange"))
+    ("UNVERIFIED" . (:foreground "indian red"))
     ("HOLD" . (:foreground "yellow"))
     ("FAILED" . (:foreground "grey"))
     ("CANCELED" . (:foreground "grey"))
+    ("VERIFIED" . (:foreground "green"))
     ("ANSWERED" . (:foreground "green"))))
 
 (setq org-todo-keywords
   '((sequence
-    "TODO(t)" "PROGRESSING(p)" "DEVELOPING(v)" "HOLD(h)"
-    "|" "DONE(d)" "ANSWERED(a)" "FAILED(f)" "CANCELED(c)")))
+    "TODO(t)" "PROGRESSING(p)" "UNVERIFIED(u)" "DEVELOPING(v)" "HOLD(h)"
+    "|" "DONE(d)" "VERIFIED(v)" "ANSWERED(a)" "FAILED(f)" "CANCELED(c)")))
 #+END_SRC
 
 Sets priority color faces
