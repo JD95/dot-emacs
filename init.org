@@ -100,7 +100,7 @@ installed. To ensure we install missing packages if they are missing.
   :ensure t)
 ; Try out Emacs packages
 (use-package try
-  :ensure t)           
+  :ensure t)
 (use-package which-key
   :ensure t)
 (use-package exec-path-from-shell
@@ -162,6 +162,10 @@ using the =Command=-key as the =Meta=-key.
 #+BEGIN_SRC emacs-lisp
 (when (memq window-system '(mac ns))
   (setq select-enable-clipboard t)
+  (setq mac-option-key-is-meta nil)
+  (setq mac-command-key-is-meta t)
+  (setq mac-command-modifier 'meta)
+  (setq mac-option-modifier nil)
   (exec-path-from-shell-initialize)
   (grep-compute-defaults)
   (when (fboundp 'mac-auto-operator-composition-mode)
@@ -283,6 +287,10 @@ Automaticly revert =doc-view=-buffers when the file changes on disk.
 (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 #+END_SRC
 
+#+begin_src emacs-lisp
+(add-hook 'write-file-hooks 'delete-trailing-whitespace)
+#+end_src
+
 *** Garbage Collection
 
 Run garbage collections when frame is not focused
@@ -334,12 +342,12 @@ default.
 Change the color-theme to =gotham=.
 
 #+BEGIN_SRC emacs-lisp
-(use-package color-theme-sanityinc-tomorrow 
+(use-package color-theme-sanityinc-tomorrow
   :ensure t)
 
 (require 'color-theme-sanityinc-tomorrow)
 (if (display-graphic-p)
-  (color-theme-sanityinc-tomorrow-night) 
+  (color-theme-sanityinc-tomorrow-night)
   (load-theme 'solarized t))
 #+END_SRC
 
@@ -492,7 +500,7 @@ Defined here to allow bindings throughout the rest of the config
 This updates the compiled init.el file with any changes made to this file.
 
 ** Advice
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp
 (defun always-true (&rest _args) 1)
 
 (defun mk-y-or-n-p-always-true (old &rest args)
@@ -637,7 +645,7 @@ Note the weekly scope of the command's precision.")
          (avg-x (/ (funcall sum xs) (float (length xs))))
          (prods (funcall sum (zipWith (lambda (x y)
                                         (* (- x avg-x) (- y avg-y)))
-                                      xs ys))) 
+                                      xs ys)))
          (sqrds (funcall sum (seq-map (lambda (x) (expt (- x avg-x) 2)) xs))))
     (/ prods (float sqrds))))
 
@@ -651,7 +659,7 @@ A [[https://en.wikipedia.org/wiki/Simple_linear_regression][single regressor]] i
 #+BEGIN_SRC emacs-lisp
 (defun zipWith (f xs ys)
   (if (or (eq xs nil) (eq ys nil))
-     '() 
+     '()
     (cons (funcall f (car xs) (car ys)) (zipWith f (cdr xs) (cdr ys)))))
 (defun zip (xs ys) (zipWith #'list xs ys))
 (defun pairs (xs) (zip xs (cdr xs)))
@@ -723,7 +731,7 @@ This is useful when pasting text from websites or word.
       (message "No non-ascii characters."))))
 #+END_SRC
 
-** Sorting 
+** Sorting
 #+BEGIN_SRC emacs-lisp
 (defun sort-words-in-region (start end)
   "Sort the words in a given region (START and END) and return them as a list."
@@ -747,7 +755,7 @@ START and END are boundries of the selected region."
         (goto-char (point-min))
         (insert words)))))
 #+END_SRC
-** Themes 
+** Themes
 
 When interactively changing the theme (using =M-x load-theme=), the
 current custom theme is not disabled. This often gives weird-looking
@@ -847,7 +855,7 @@ are just present window configs generated from a macro.
     (switch-to-buffer (get-buffer "*Org Agenda*"))))
 #+END_SRC
 
-* Minor Modes 
+* Minor Modes
 ** avy
 
 Avy is a tool for jumping to specific words based on their first symbol
@@ -919,7 +927,7 @@ Flyspell offers on-the-fly spell checking. We can enable flyspell for all
 text-modes with this snippet.
 
 #+BEGIN_SRC emacs-lisp
-(when config-use-flyspell 
+(when config-use-flyspell
   (add-hook 'text-mode-hook 'turn-on-flyspell))
 #+END_SRC
 
@@ -928,7 +936,7 @@ enables spell checking for comments and strings. We can enable it for all
 programming modes using the =prog-mode-hook=.
 
 #+BEGIN_SRC emacs-lisp
-(when config-use-flyspell 
+(when config-use-flyspell
   (add-hook 'prog-mode-hook 'flyspell-prog-mode))
 #+END_SRC
 
@@ -1014,14 +1022,14 @@ Use Prescient with Ivy. This adds memory to counsel selections, sorting the resu
 (use-package ivy-prescient
   :ensure t
   :after counsel
-  :config 
+  :config
     (ivy-prescient-mode 1)
     (prescient-persist-mode 1))
 
 (setq prescient-history-length 100)
 (setq prescient-frequency-decay 0.997)
 (setq prescient-frequency-threshold 0.5)
-(setq prescient-sort-length-enable t) 
+(setq prescient-sort-length-enable t)
 #+end_src
 
 There are several methods that can be used to filter prescient results:
@@ -1039,7 +1047,7 @@ There are several methods that can be used to filter prescient results:
 However, we don't want this behavior on all selections. =ivy-prescient-sort-commands= allows us to specify either only the commands we want to use prescient with or which commands to ignore.
 
 #+begin_src emacs-lisp
-(setq ivy-prescient-sort-commands 
+(setq ivy-prescient-sort-commands
   '(:not ivy-switch-buffer swiper-isearch))
 #+end_src
 
@@ -1109,7 +1117,7 @@ _SPC_ cancel
 ** magit
 
 #+BEGIN_SRC emacs-lisp
-(when config-use-magit 
+(when config-use-magit
   (use-package magit :ensure t)
   (define-key custom-bindings-map (kbd "C-c m") 'magit-status))
 #+END_SRC
@@ -1159,11 +1167,11 @@ Enable projectile mode everywhere.
 )
 #+end_src
 
-* Major Modes 
+* Major Modes
 ** agda
 
 #+begin_src emacs-lisp
-(when config-use-agda 
+(when config-use-agda
 (load-file (let ((coding-system-for-read 'utf-8))
     (shell-command-to-string "agda-mode.exe locate")))
 
@@ -1172,7 +1180,7 @@ Enable projectile mode everywhere.
 (add-hook 'org-mode-hook (lambda () (set-input-method "Agda")))
 (agda-input-setup)
 
-(add-hook 'agda2-mode-hook 
+(add-hook 'agda2-mode-hook
   (lambda ()
     (interactive)
     (set-face-foreground 'agda2-highlight-datatype-face "dodger blue")
@@ -1213,15 +1221,6 @@ the echo area. Haskell has several indentation modes - I prefer using
   
 (setq haskell-stylish-on-save t)
 (setq haskell-mode-stylish-haskell-path "ormolu")
-
-(defun my-haskell-mode-delete-trailing-whitespace ()
-  (when (eq major-mode 'haskell-mode)
-    (delete-trailing-whitespace)))
-
-(add-hook 'haskell-mode-hook
-  (lambda ()
-   (setq show-trailing-whitespace t)
-   (add-hook 'before-save-hook #'my-haskell-mode-delete-trailing-whitespace nil 'local)))
 #+END_SRC
 ** html
 
@@ -1339,7 +1338,7 @@ function to a key!
   :straight (org :tag "release_9.4.6")
   :ensure t
   :config
-  (org-babel-do-load-languages 
+  (org-babel-do-load-languages
   'org-babel-load-languages
         '((dot . t)
            (ledger . t)
@@ -1356,17 +1355,17 @@ function to a key!
 
 (setq org-modules '(org-habit))
 
-(defun org-recompile-elc-files () 
+(defun org-recompile-elc-files ()
   (interactive)
-  (let* ((org-folders (file-expand-wildcards "~/.emacs.d/elpa/org-*")) 
+  (let* ((org-folders (file-expand-wildcards "~/.emacs.d/elpa/org-*"))
          (is-org-folder (lambda (s) (string-match "^org-[0-9]+" s)))
          (find-matches  (lambda (list) (seq-filter is-org-folder list)))
-         (org-folder (car (funcall find-matches org-folders)))) 
+         (org-folder (car (funcall find-matches org-folders))))
     (mapc 'delete-file (directory-files org-folder t ".*\.elc"))
     (byte-recompile-directory org-folder 0 t)))
 #+END_SRC
 
-*** editing 
+*** editing
 
 Use aspell if present, mainly useful on windows.
 
@@ -1388,11 +1387,11 @@ Shortens url links in org mode
   (let ((url (thing-at-point 'url))
     (bounds (bounds-of-thing-at-point 'url)))
     (kill-region (car bounds) (cdr bounds))
-    (insert (format "[[%s][%s]]" url 
-      (truncate-string-to-width url 
-         (if arg 
-           (prefix-numeric-value arg) 
-           40) 
+    (insert (format "[[%s][%s]]" url
+      (truncate-string-to-width url
+         (if arg
+           (prefix-numeric-value arg)
+           40)
        nil nil "...")))))
 #+END_SRC
 
@@ -1416,7 +1415,7 @@ Prevents editing invisible text
 
 #+begin_src emacs-lisp
 (setq org-catch-invisible-edits 'error)
-(setq org-src-preserve-indentation nil) 
+(setq org-src-preserve-indentation nil)
 (setq org-edit-src-content-indentation 0)
 #+end_src
 
@@ -1482,10 +1481,10 @@ These org-edna functions change only the time on a schedule or deadline.
 #+begin_src emacs-lisp
 (setq org-agenda-custom-commands
   '(("!" "Expired Deadlines" tags-todo
-     "+DEADLINE<\"<today>\"/TODO|PROGRESSING" 
-     nil 
+     "+DEADLINE<\"<today>\"/TODO|PROGRESSING"
+     nil
      nil)
-    ("d" "Scheduled or Deadline" agenda 
+    ("d" "Scheduled or Deadline" agenda
      "+DEADLINE+SCHEDULED"
      nil nil)
     ("u" "Upcoming" ((org-ql-block '(deadline :to 62))))))
@@ -1575,9 +1574,9 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
 Sets priority color faces
 
 #+BEGIN_SRC emacs-lisp
-(setq org-priority-faces 
-  '((?A . (:foreground "#00FFFF")) 
-    (?B . (:foreground "#00F1E8")) 
+(setq org-priority-faces
+  '((?A . (:foreground "#00FFFF"))
+    (?B . (:foreground "#00F1E8"))
     (?C . (:foreground "#00E3D1"))
     (?D . (:foreground "#00D5B9"))
     (?E . (:foreground "#00C7A2"))
@@ -1748,7 +1747,7 @@ Prevent org mode from auto expanding relative paths.
 (setq org-link-file-path-type 'relative)
 #+end_src
 
-*** source blocks 
+*** source blocks
 
 When editing org-files with source-blocks, we want the source blocks to
 be themed as they would in their native mode.
@@ -1923,10 +1922,10 @@ This function will render the given org file as html and then insert the result 
         (org-file-buffer (find-file-noselect org-file))
 
         ;; Switch to temp buffers to render contents of org file
-        (result (with-current-buffer org-file-buffer 
+        (result (with-current-buffer org-file-buffer
                   ;; Temporarily use the org-file-buffer and render
                   (org-twbs-export-as-html nil nil t t)
-                  (with-current-buffer "*Org HTML Export*" 
+                  (with-current-buffer "*Org HTML Export*"
                      ;; Temporarily switch and get result of render
                      (buffer-string)))))
 
@@ -2006,9 +2005,9 @@ A utility for adding tags to zettlekausten notes
 (defun org-zettelkasten-add-tag ()
   (interactive)
   (save-window-excursion
-    (org-zettelkasten-append-tag 
-      (org-zettelkasten-pick-tag) 
-      (buffer-name) 
+    (org-zettelkasten-append-tag
+      (org-zettelkasten-pick-tag)
+      (buffer-name)
       (first-line-of-buffer-or-name))))
 #+end_src
 
@@ -2026,7 +2025,7 @@ Add all tags currently listed in grep to the current note
 (defun org-zettelkasten-copy-tags-from-grep ()
   (interactive)
   (mapc (lambda (tag-file-name)
-          (org-zettelkasten-append-tag 
+          (org-zettelkasten-append-tag
            (concat org-zettelkasten-dir "/zettl-tags/" tag-file-name)
            (buffer-name)
            (first-line-of-buffer-or-name)))
@@ -2048,7 +2047,7 @@ Search the zettelkasten using grep
 
 #+begin_src emacs-lisp
 (defun org-zettelkasten-search ()
-  (interactive) 
+  (interactive)
   (lgrep (read-string "query: ") "*.org" org-zettelkasten-dir))
 #+end_src
 
@@ -2060,22 +2059,22 @@ Create new Zettelkasten note
   (find-file (concat org-zettelkasten-dir "/"
                      (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org")))
 
-(defun org-zettelkasten-gen-id () 
+(defun org-zettelkasten-gen-id ()
   (interactive)
   (insert (format-time-string "%d%m%Y%H%M%S" (current-time))))
 #+end_src
 
 #+begin_src emacs-lisp
-(defun org-zettelkasten-conversation () 
+(defun org-zettelkasten-conversation ()
   (interactive)
   (counsel-find-file (concat org-zettelkasten-dir "/conversations/")))
 
-(defun org-zettelkasten-conversation-branch () 
+(defun org-zettelkasten-conversation-branch ()
   (interactive)
   (let* ((new-note-name (concat (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org"))
          (new-note-path (concat org-zettelkasten-dir "/" new-note-name))
          (new-note-desc (if (use-region-p)
-                              (progn 
+                              (progn
                                 (kill-region (region-beginning) (region-end))
                                 (concat "][" (car kill-ring) "]]"))
                               "]]"))
@@ -2098,9 +2097,9 @@ Functions for referencing notes
 
 (defun org-zettelkasten-use-ref ()
   (interactive)
-  (let* ((link-end (if (use-region-p) 
-                         (progn 
-                            (kill-region (region-beginning) (region-end)) 
+  (let* ((link-end (if (use-region-p)
+                         (progn
+                            (kill-region (region-beginning) (region-end))
                             (concat "][" (car kill-ring) "]]"))
                        "]]")))
     (insert (concat "[[file:" (file-relative-name org-zettelkasten-ref default-directory) link-end)))
@@ -2110,13 +2109,13 @@ Functions for referencing notes
 A hydra for quickly calling zettlekausten functions
 
 #+begin_src emacs-lisp
-(defhydra hydra-zettelkasten (:hint nil) 
+(defhydra hydra-zettelkasten (:hint nil)
   "
 ^Notes^         ^Refs^         ^Tags^                    ^Search^
 ----------------------------------------------------------------------
 _n_: New Note   _g_: Grab ref   _t_: Add Tag              _s_: Search
 _c_: New Convo  _u_: Use Ref    _l_: List Tags            _e_: Links to this Note
-_b_: Branch     ^ ^             _C_: Copy Tags from Grep  ^ ^ 
+_b_: Branch     ^ ^             _C_: Copy Tags from Grep  ^ ^
 _r_: Rename Buffer
 "
   ("n" org-zettelkasten-new-note)
@@ -2125,10 +2124,10 @@ _r_: Rename Buffer
   ("r" org-zettelkasten-buffer-name)
 
   ("t" org-zettelkasten-add-tag)
-  ("l" org-zettelkasten-list-tags) 
+  ("l" org-zettelkasten-list-tags)
   ("C" org-zettelkasten-copy-tags-from-grep)
 
-  ("s" org-zettelkasten-search) 
+  ("s" org-zettelkasten-search)
   ("e" org-zettelkasten-list-external-refs)
 
   ("g" org-zettelkasten-grab-ref)
@@ -2143,10 +2142,10 @@ _r_: Rename Buffer
 (when config-use-purescript
   (use-package purescript-mode
     :ensure t)
-  
+
   (defun purescript-setup ()
     (turn-on-purescript-indentation))
-  
+
   (add-hook 'purescript-mode-hook #'purescript-setup))
 #+END_SRC
 ** prolog
@@ -2193,21 +2192,21 @@ _r_: Rename Buffer
     :ensure t)
   (use-package cargo
     :ensure t)
-  
+
   (require 'rust-mode)
-  
+
   (defun rust-mode-setup ()
     (cargo-minor-mode nil))
-  
+
   (defun racer-mode-setup ()
     (eldoc-mode))
-  
+
   (add-hook 'rust-mode-hook #'rust-mode-setup)
-  
+
   (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
   (define-key rust-mode-map (kbd "C-?") #'racer-describe)
   (setq company-tooltip-align-annotations t)
-  
+
   (setq rust-format-on-save t))
 #+END_SRC
 ** z3
@@ -2217,7 +2216,7 @@ _r_: Rename Buffer
   :ensure t)
 #+end_src
 
-* Finalize Settings 
+* Finalize Settings
 
 Lastly we need to activate the map by creating and activating the
 =minor-mode=.
