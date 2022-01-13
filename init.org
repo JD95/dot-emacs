@@ -1007,6 +1007,9 @@ Some keybindings for ease of use
 (global-set-key (kbd "M-y") 'counsel-yank-pop)
 (global-set-key (kbd "C-c v") 'ivy-push-view)
 (global-set-key (kbd "C-c V") 'ivy-pop-view)
+(global-set-key (kbd "C-x b")  #'counsel-switch-buffer)
+(global-set-key (kbd "C-x C-b") #'list-buffers)
+(global-set-key (kbd "C-x k")  #'kill-buffer*)
 
 (setq ivy-re-builders-alist
       '((swiper-isearch . ivy--regex)
