@@ -1127,15 +1127,6 @@ _SPC_ cancel
   (define-key custom-bindings-map (kbd "C-c a")  'mc/mark-all-like-this)
   (define-key custom-bindings-map (kbd "C-c n")  'mc/mark-next-like-this)
 #+END_SRC
-** perspective
-#+begin_src emacs-lisp
-(use-package perspective
-   :straight t
-   :init (persp-mode))
-(global-set-key (kbd "C-x b")  #'persp-counsel-switch-buffer)
-(global-set-key (kbd "C-x C-b") #'persp-list-buffers)
-(global-set-key (kbd "C-x k")  #'persp-kill-buffer*)
-#+end_src
 ** projectile
 
 Use a custom program for projectile's grep
@@ -1209,7 +1200,7 @@ accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
   :config
    (setq graphviz-dot-indent-width 4))
 #+end_src
-** haskell 
+** haskell
 
 =haskell-doc-mode= is similar to =eldoc=, it displays documentation in
 the echo area. Haskell has several indentation modes - I prefer using
@@ -1218,7 +1209,7 @@ the echo area. Haskell has several indentation modes - I prefer using
 #+BEGIN_SRC emacs-lisp :tangle (if config-use-haskell "yes" "no")
 (use-package haskell-mode
   :ensure t)
-  
+
 (setq haskell-stylish-on-save t)
 (setq haskell-mode-stylish-haskell-path "ormolu")
 #+END_SRC
@@ -1335,7 +1326,7 @@ function to a key!
 #+BEGIN_SRC emacs-lisp
 (use-package org
   :demand
-  :straight (org :tag "release_9.4.6")
+  :straight (org :tag "release_9.5")
   :ensure t
   :config
   (org-babel-do-load-languages
@@ -1354,15 +1345,6 @@ function to a key!
   :ensure t)
 
 (setq org-modules '(org-habit))
-
-(defun org-recompile-elc-files ()
-  (interactive)
-  (let* ((org-folders (file-expand-wildcards "~/.emacs.d/elpa/org-*"))
-         (is-org-folder (lambda (s) (string-match "^org-[0-9]+" s)))
-         (find-matches  (lambda (list) (seq-filter is-org-folder list)))
-         (org-folder (car (funcall find-matches org-folders))))
-    (mapc 'delete-file (directory-files org-folder t ".*\.elc"))
-    (byte-recompile-directory org-folder 0 t)))
 #+END_SRC
 
 *** editing
@@ -1575,32 +1557,12 @@ Sets priority color faces
 
 #+BEGIN_SRC emacs-lisp
 (setq org-priority-faces
-  '((?A . (:foreground "#00FFFF"))
-    (?B . (:foreground "#00F1E8"))
-    (?C . (:foreground "#00E3D1"))
-    (?D . (:foreground "#00D5B9"))
-    (?E . (:foreground "#00C7A2"))
-    (?F . (:foreground "#00B98B"))
-    (?G . (:foreground "#00AC74"))
-    (?H . (:foreground "#009E5D"))
-    (?I . (:foreground "#009046"))
-    (?J . (:foreground "#00822E"))
-    (?K . (:foreground "#007417"))
-    (?L . (:foreground "#006600"))
-    (?M . (:foreground "#055D00"))
-    (?N . (:foreground "#095300"))
-    (?O . (:foreground "#0E4A00"))
-    (?P . (:foreground "#134100"))
-    (?Q . (:foreground "#173800"))
-    (?R . (:foreground "#1C2E00"))
-    (?S . (:foreground "#202500"))
-    (?T . (:foreground "#251C00"))
-    (?U . (:foreground "#2A1300"))
-    (?V . (:foreground "#2E0900"))
-    (?W . (:foreground "#330000"))
-    (?X . (:foreground "#220000"))
-    (?Y . (:foreground "#110000"))
-    (?Z . (:foreground "#000000"))))
+  '((?A . (:foreground "#fc0303"))
+    (?B . (:foreground "#db792e"))
+    (?C . (:foreground "#ebe06a"))
+    (?D . (:foreground "#56fc6c"))
+    (?E . (:foreground "#00fbff"))
+    (?F . (:foreground "#ad61ff"))))
 
 (setq org-priority-highest ?A)
 (setq org-priority-lowest ?Z)
