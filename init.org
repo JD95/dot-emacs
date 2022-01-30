@@ -1411,6 +1411,22 @@ This converts markdown style links into org-mode style links
   (interactive)
   (query-replace-regexp "\\[\\(.+\\)\\](\\(.*\\))" "[[\\2][\\1]]" nil (region-beginning) (region-end)))
 #+end_src
+
+This function helps with adding books to my index
+
+#+begin_src emacs-lisp
+(defun org-replace-file-path-with-todo-link (start end)
+  (interactive "r")
+  (query-replace-regexp
+   (rx (0+ any)
+       (or (: (= 2 (in digit)) ":" (= 2 (in digit)))
+              (: (= 4 (in digit)) "-" (= 2 (in digit)) "-" (= 2 (in digit))))
+           "  "
+           (: (group (0+ any)) "." (group (or "pdf" "epub" "djvu"))))
+   "** TODO [[file:./\\1.\\2][\\1]]"
+   nil start end))
+#+end_src
+
 *** evil org
 
 #+BEGIN_SRC emacs-lisp
