@@ -1640,6 +1640,8 @@ Helps sort sections
   (org-sort-entries nil ?o))
 #+END_SRC
 
+Count only the subtasks directly beneath a header
+
 #+begin_src emacs-lisp
 (setq org-hierarchical-todo-statistics nil)
 #+end_src
@@ -1944,6 +1946,16 @@ subsystem.
       "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
       "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""))
 #+END_SRC
+*** refile
+
+Configures refile to file things two headers deep and use outline completion
+
+So like =Project Backlog/Some Project/= it refile to this sub header
+
+#+begin_src emacs-lisp
+(setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
+(setq org-refile-use-outline-path t)
+#+end_src
 *** ref
 #+BEGIN_SRC emacs-lisp
 ;; (require 'org-ref)
