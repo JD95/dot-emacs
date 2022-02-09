@@ -1699,6 +1699,15 @@ This function will help randomly select a todo in the current tree.
     (lambda () (at-todo '("TODO" "DEVELOPING" "PROGRESSING")))
     1))
 #+END_SRC
+**** super
+
+#+begin_src emacs-lisp
+(use-package org-super-agenda
+  :ensure t)
+
+(setq org-super-agenda-groups '(
+  (:name "Morning" :tag "Morning")))
+#+end_src
 *** links
 
 #+begin_src emacs-lisp
