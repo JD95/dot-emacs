@@ -1420,8 +1420,8 @@ This function helps with adding books to my index
   (query-replace-regexp
    (rx (0+ any)
        (or (: (= 2 (in digit)) ":" (= 2 (in digit)))
-              (: (= 4 (in digit)) "-" (= 2 (in digit)) "-" (= 2 (in digit))))
-           "  "
+           (: (= 4 (in digit)) "-" (= 2 (in digit)) "-" (= 2 (in digit))))
+           (1+ " ")
            (: (group (0+ any)) "." (group (or "pdf" "epub" "djvu"))))
    "** TODO [[file:./\\1.\\2][\\1]]"
    nil start end))
@@ -1706,7 +1706,8 @@ This function will help randomly select a todo in the current tree.
   :ensure t)
 
 (setq org-super-agenda-groups '(
-  (:name "Morning" :tag "Morning")))
+  (:name "Time Sensitive" :tag "TimeSensitive")))
+(org-super-agenda-mode)
 #+end_src
 *** links
 
