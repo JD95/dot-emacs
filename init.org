@@ -1557,8 +1557,8 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keyword-faces
   '(("TODO" . (:foreground "red"))
-    ("PROGRESSING" . (:foreground "orange"))
     ("DEVELOPING" . (:foreground "DarkOrange"))
+    ("PROGRESSING" . (:foreground "orange"))
     ("UNVERIFIED" . (:foreground "indian red"))
     ("HOLD" . (:foreground "yellow"))
     ("FAILED" . (:foreground "grey"))
@@ -1568,7 +1568,7 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
 
 (setq org-todo-keywords
   '((sequence
-    "TODO(t)" "PROGRESSING(p)" "UNVERIFIED(u)" "DEVELOPING(v)" "HOLD(h)"
+    "DEVELOPING(v)" "TODO(t)" "UNVERIFIED(u)" "PROGRESSING(p)" "HOLD(h)"
     "|" "DONE(d)" "VERIFIED(v)" "ANSWERED(a)" "FAILED(f)" "CANCELED(c)")))
 #+END_SRC
 
@@ -1699,6 +1699,28 @@ This function will help randomly select a todo in the current tree.
     (lambda () (at-todo '("TODO" "DEVELOPING" "PROGRESSING")))
     1))
 #+END_SRC
+**** stats
+
+#+begin_src emacs-lisp
+(defun force-double-digit-format-advice (orig fmt &rest args)
+  (if (string= fmt "[%d%%]")
+      (apply #'format "[%02d%%]" args)
+      (apply orig fmt args)))
+
+(defun org-update-parent-todo-statistics-advice (orig &rest all)
+  (progn
+    (advice-add
+      #'format :around
+      #'force-double-digit-format-advice)
+    (apply orig all)
+    (advice-remove
+      #'format
+      #'force-double-digit-format-advice)))
+
+(advice-add
+  #'org-update-parent-todo-statistics :around
+  #'org-update-parent-todo-statistics-advice)
+#+end_src
 **** super
 
 #+begin_src emacs-lisp
