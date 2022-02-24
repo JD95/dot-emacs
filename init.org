@@ -1557,8 +1557,9 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keyword-faces
   '(("TODO" . (:foreground "red"))
-    ("DEVELOPING" . (:foreground "DarkOrange"))
+    ("DEVELOPING" . (:foreground "DarkRed"))
     ("PROGRESSING" . (:foreground "orange"))
+    ("RESEARCHING" . (:foreground "orange"))
     ("UNVERIFIED" . (:foreground "indian red"))
     ("HOLD" . (:foreground "yellow"))
     ("FAILED" . (:foreground "grey"))
@@ -1567,9 +1568,10 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
     ("ANSWERED" . (:foreground "green"))))
 
 (setq org-todo-keywords
-  '((sequence
-    "DEVELOPING(v)" "TODO(t)" "UNVERIFIED(u)" "PROGRESSING(p)" "HOLD(h)"
-    "|" "DONE(d)" "VERIFIED(v)" "ANSWERED(a)" "FAILED(f)" "CANCELED(c)")))
+  '((sequence "TODO(t)" "|" "DONE(d)")
+    (sequence "DEVELOPING(v)" "READY(y)" "PROGRESSING(p)" "HOLD(h)" "|" "FINISHED(f)")
+    (sequence "UNKNOWN(u)" "RESEARCHING(r)" "|" "ANSWERED(v)")
+    (sequence "|" "FAILED(f)" "CANCELED(c)")))
 #+END_SRC
 
 Sets priority color faces
