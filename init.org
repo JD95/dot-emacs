@@ -1346,6 +1346,15 @@ function to a key!
   :ensure t)
 (use-package org-ql
   :ensure t)
+(use-package org-recur
+  :hook ((org-mode . org-recur-mode)
+         (org-agenda-mode . org-recur-agenda-mode))
+  :demand t
+  :config
+    (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
+    (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
+    (setq org-recur-finish-done t
+          org-recur-finish-archive t))
 
 (setq org-modules '(org-habit))
 #+END_SRC
@@ -1501,6 +1510,21 @@ Highlight the current line in agenda view
 
 #+begin_src emacs-lisp
 (add-hook 'org-agenda-finalize-hook #'hl-line-mode)
+#+end_src
+
+Truncate lines after the habits graph
+
+#+begin_src emacs-lisp
+(defun truncate-org-agenda-entries ()
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (when (seq-contains (thing-at-point 'line t) ?!)
+        (move-to-column 62)
+        (zap-up-to-char 1 ?\n))
+      (forward-line 1))))
+
+(add-hook 'org-agenda-finalize-hook #'truncate-org-agenda-entries)
 #+end_src
 
 **** schedule
