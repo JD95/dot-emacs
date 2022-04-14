@@ -1512,21 +1512,6 @@ Highlight the current line in agenda view
 (add-hook 'org-agenda-finalize-hook #'hl-line-mode)
 #+end_src
 
-Truncate lines after the habits graph
-
-#+begin_src emacs-lisp
-(defun truncate-org-agenda-entries ()
-  (save-excursion
-    (goto-char (point-min))
-    (while (not (eobp))
-      (when (seq-contains (thing-at-point 'line t) ?!)
-        (move-to-column 62)
-        (zap-up-to-char 1 ?\n))
-      (forward-line 1))))
-
-(add-hook 'org-agenda-finalize-hook #'truncate-org-agenda-entries)
-#+end_src
-
 **** schedule
 
 Don't delay for scheduled tasks
@@ -1594,7 +1579,7 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
 (setq org-todo-keywords
   '((sequence "TODO(t)" "|" "DONE(d)")
     (sequence "DEVELOPING(v)" "READY(y)" "PROGRESSING(p)" "HOLD(h)" "|" "FINISHED(f)")
-    (sequence "UNKNOWN(u)" "RESEARCHING(r)" "|" "ANSWERED(v)")
+    (sequence "UNKNOWN(u)" "RESEARCHING(r)" "|" "ANSWERED(a)")
     (sequence "|" "FAILED(f)" "CANCELED(c)")))
 #+END_SRC
 
@@ -1753,8 +1738,33 @@ This function will help randomly select a todo in the current tree.
 (use-package org-super-agenda
   :ensure t)
 
+(defun my-org-agenda-remove-recur (str)
+  (nth 0 (split-string str "|")))
+
 (setq org-super-agenda-groups '(
-  (:name "Time Sensitive" :tag "TimeSensitive")))
+  (:name "Time Sensitive"
+     :time-grid t
+     :tag "TimeSensitive"
+     :transformer #'my-org-agenda-remove-recur)
+  (:name "Short Term Wellfare"
+     :priority "A"
+     :transformer #'my-org-agenda-remove-recur)
+  (:name "Long Term Wellfare"
+     :priority "B"
+     :transformer #'my-org-agenda-remove-recur)
+  (:name "Validation"
+     :priority "C"
+     :transformer #'my-org-agenda-remove-recur)
+  (:name "Actualization"
+     :priority "D"
+     :transformer #'my-org-agenda-remove-recur)
+  (:name "Reading"
+     :priority "E"
+     :transformer #'my-org-agenda-remove-recur)
+  (:name "Refinement"
+     :priority "F"
+     :transformer #'my-org-agenda-remove-recur)
+))
 (org-super-agenda-mode)
 #+end_src
 *** links
