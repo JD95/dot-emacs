@@ -1605,6 +1605,21 @@ Sets priority color faces
 (setq org-todo-heirarchical-statistics nil)
 #+END_SRC
 
+Auto detect what kind of todo item is being completed and call the right function
+
+#+begin_src emacs-lisp
+(defun detect-org-recur-advice (orig &rest all)
+  (interactive)
+  (let ((header-text (nth 4 (org-heading-components))))
+    (if (seq-contains-p header-text ?|)
+      (org-recur-finish)
+      (apply orig all))))
+
+(advice-add
+ #'org-todo :around
+ #'detect-org-recur-advice)
+#+end_src
+
 **** todo editing
 
 These functions helps clear out done tasks in an org file
@@ -1745,6 +1760,11 @@ This function will help randomly select a todo in the current tree.
   (:name "Time Sensitive"
      :time-grid t
      :tag "TimeSensitive"
+     :transformer #'my-org-agenda-remove-recur)
+  (:name "Objectives"
+     :tag "Objective")
+  (:name "Shower"
+     :tag "Shower"
      :transformer #'my-org-agenda-remove-recur)
   (:name "Short Term Wellfare"
      :priority "A"
