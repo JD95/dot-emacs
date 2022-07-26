@@ -363,48 +363,6 @@ Change the color-theme to =gotham=.
 (set-fontset-font "fontset-default" 'unicode "DejaVu Sans")
 #+END_SRC
 
-For Language Fonts
-
-#+begin_src emacs-lisp
-(defvar emacs-english-font "DejaVu Sans Mono"
-  "The font for English.")
-
-(defvar emacs-cjk-font "Hiragino Sans GB W3"
-  "The font name for CJK.")
-
-(defvar emacs-font-size-pair '(13 . 16)
-  "Default font size pair for (english . chinese)")
-
-;; Needed to ensure that cjk characters don't misalign with
-;; latin letters
-(defvar emacs-font-size-pair-list
-  '(( 5 .  6) (10 . 12)
-    (13 . 16) (15 . 18) (17 . 20)
-    (19 . 22) (20 . 24) (21 . 26)
-    (24 . 28) (26 . 32) (28 . 34)
-    (30 . 36) (34 . 40) (36 . 44))
-  "This list is used to store matching (english . chinese) font-size.")
-
-(defun font-exist-p (fontname)
-  "Test if this font is exist or not."
-  (if (or (not fontname) (string= fontname ""))
-      nil
-    (if (not (x-list-fonts fontname)) nil t)))
-
-(defun set-font (english chinese size-pair)
-  "Setup emacs English and Chinese font on x window-system."
-
-  (if (font-exist-p english)
-      (set-frame-font (format "%s:pixelsize=%d" english (car size-pair)) t))
-
-  (if (font-exist-p chinese)
-      (dolist (charset '(kana han symbol cjk-misc bopomofo))
-        (set-fontset-font (frame-parameter nil 'font) charset
-                          (font-spec :family chinese :size (cdr size-pair))))))
-
-(set-font emacs-english-font emacs-cjk-font emacs-font-size-pair)
-#+end_src
-
 diminish.el allows you to hide or abbreviate their presence in the
 modeline. I rarely look at the modeline to find out what minor-modes are
 enabled, so I disable every global minor-mode, and some for lisp editing.
@@ -1432,7 +1390,7 @@ This function helps with adding books to my index
            (: (= 4 (in digit)) "-" (= 2 (in digit)) "-" (= 2 (in digit))))
            (1+ " ")
            (: (group (0+ any)) "." (group (or "pdf" "epub" "djvu"))))
-   "** TODO [[file:./\\1.\\2][\\1]]"
+   "** READY [[file:./\\1.\\2][\\1]]"
    nil start end))
 #+end_src
 
@@ -1472,38 +1430,16 @@ Adds any inherited tags to the immediate children.
 #+END_SRC
 *** agenda
 
-These org-edna functions change only the time on a schedule or deadline.
-#+begin_src emacs-lisp
-(defun org-edna-set-time (type _last-entry args)
-  (let* ((new-time (nth 0 args))
-         (prev-ts (org-edna--get-planning-info type))
-         (time-val (split-string new-time ":"))
-         (ts (org-read-date-analyze prev-ts nil '(nil nil nil nil nil nil))))
-    (setcar (nthcdr 2 ts) (string-to-number (nth 0 time-val)))
-    (setcar (nthcdr 1 ts) (string-to-number (nth 1 time-val)))
-    (org--deadline-or-schedule nil type
-       (format-time-string "%F %R" (apply 'encode-time (mapcar (lambda (e) (or e 0)) ts))))))
-
-(defun org-edna-action/schedule-time! (last-entry &rest args) (org-edna-set-time 'scheduled last-entry args))
-(defun org-edna-action/deadline-time! (last-entry &rest args) (org-edna-set-time 'deadline last-entry args))
-#+end_src
-
 #+begin_src emacs-lisp
 (setq org-agenda-custom-commands
   '(("!" "Expired Deadlines" tags-todo
      "+DEADLINE<\"<today>\"/TODO|PROGRESSING"
-     nil
-     nil)
+     nil nil)
     ("d" "Scheduled or Deadline" agenda
      "+DEADLINE+SCHEDULED"
      nil nil)
-    ("u" "Upcoming" ((org-ql-block '(deadline :to 62))))))
-#+end_src
-
-Needed to prevent bug with agenda where it will get an "Invalid search bound" error, causing the next todo marked through agenda to mark everything in the range from it to the last one as done.
-#+begin_src emacs-lisp
-(setq org-agenda-loop-over-headlines-in-active-region nil)
-(setq org-loop-over-headlines-in-active-region nil)
+    ("u" "Upcoming"
+     ((org-ql-block '(ts :to 62))))))
 #+end_src
 
 Highlight the current line in agenda view
@@ -1524,12 +1460,6 @@ Hide all tags on agenda view
 #+BEGIN_SRC emacs-lisp
 (setq org-agenda-hide-tags-regexp ".*")
 #+END_SRC
-
-Org has an annoying warning message a repeating task needs to be shifted more than 10 times it's interval. This will override the prompt to always return yes.
-
-#+begin_src emacs-lisp
-;;(advice-add 'org-auto-repeat-maybe :around #'mk-y-or-n-p-always-true)
-#+end_src
 
 **** habits
 
@@ -1612,12 +1542,16 @@ Auto detect what kind of todo item is being completed and call the right functio
   (interactive)
   (let ((header-text (nth 4 (org-heading-components))))
     (if (seq-contains-p header-text ?|)
-      (org-recur-finish)
+      (progn
+        (org-recur-finish)
+        (read-char "Task completed! Press any key to continue...") nil 1)
       (apply orig all))))
 
 (advice-add
  #'org-todo :around
  #'detect-org-recur-advice)
+
+(setq org-log-done 'time)
 #+end_src
 
 **** todo editing
@@ -1685,6 +1619,33 @@ Sets all immediate children of header to set deadline for sibling 1 day after co
            (org-set-property "TRIGGER" "next-sibling deadline!(\"++1d\")")))
        nil
        'tree))))
+#+end_src
+
+***** custom edna triggers
+
+These org-edna functions change only the time on a schedule or deadline.
+
+#+begin_src emacs-lisp
+(defun org-edna-set-time (type _last-entry args)
+  (let* ((new-time (nth 0 args))
+         (prev-ts (org-edna--get-planning-info type))
+         (time-val (split-string new-time ":"))
+         (ts (org-read-date-analyze prev-ts nil '(nil nil nil nil nil nil))))
+    (setcar (nthcdr 2 ts) (string-to-number (nth 0 time-val)))
+    (setcar (nthcdr 1 ts) (string-to-number (nth 1 time-val)))
+    (org--deadline-or-schedule nil type
+       (format-time-string "%F %R" (apply 'encode-time (mapcar (lambda (e) (or e 0)) ts))))))
+
+(defun org-edna-action/schedule-time! (last-entry &rest args)
+  (org-edna-set-time 'scheduled last-entry args))
+
+(defun org-edna-action/deadline-time! (last-entry &rest args)
+  (org-edna-set-time 'deadline last-entry args))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun org-edna-action/away-from-home! (last-entry &rest args)
+    ())
 #+end_src
 
 **** todo navigation
@@ -1854,16 +1815,6 @@ Make blocks more distinct
    ((t (:foreground "#D6D6D6" :background "#2e373b"))))
  )
 #+end_src
-
-*** alerts
-
-Enable [[https://github.com/spegoraro/org-alert][org-alert]]
-
-#+BEGIN_SRC emacs-lisp
-;;(require 'org-alert)
-;;(setq alert-default-style 'libnotify)
-#+END_SRC
-Ensure that .org files are opened with org-mode
 
 *** pdf
 
