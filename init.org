@@ -92,6 +92,8 @@ installed. To ensure we install missing packages if they are missing.
 (eval-when-compile
   (require 'use-package))
 
+(package-refresh-contents)
+
 ; automatically compile Emacs Lisp libraries
 (use-package auto-compile
   :ensure t)
@@ -288,7 +290,7 @@ Automaticly revert =doc-view=-buffers when the file changes on disk.
 #+END_SRC
 
 #+begin_src emacs-lisp
-(add-hook 'write-file-hooks 'delete-trailing-whitespace)
+(add-hook 'write-file-functions 'delete-trailing-whitespace)
 #+end_src
 
 *** Garbage Collection
@@ -500,11 +502,11 @@ buffer, including the minibuffer and mode line.
 
 (defun global-scale-up ()
   (interactive)
-  (global-scale-internal (incf size 20)))
+  (global-scale-internal (cl-incf size 20)))
 
 (defun global-scale-down ()
   (interactive)
-  (global-scale-internal (decf size 20)))
+  (global-scale-internal (cl-decf size 20)))
 
 (defun global-scale-internal (arg)
   (set-face-attribute 'default (selected-frame) :height arg)
@@ -729,7 +731,16 @@ enabled themes.
 ** Updating Config
 
 #+BEGIN_SRC emacs-lisp
-(require 'org)
+(use-package org
+  :ensure t
+  :config
+  (org-babel-do-load-languages
+  'org-babel-load-languages
+        '((dot . t)
+           (emacs-lisp . t)
+           (shell . t)))
+  (setq org-startup-indented t)
+  (org-reload))
 
 (defun update-init-el ()
   (interactive)
@@ -1171,6 +1182,23 @@ the echo area. Haskell has several indentation modes - I prefer using
 (use-package haskell-mode
   :ensure t)
 
+(use-package lsp-mode
+  :ensure t
+  :hook ((haskell-mode . lsp))
+  :commands lsp)
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+(use-package flycheck
+  :ensure t)
+(setq
+  lsp-ui-sideline-enable t
+  lsp-fly-check-enable t)
+
+(use-package lsp-haskell
+  :ensure t
+  :config (setf lsp-haskell-server-path "haskell-language-server-wrapper"))
+
 (setq haskell-stylish-on-save t)
 (setq haskell-mode-stylish-haskell-path "ormolu")
 #+END_SRC
@@ -1284,20 +1312,11 @@ function to a key!
                (local-set-key (kbd "C-c b") 'insert-markdown-inline-math-block)) t)
 #+END_SRC
 ** org
+
+Org itself installed earlier
+
 #+BEGIN_SRC emacs-lisp
-(use-package org
-  :demand
-  :straight (org :tag "release_9.5")
-  :ensure t
-  :config
-  (org-babel-do-load-languages
-  'org-babel-load-languages
-        '((dot . t)
-           (ledger . t)
-           (emacs-lisp . t)
-           (shell . t)))
-  (setq org-startup-indented t)
-  (org-reload))
+
 (use-package ox-twbs
   :ensure t)
 (use-package evil-org
@@ -1366,7 +1385,7 @@ Customizes the structure templates
 Prevents editing invisible text
 
 #+begin_src emacs-lisp
-(setq org-catch-invisible-edits 'error)
+(setq org-fold-catch-invisible-edits 'error)
 (setq org-src-preserve-indentation nil)
 (setq org-edit-src-content-indentation 0)
 #+end_src
@@ -1438,8 +1457,8 @@ Adds any inherited tags to the immediate children.
     ("d" "Scheduled or Deadline" agenda
      "+DEADLINE+SCHEDULED"
      nil nil)
-    ("u" "Upcoming"
-     ((org-ql-block '(ts :to 62))))))
+    ("u" "Upcoming Events"
+     ((org-ql-block '(and (ts :from today :to +62) (tags "Event")))))))
 #+end_src
 
 Highlight the current line in agenda view
@@ -2114,8 +2133,10 @@ Create new Zettelkasten note
          (prev-note-title (first-line-of-buffer-or-name))
          (prev-note-link (concat "[[file:" (file-relative-name (buffer-file-name) org-zettelkasten-dir) "][" prev-note-title "]]")))
     (insert new-note-link)
+    (save-buffer)
     (find-file new-note-path)
-    (insert (concat (car kill-ring) "\n\nprevious:\n" prev-note-link))))
+    (insert (concat (car kill-ring) "\n\nprevious:\n" prev-note-link))
+    (org-zettelkasten-buffer-name)))
 #+end_src
 
 Functions for referencing notes
