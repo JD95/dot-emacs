@@ -92,8 +92,6 @@ installed. To ensure we install missing packages if they are missing.
 (eval-when-compile
   (require 'use-package))
 
-(package-refresh-contents)
-
 ; automatically compile Emacs Lisp libraries
 (use-package auto-compile
   :ensure t)
@@ -1099,12 +1097,6 @@ _SPC_ cancel
   (use-package magit :ensure t)
   (define-key custom-bindings-map (kbd "C-c m") 'magit-status))
 #+END_SRC
-** multiple-cursors
-#+BEGIN_SRC emacs-lisp
-  (define-key custom-bindings-map (kbd "C-c e")  'mc/edit-lines)
-  (define-key custom-bindings-map (kbd "C-c a")  'mc/mark-all-like-this)
-  (define-key custom-bindings-map (kbd "C-c n")  'mc/mark-next-like-this)
-#+END_SRC
 ** projectile
 
 Use a custom program for projectile's grep
@@ -1749,6 +1741,8 @@ This function will help randomly select a todo in the current tree.
      :transformer #'my-org-agenda-remove-recur)
   (:name "Objectives"
      :tag "Objective")
+  (:name "Meals"
+     :tag "Meal")
   (:name "Shower"
      :tag "Shower"
      :transformer #'my-org-agenda-remove-recur)
@@ -2047,7 +2041,7 @@ A utility for adding tags to zettlekausten notes
     name))
 
 (defun org-zettelkasten-append-tag (tag-file-name buff-name link-text)
-  (append-to-file (concat "\n[[file:../" buff-name "][" link-text "]]") nil
+  (append-to-file (concat "[[file:../" buff-name "][" link-text "]]") nil
                   tag-file-name))
 
 (defun first-line-of-buffer-or-name ()
@@ -2059,12 +2053,18 @@ A utility for adding tags to zettlekausten notes
   (interactive)
   (rename-buffer (first-line-of-buffer-or-name)))
 
+(defun org-zettelkasten-add-tag-if-missing (tag-file-name title)
+  (let* ((id (org-zettelkasten-get-file-id)))
+  (with-temp-buffer
+    (insert-file-contents tag-file-name)
+    (when (not (re-search-forward id nil t))
+      (org-zettelkasten-append-tag tag-file-name (concat id ".org") title)))))
+
 (defun org-zettelkasten-add-tag ()
   (interactive)
   (save-window-excursion
-    (org-zettelkasten-append-tag
+    (org-zettelkasten-add-tag-if-missing
       (org-zettelkasten-pick-tag)
-      (buffer-name)
       (first-line-of-buffer-or-name))))
 #+end_src
 
@@ -2165,6 +2165,31 @@ Functions for referencing notes
   )
 #+end_src
 
+A function for easy html export to blog
+
+#+begin_src emacs-lisp
+(defun org-zettelkasten-publish-to-blog ()
+  (interactive)
+  (let* ((input (buffer-file-name))
+        (id-regex (rx (1+ (in digit)) ".org"))
+        (id (substring input (string-match id-regex input) -4))
+        (old-buffer (buffer-name)))
+    (save-window-excursion
+      (org-zettelkasten-add-tag-if-missing
+       (concat org-zettelkasten-dir "/zettl-tags/blog-published.org")
+       (first-line-of-buffer-or-name))
+      (with-temp-buffer
+        (insert-buffer-substring old-buffer)
+         (beginning-of-buffer)
+         (insert "#+TITLE: ")
+        (org-html-export-as-html))
+      (switch-to-buffer "*Org HTML Export*")
+      (write-region
+       (point-min) (point-max)
+       (concat "d:/current-projects/blog/" id ".html"))
+      (kill-matching-buffers "\\*Org HTML Export\\*" nil t))))
+#+end_src
+
 A hydra for quickly calling zettlekausten functions
 
 #+begin_src emacs-lisp
@@ -2174,7 +2199,7 @@ A hydra for quickly calling zettlekausten functions
 ----------------------------------------------------------------------
 _n_: New Note   _g_: Grab ref   _t_: Add Tag              _s_: Search
 _c_: New Convo  _u_: Use Ref    _l_: List Tags            _e_: Links to this Note
-_b_: Branch     ^ ^             _C_: Copy Tags from Grep  ^ ^
+_b_: Branch     ^ ^             _C_: Copy Tags from Grep  _p_: Publish to Blog
 _r_: Rename Buffer
 "
   ("n" org-zettelkasten-new-note)
@@ -2191,6 +2216,7 @@ _r_: Rename Buffer
 
   ("g" org-zettelkasten-grab-ref)
   ("u" org-zettelkasten-use-ref)
+  ("p" org-zettelkasten-publish-to-blog)
 )
 
 (global-set-key (kbd "C-c z") #'hydra-zettelkasten/body)
@@ -2255,7 +2281,8 @@ _r_: Rename Buffer
   (require 'rust-mode)
 
   (defun rust-mode-setup ()
-    (cargo-minor-mode nil))
+    (cargo-minor-mode nil)
+    (flycheck-mode))
 
   (defun racer-mode-setup ()
     (eldoc-mode))
