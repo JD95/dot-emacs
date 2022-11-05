@@ -2034,6 +2034,20 @@ So like =Project Backlog/Some Project/= it refile to this sub header
 A utility for adding tags to zettlekausten notes
 
 #+begin_src emacs-lisp
+(defun org-zettelkasten-get-file-id ()
+  (let ((path (buffer-file-name)))
+  (with-temp-buffer
+    (insert path)
+    (beginning-of-buffer)
+    (while (re-search-forward
+            (rx (char alpha) ":/"
+                (1+ (1+ (char word)) "/")
+                (group (1+ digit))
+                ".org")
+           nil t)
+      (replace-match "\\1"))
+    (buffer-string))))
+
 (defun org-zettelkasten-pick-tag ()
   (let* ((tag-file-buffer (find-file (counsel-find-file (concat org-zettelkasten-dir "/zettl-tags/"))))
          (name (buffer-file-name tag-file-buffer)))
