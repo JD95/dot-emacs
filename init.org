@@ -748,6 +748,7 @@ enabled themes.
 
 (defun update-init-el ()
   (interactive)
+  (package-refresh-contents)
   ;; Open the configuration
   (find-file (concat user-emacs-directory "init.org"))
   ;; tangle it
@@ -2186,7 +2187,20 @@ A function for easy html export to blog
       (switch-to-buffer "*Org HTML Export*")
       (write-region
        (point-min) (point-max)
-       (concat "d:/current-projects/blog/" id ".html"))
+       (concat "d:/current-projects/blog/public/" id ".html"))
+      (with-temp-buffer
+        (insert-file-contents
+         (concat org-zettelkasten-dir "/zettl-tags/blog-published.org"))
+        (while (re-search-forward (rx "../" (group (1+ (in digit))) ".org") nil t)
+          (replace-match "\\1.html"))
+        (beginning-of-buffer)
+        (while (re-search-forward (rx "[[") nil t)
+          (replace-match "\n- [["))
+        (org-html-export-as-html))
+      (switch-to-buffer "*Org HTML Export*")
+      (write-region
+       (point-min) (point-max)
+       "d:/current-projects/blog/public/index.html")
       (kill-matching-buffers "\\*Org HTML Export\\*" nil t))))
 #+end_src
 
