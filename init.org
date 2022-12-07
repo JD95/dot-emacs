@@ -2071,7 +2071,8 @@ A utility for adding tags to zettlekausten notes
 (defun org-zettelkasten-add-tag-if-missing (tag-file-name title)
   (let* ((id (org-zettelkasten-get-file-id)))
   (with-temp-buffer
-    (insert-file-contents tag-file-name)
+    (when (file-exists-p tag-file-name)
+      (insert-file-contents tag-file-name))
     (when (not (re-search-forward id nil t))
       (org-zettelkasten-append-tag tag-file-name (concat id ".org") title)))))
 
