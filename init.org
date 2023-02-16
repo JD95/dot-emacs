@@ -1128,6 +1128,26 @@ Enable projectile mode everywhere.
     (yas-global-mode 1)
 )
 #+end_src
+** lsp
+
+
+#+begin_src emacs-lisp
+(use-package lsp-mode
+  :ensure t
+  :hook ((haskell-mode . lsp) (dhall-mode .lsp))
+  :commands lsp)
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+(use-package flycheck
+  :ensure t)
+(setq
+  lsp-ui-sideline-enable t
+  lsp-fly-check-enable t)
+(use-package lsp-haskell
+  :ensure t
+  :config (setf lsp-haskell-server-path "haskell-language-server-wrapper"))
+#+end_src
 
 * Major Modes
 ** agda
@@ -1181,26 +1201,18 @@ the echo area. Haskell has several indentation modes - I prefer using
 (use-package haskell-mode
   :ensure t)
 
-(use-package lsp-mode
-  :ensure t
-  :hook ((haskell-mode . lsp))
-  :commands lsp)
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode)
-(use-package flycheck
-  :ensure t)
-(setq
-  lsp-ui-sideline-enable t
-  lsp-fly-check-enable t)
-
-(use-package lsp-haskell
-  :ensure t
-  :config (setf lsp-haskell-server-path "haskell-language-server-wrapper"))
-
 (setq haskell-stylish-on-save t)
 (setq haskell-mode-stylish-haskell-path "ormolu")
 #+END_SRC
+** dhall
+#+begin_src emacs-lisp
+(use-package dhall-mode
+  :ensure t
+  :config
+   (setq
+     dhall-format-arguments (\` ("--ascii"))
+     dhall-use-header-line nil))
+#+end_src
 ** html
 
 #+begin_src emacs-lisp
@@ -1520,6 +1532,9 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
     ("UNVERIFIED" . (:foreground "indian red"))
     ("HOLD" . (:foreground "yellow"))
     ("FAILED" . (:foreground "grey"))
+    ("BUY" . (:foreground "red"))
+    ("ORDERD" . (:foreground "orange"))
+    ("BOUGHT" . (:foreground "green"))
     ("CANCELED" . (:foreground "grey"))
     ("VERIFIED" . (:foreground "green"))
     ("ANSWERED" . (:foreground "green"))))
@@ -1528,6 +1543,7 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
   '((sequence "TODO(t)" "|" "DONE(d)")
     (sequence "DEVELOPING(v)" "READY(y)" "PROGRESSING(p)" "HOLD(h)" "|" "FINISHED(f)")
     (sequence "UNKNOWN(u)" "RESEARCHING(r)" "|" "ANSWERED(a)")
+    (sequence "BUY(b)" "ORDERED(o)" "|" "BOUGHT(h)")
     (sequence "|" "FAILED(f)" "CANCELED(c)")))
 #+END_SRC
 
@@ -2013,7 +2029,7 @@ So like =Project Backlog/Some Project/= it refile to this sub header
 
 #+begin_src emacs-lisp
 (setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
-(setq org-refile-use-outline-path t)
+(setq org-refile-use-outline-path 'file)
 #+end_src
 *** ref
 #+BEGIN_SRC emacs-lisp
@@ -2262,6 +2278,13 @@ _r_: Rename Buffer
 
   (add-hook 'purescript-mode-hook #'purescript-setup))
 #+END_SRC
+** powershell
+#+begin_src emacs-lisp
+(use-package powershell-mode
+  :ensure t
+  :config
+   (setq powershell-indent 2))
+#+end_src
 ** prolog
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
