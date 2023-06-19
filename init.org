@@ -151,6 +151,19 @@ Some packages need to be installed manually, so we add a custom folder to the lo
 (auto-compile-on-save-mode)
 #+END_SRC
 
+#+begin_src emacs-lisp
+(defun config-require (symbol)
+  (if (boundp symbol)
+      (if (eval symbol) "yes" "no")
+      (progn
+        (write-region
+          (concat "(setq " (symbol-name symbol) " nil)")
+          nil
+          (concat user-emacs-directory "settings.el")
+          'append)
+         "no")))
+#+end_src
+
 ** System
 *** macOS
 
@@ -900,18 +913,16 @@ These are the configurations for evil mode editing.
 Flyspell offers on-the-fly spell checking. We can enable flyspell for all
 text-modes with this snippet.
 
-#+BEGIN_SRC emacs-lisp
-(when config-use-flyspell
-  (add-hook 'text-mode-hook 'turn-on-flyspell))
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-flyspell)
+(add-hook 'text-mode-hook 'turn-on-flyspell)
 #+END_SRC
 
 To use flyspell for programming there is =flyspell-prog-mode=, that only
 enables spell checking for comments and strings. We can enable it for all
 programming modes using the =prog-mode-hook=.
 
-#+BEGIN_SRC emacs-lisp
-(when config-use-flyspell
-  (add-hook 'prog-mode-hook 'flyspell-prog-mode))
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-flyspel)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
 #+END_SRC
 
 When working with several languages, we should be able to cycle through
@@ -1093,10 +1104,9 @@ _SPC_ cancel
 #+END_SRC
 ** magit
 
-#+BEGIN_SRC emacs-lisp
-(when config-use-magit
-  (use-package magit :ensure t)
-  (define-key custom-bindings-map (kbd "C-c m") 'magit-status))
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-magit)
+(use-package magit :ensure t)
+(define-key custom-bindings-map (kbd "C-c m") 'magit-status)
 #+END_SRC
 ** projectile
 
@@ -1132,8 +1142,7 @@ Enable projectile mode everywhere.
 * Major Modes
 ** agda
 
-#+begin_src emacs-lisp
-(when config-use-agda
+#+begin_src emacs-lisp :tangle (config-require 'use-agda)
 (load-file (let ((coding-system-for-read 'utf-8))
     (shell-command-to-string "agda-mode.exe locate")))
 
@@ -1150,7 +1159,6 @@ Enable projectile mode everywhere.
     (set-face-foreground 'agda2-highlight-primitive-face "dodger blue")
     (set-face-foreground 'agda2-highlight-function-face "dodger blue")
     (set-face-foreground 'agda2-highlight-postulate-face "dodger blue")))
-)
 #+end_src
 
 ** bash
@@ -1177,7 +1185,7 @@ accordance with ~comint-buffer-maximum-size~, which defaults to 1024 lines.
 the echo area. Haskell has several indentation modes - I prefer using
 =haskell-indent=.
 
-#+BEGIN_SRC emacs-lisp :tangle (if config-use-haskell "yes" "no")
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-haskell)
 (use-package haskell-mode
   :ensure t)
 
@@ -1214,7 +1222,7 @@ the echo area. Haskell has several indentation modes - I prefer using
 #+end_src
 
 ** idris
-#+BEGIN_SRC emacs-lisp :tangle (if config-use-idris "yes" "no")
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-idris)
 (use-package idris-mode :ensure t)
 (add-to-list 'exec-path idris-location)
 #+END_SRC
@@ -2251,22 +2259,21 @@ _r_: Rename Buffer
 #+end_src
 
 ** purescript
-#+BEGIN_SRC emacs-lisp
-(when config-use-purescript
-  (use-package purescript-mode
-    :ensure t)
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-purescript)
+(use-package purescript-mode
+  :ensure t)
 
-  (defun purescript-setup ()
-    (turn-on-purescript-indentation))
+(defun purescript-setup ()
+  (turn-on-purescript-indentation))
 
-  (add-hook 'purescript-mode-hook #'purescript-setup))
+(add-hook 'purescript-mode-hook #'purescript-setup)
 #+END_SRC
 ** prolog
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
 #+end_src
 ** python
-#+BEGIN_SRC emacs-lisp :tangle (if config-use-python "yes" "no")
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-python)
 (use-package elpy
   :ensure t)
 (use-package py-autopep8
@@ -2280,52 +2287,52 @@ _r_: Rename Buffer
 #+END_SRC
 ** php
 
-#+begin_src emacs-lisp :tangle (if config-use-php "yes" "no")
+#+begin_src emacs-lisp :tangle (config-require 'use-php)
 (use-package php-mode :ensure t)
 #+end_src
 ** javascript
-#+BEGIN_SRC emacs-lisp :tangle (if config-use-javascript "yes" "no")
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-javascript)
 (use-package js2-mode :ensure t)
 #+END_SRC
 ** nix
-#+BEGIN_SRC emacs-lisp :tangle (if config-use-nix "yes" "no")
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-nix)
 (use-package nix-mode :ensure t)
 #+END_SRC
 ** rust
 
-#+BEGIN_SRC emacs-lisp
-(when config-use-rust
-  (use-package rust-mode
-    :ensure t)
-  (use-package racer
-    :ensure t)
-  (use-package flycheck-rust
-    :ensure t)
-  (use-package flycheck-rust
-    :ensure t)
-  (use-package cargo
-    :ensure t)
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-rust)
+(use-package rust-mode
+  :ensure t)
+(use-package racer
+  :ensure t)
+(use-package flycheck-rust
+  :ensure t)
+(use-package flycheck-rust
+  :ensure t)
+(use-package cargo
+  :ensure t)
 
-  (require 'rust-mode)
+(require 'rust-mode)
 
-  (defun rust-mode-setup ()
-    (cargo-minor-mode nil)
-    (flycheck-mode))
+(defun rust-mode-setup ()
+  (cargo-minor-mode nil)
+  (flycheck-mode))
 
-  (defun racer-mode-setup ()
-    (eldoc-mode))
+(defun racer-mode-setup ()
+  (eldoc-mode))
 
-  (add-hook 'rust-mode-hook #'rust-mode-setup)
+(add-hook 'rust-mode-hook #'rust-mode-setup)
 
-  (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
-  (define-key rust-mode-map (kbd "C-?") #'racer-describe)
-  (setq company-tooltip-align-annotations t)
+(define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+(define-key rust-mode-map (kbd "C-?") #'racer-describe)
+(setq company-tooltip-align-annotations t)
 
-  (setq rust-format-on-save t))
+(setq rust-format-on-save t)
 #+END_SRC
+
 ** z3
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle (config-require 'use-z3)
 (use-package z3-mode
   :ensure t)
 #+end_src
