@@ -21,3 +21,12 @@ config.json
 /eshell/history
 /tramp
 /transient/history.el
+*.~undo-tree~
+.org-id-locations
+/eshell
+.lsp-session-*
+%backup%~
+/straight
+/var
+/org-persist
+projects

@@ -51,8 +51,7 @@ This settings will help make the rest of the config run smoother.
 Lexical scoping is faster than dynamic scoping.
 
 #+BEGIN_SRC emacs-lisp
-;;; -*- lexical-binding: t; -*-
-(setq lexical-binding t)
+;;; -*- lexical-binding: t; byte-compile-warnings: (not docstrings); -*-
 #+END_SRC
 
 ** Packages
@@ -91,6 +90,17 @@ installed. To ensure we install missing packages if they are missing.
 #+BEGIN_SRC emacs-lisp
 (eval-when-compile
   (require 'use-package))
+
+(use-package org
+  :ensure t
+  :config
+  (org-babel-do-load-languages
+  'org-babel-load-languages
+        '((dot . t)
+           (emacs-lisp . t)
+           (shell . t)))
+  (setq org-startup-indented t)
+  (org-reload))
 
 ; automatically compile Emacs Lisp libraries
 (use-package auto-compile
@@ -151,19 +161,6 @@ Some packages need to be installed manually, so we add a custom folder to the lo
 (auto-compile-on-save-mode)
 #+END_SRC
 
-#+begin_src emacs-lisp
-(defun config-require (symbol)
-  (if (boundp symbol)
-      (if (eval symbol) "yes" "no")
-      (progn
-        (write-region
-          (concat "(setq " (symbol-name symbol) " nil)")
-          nil
-          (concat user-emacs-directory "settings.el")
-          'append)
-         "no")))
-#+end_src
-
 ** System
 *** macOS
 
@@ -174,11 +171,11 @@ using the =Command=-key as the =Meta=-key.
 
 #+BEGIN_SRC emacs-lisp
 (when (memq window-system '(mac ns))
-  (setq select-enable-clipboard t)
-  (setq mac-option-key-is-meta nil)
-  (setq mac-command-key-is-meta t)
-  (setq mac-command-modifier 'meta)
-  (setq mac-option-modifier nil)
+  (defvar select-enable-clipboard t)
+  (defvar mac-option-key-is-meta nil)
+  (defvar mac-command-key-is-meta t)
+  (defvar mac-command-modifier 'meta)
+  (defvar mac-option-modifier nil)
   (exec-path-from-shell-initialize)
   (grep-compute-defaults)
   (when (fboundp 'mac-auto-operator-composition-mode)
@@ -748,17 +745,6 @@ enabled themes.
 ** Updating Config
 
 #+BEGIN_SRC emacs-lisp
-(use-package org
-  :ensure t
-  :config
-  (org-babel-do-load-languages
-  'org-babel-load-languages
-        '((dot . t)
-           (emacs-lisp . t)
-           (shell . t)))
-  (setq org-startup-indented t)
-  (org-reload))
-
 (defun update-init-el ()
   (interactive)
   (package-refresh-contents)
@@ -921,7 +907,7 @@ To use flyspell for programming there is =flyspell-prog-mode=, that only
 enables spell checking for comments and strings. We can enable it for all
 programming modes using the =prog-mode-hook=.
 
-#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-flyspel)
+#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-flyspell)
 (add-hook 'prog-mode-hook 'flyspell-prog-mode)
 #+END_SRC
 
@@ -1668,7 +1654,8 @@ Sets all immediate children of header to set deadline for sibling 1 day after co
 These org-edna functions change only the time on a schedule or deadline.
 
 #+begin_src emacs-lisp
-(defun org-edna-set-time (type _last-entry args)
+(defun org-edna-set-time (type last-entry args)
+  (ignore last-entry)
   (let* ((new-time (nth 0 args))
          (prev-ts (org-edna--get-planning-info type))
          (time-val (split-string new-time ":"))
@@ -1683,11 +1670,6 @@ These org-edna functions change only the time on a schedule or deadline.
 
 (defun org-edna-action/deadline-time! (last-entry &rest args)
   (org-edna-set-time 'deadline last-entry args))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun org-edna-action/away-from-home! (last-entry &rest args)
-    ())
 #+end_src
 
 **** todo navigation
@@ -2063,7 +2045,7 @@ A utility for adding tags to zettlekausten notes
   (let ((path (buffer-file-name)))
   (with-temp-buffer
     (insert path)
-    (beginning-of-buffer)
+    (goto-char (point-min))
     (while (re-search-forward
             (rx (char alpha) ":/"
                 (1+ (1+ (char word)) "/")
@@ -2220,7 +2202,7 @@ A function for easy html export to blog
        (first-line-of-buffer-or-name))
       (with-temp-buffer
         (insert-buffer-substring old-buffer)
-         (beginning-of-buffer)
+         (goto-char (point-min))
          (insert "#+TITLE: ")
         (org-html-export-as-html))
       (switch-to-buffer "*Org HTML Export*")
@@ -2232,7 +2214,7 @@ A function for easy html export to blog
          (concat org-zettelkasten-dir "/zettl-tags/blog-published.org"))
         (while (re-search-forward (rx "../" (group (1+ (in digit))) ".org") nil t)
           (replace-match "\\1.html"))
-        (beginning-of-buffer)
+        (goto-char (point-min))
         (while (re-search-forward (rx "[[") nil t)
           (replace-match "\n- [["))
         (org-html-export-as-html))

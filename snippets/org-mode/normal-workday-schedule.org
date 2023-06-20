@@ -1,0 +1,27 @@
+# -*- mode: snippet -*-
+# name: normal-workday-schedule
+# key: <nws
+# --
+
+** TODO Truvada
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Put on Toe Spacers
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Eat Protein Bar
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Brush Teeth
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Eat Yogurt
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Eat Lunch
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Brush Teeth
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Drink Protein Shake
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Dinner
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Brush Teeth
+  SCHEDULED: `(org-today-timestamp)`
+** TODO Put in Retainer
+  SCHEDULED: `(org-today-timestamp)`
