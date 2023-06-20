@@ -2072,7 +2072,7 @@ A utility for adding tags to zettlekausten notes
     name))
 
 (defun org-zettelkasten-append-tag (tag-file-name buff-name link-text)
-  (append-to-file (concat "[[file:../" buff-name "][" link-text "]]") nil
+  (append-to-file (concat "[[file:../" buff-name "][\n" link-text "]]") nil
                   tag-file-name))
 
 (defun first-line-of-buffer-or-name ()
