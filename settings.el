@@ -24,10 +24,10 @@
 (setq zettelkasten-people-path "e:/nextcloud/Zettlekasten/17062020123421.org")
 (setq z3-solver-cmd "z3")
 
-(setq use-agda nil)
+(setq use-agda t)
 (setq use-z3 nil)
 (setq use-rust nil)
-(setq use-nix nil)
+(setq use-nix t)
 (setq use-javascript nil)
 (setq use-php nil)
 (setq use-python nil)
