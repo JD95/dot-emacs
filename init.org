@@ -1511,9 +1511,19 @@ Auto detect what kind of todo item is being completed and call the right functio
         (read-char "Task completed! Press any key to continue...") nil 1)
       (apply orig all))))
 
+(defun org-call-header-action-advice (orig &rest all)
+  (interactive)
+  (eval (car (read-from-string
+    (format "(progn %s)" (org-entry-get (point) "action")))))
+  (apply orig all))
+
 (advice-add
  #'org-todo :around
  #'detect-org-recur-advice)
+
+(advice-add
+ #'org-todo :around
+ #'org-call-header-action-advice)
 
 (setq org-log-done 'time)
 #+end_src
