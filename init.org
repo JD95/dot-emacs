@@ -1519,11 +1519,14 @@ Auto detect what kind of todo item is being completed and call the right functio
 #+begin_src emacs-lisp
 (defun org-call-header-action-advice (orig &rest all)
   (interactive)
-  (let ((string-action (format "(progn %s)" (org-entry-get (point) "action"))))
-  ; Call the action and it's result says if org-todo
-  ; should be called
-  (when (eval (car (read-from-string string-action)))
-    (apply orig all))))
+  (let ((action-property (org-entry-get (point) "action")))
+    (if action-property
+      (let ((string-action (format "(progn %s)" action-property)))
+        ; Call the action and it's result says if org-todo
+        ; should be called
+        (when (eval (car (read-from-string string-action)))
+          (apply orig all)))
+      (apply orig all))))
 
 (advice-add
  #'org-todo :around
