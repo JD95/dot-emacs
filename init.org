@@ -1528,6 +1528,25 @@ Auto detect what kind of todo item is being completed and call the right functio
 (setq org-log-done 'time)
 #+end_src
 
+***** actions
+
+#+begin_src emacs-lisp
+(defun org-todo-action-iter-property (property func)
+  (let ((value (org-entry-get (point) property)))
+    (org-entry-put (point) property (funcall func value))))
+
+(defun org-todo-action-shift-next-date (num-days)
+  (progn
+    (org-todo-action-iter-property
+     "next-date"
+     (lambda (date)
+       (with-temp-buffer
+         (insert date)
+         (goto-char 10) ;; This would be the day in a timestamp
+         (org-timestamp-up num-days) ;; Shift this many days
+         (buffer-string))))))
+#+end_src
+
 **** todo editing
 
 These functions helps clear out done tasks in an org file
