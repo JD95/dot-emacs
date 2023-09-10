@@ -1513,8 +1513,9 @@ Auto detect what kind of todo item is being completed and call the right functio
 
 (defun org-call-header-action-advice (orig &rest all)
   (interactive)
-  (eval (car (read-from-string
-    (format "(progn %s)" (org-entry-get (point) "action")))))
+  (when (string= "DONE" (nth 2 (org-heading-components)))
+    (eval (car (read-from-string
+        (format "(progn %s)" (org-entry-get (point) "action"))))))
   (apply orig all))
 
 (advice-add
@@ -1532,11 +1533,12 @@ Auto detect what kind of todo item is being completed and call the right functio
 
 #+begin_src emacs-lisp
 (defun org-todo-action-iter-property (property func)
-  (let ((value (org-entry-get (point) property)))
-    (org-entry-put (point) property (funcall func value))))
+  (save-excursion
+    (let ((value (org-entry-get (point) property)))
+      (org-entry-put (point) property (funcall func value)))))
 
 (defun org-todo-action-shift-next-date (num-days)
-  (progn
+  (save-excursion
     (org-todo-action-iter-property
      "next-date"
      (lambda (date)
@@ -1545,6 +1547,13 @@ Auto detect what kind of todo item is being completed and call the right functio
          (goto-char 10) ;; This would be the day in a timestamp
          (org-timestamp-up num-days) ;; Shift this many days
          (buffer-string))))))
+
+(defun org-todo-plan-ahead (thing num-days)
+  (progn
+    (org-todo-action-shift-next-date num-days)
+    (let* ((new-date (save-excursion (org-entry-get (point) "next-date")))
+          (new-heading (format "Plan %s for %s" thing new-date)))
+      (org-edit-headline new-heading))))
 #+end_src
 
 **** todo editing
