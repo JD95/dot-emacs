@@ -2213,6 +2213,7 @@ _r_: Rename Buffer
 ** prolog
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+(setq prolog-indent-width 2)
 #+end_src
 ** python
 #+BEGIN_SRC emacs-lisp :tangle (config-require 'use-python)
