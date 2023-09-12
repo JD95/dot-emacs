@@ -1452,7 +1452,6 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
 (org-edna-mode)
 #+end_src
 
-
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keyword-faces
   '(("TODO" . (:foreground "red"))
@@ -1497,6 +1496,7 @@ Sets priority color faces
 #+BEGIN_SRC emacs-lisp
 (setq org-log-into-drawer 'LOGBOOK)
 (setq org-todo-heirarchical-statistics nil)
+(setq org-log-done 'time)
 #+END_SRC
 
 Auto detect what kind of todo item is being completed and call the right function
@@ -1514,8 +1514,78 @@ Auto detect what kind of todo item is being completed and call the right functio
 (advice-add
  #'org-todo :around
  #'detect-org-recur-advice)
+#+end_src
 
-(setq org-log-done 'time)
+#+begin_src emacs-lisp
+(defun org-call-header-action-advice (orig &rest all)
+  (interactive)
+  (let ((action-property (org-entry-get (point) "action")))
+    (if action-property
+      (let ((string-action (format "(progn %s)" action-property)))
+        ; Call the action and it's result says if org-todo
+        ; should be called
+        (when (eval (car (read-from-string string-action)))
+          (apply orig all)))
+      (apply orig all))))
+
+(advice-add
+ #'org-todo :around
+ #'org-call-header-action-advice)
+#+end_src
+
+***** actions
+
+Helpers
+
+#+begin_src emacs-lisp
+(defun org-todo-action-iter-property (property func)
+  (save-excursion
+    (let ((value (org-entry-get (point) property)))
+      (org-entry-put (point) property (funcall func value)))))
+
+(defun org-todo-inc-mod (property mod-base)
+  (org-todo-action-iter-property property
+    (lambda (x)
+      (number-to-string (mod (+ (string-to-number x) 1) mod-base)))))
+
+(defun org-todo-action-shift-next-date (num-days)
+  (save-excursion
+    (org-todo-action-iter-property
+     "next-date"
+     (lambda (date)
+       (with-temp-buffer
+         (insert date)
+         (goto-char 10) ;; This would be the day in a timestamp
+         (org-timestamp-up num-days) ;; Shift this many days
+         (buffer-string))))))
+#+end_src
+
+Usable actions
+
+#+begin_src emacs-lisp
+(defun org-todo-plan-ahead (thing num-days)
+  (when (string= "DONE" (nth 2 (org-heading-components)))
+    (progn
+      (org-todo-action-shift-next-date num-days)
+      (let* ((new-date (save-excursion (org-entry-get (point) "next-date")))
+            (new-heading (format "Plan %s for %s" thing new-date)))
+        (org-edit-headline new-heading))
+       'continue)))
+
+(defun org-todo-count-n (n-times)
+  (save-excursion
+    (if (string= "TODO" (nth 2 (org-heading-components)))
+      (progn
+        (org-todo-inc-mod "count" n-times)
+        (let* ((new-count (save-excursion (org-entry-get (point) "count")))
+               (old-heading (nth 4 (org-heading-components)))
+               (heading-text (string-trim-right (car (split-string old-heading "\\["))))
+               (new-heading (format "%s [%s/%d]" heading-text new-count n-times))
+               (should-continue (string= "0" new-count)))
+          (progn
+            (org-edit-headline (if should-continue heading-text new-heading))
+            should-continue)))
+       'continue)))
 #+end_src
 
 **** todo editing
