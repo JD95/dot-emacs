@@ -1462,7 +1462,8 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
     ("HOLD" . (:foreground "yellow"))
     ("FAILED" . (:foreground "grey"))
     ("BUY" . (:foreground "pink"))
-    ("ORDERD" . (:foreground "orange"))
+    ("SHOPPING" . (:foreground "orange"))
+    ("ORDERED" . (:foreground "sky blue"))
     ("BOUGHT" . (:foreground "green"))
     ("CANCELED" . (:foreground "grey"))
     ("VERIFIED" . (:foreground "green"))
@@ -1472,7 +1473,7 @@ Edna is a package that adds extensible conditions and dependencies for todo stat
   '((sequence "TODO(t)" "|" "DONE(d)")
     (sequence "DEVELOPING(v)" "READY(y)" "PROGRESSING(p)" "HOLD(h)" "|" "FINISHED(f)")
     (sequence "UNKNOWN(u)" "RESEARCHING(r)" "|" "ANSWERED(a)")
-    (sequence "BUY(b)" "ORDERED(o)" "|" "BOUGHT(h)")
+    (sequence "BUY(b)" "SHOPPING(s)" "ORDERED(o)" "|" "BOUGHT(h)")
     (sequence "|" "FAILED(a)" "CANCELED(c)")))
 #+END_SRC
 
@@ -1563,14 +1564,14 @@ Helpers
 Usable actions
 
 #+begin_src emacs-lisp
-(defun org-todo-plan-ahead (thing num-days)
-  (when (string= "DONE" (nth 2 (org-heading-components)))
-    (progn
+(defun org-todo-plan-for (thing num-days)
+  (progn
+    (when (string= "DONE" (nth 2 (org-heading-components)))
       (org-todo-action-shift-next-date num-days)
       (let* ((new-date (save-excursion (org-entry-get (point) "next-date")))
             (new-heading (format "Plan %s for %s" thing new-date)))
-        (org-edit-headline new-heading))
-       'continue)))
+        (org-edit-headline new-heading)))
+    'continue))
 
 (defun org-todo-count-n (n-times)
   (save-excursion
@@ -1748,31 +1749,17 @@ This function will help randomly select a todo in the current tree.
   (nth 0 (split-string str "|")))
 
 (setq org-super-agenda-groups '(
-  (:name "Time Sensitive"
-     :time-grid t
-     :tag "TimeSensitive"
-     :transformer #'my-org-agenda-remove-recur)
-  (:name "Objectives"
-     :tag "Objective")
-  (:name "Meals"
-     :tag "Meal")
-  (:name "Shower"
-     :tag "Shower"
-     :transformer #'my-org-agenda-remove-recur)
   (:name "Short Term Wellfare"
      :priority "A"
      :transformer #'my-org-agenda-remove-recur)
   (:name "Long Term Wellfare"
      :priority "B"
      :transformer #'my-org-agenda-remove-recur)
-  (:name "Validation"
+  (:name "Relationships"
      :priority "C"
      :transformer #'my-org-agenda-remove-recur)
   (:name "Actualization"
      :priority "D"
-     :transformer #'my-org-agenda-remove-recur)
-  (:name "Reading"
-     :priority "E"
      :transformer #'my-org-agenda-remove-recur)
   (:name "Refinement"
      :priority "F"
