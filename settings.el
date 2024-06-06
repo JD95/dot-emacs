@@ -26,7 +26,7 @@
 
 (setq use-agda t)
 (setq use-z3 nil)
-(setq use-rust nil)
+(setq use-rust t)
 (setq use-nix t)
 (setq use-javascript nil)
 (setq use-php nil)

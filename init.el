@@ -649,6 +649,23 @@ _SPC_ cancel
   :ensure t
   :config (setf lsp-haskell-server-path "haskell-language-server-wrapper"))
 
+(load-file (let ((coding-system-for-read 'utf-8))
+    (shell-command-to-string "agda-mode.exe locate")))
+
+(require 'agda-input)
+(add-hook 'text-mode-hook (lambda () (set-input-method "Agda")))
+(add-hook 'org-mode-hook (lambda () (set-input-method "Agda")))
+(agda-input-setup)
+
+(add-hook 'agda2-mode-hook
+  (lambda ()
+    (interactive)
+    (set-face-foreground 'agda2-highlight-datatype-face "dodger blue")
+    (set-face-foreground 'agda2-highlight-primitive-type-face "dodger blue")
+    (set-face-foreground 'agda2-highlight-primitive-face "dodger blue")
+    (set-face-foreground 'agda2-highlight-function-face "dodger blue")
+    (set-face-foreground 'agda2-highlight-postulate-face "dodger blue")))
+
 (add-hook 'compilation-filter-hook 'comint-truncate-buffer)
 
 (use-package graphviz-dot-mode
@@ -823,6 +840,8 @@ math-block around the region."
   '(("!" "Expired Deadlines" tags-todo
      "+DEADLINE<\"<today>\"/TODO|PROGRESSING"
      nil nil)
+    ("p" "In Progress" tags-todo
+     "/PROGRESSING|RESEARCHING|SHOPPING")
     ("d" "Scheduled or Deadline" agenda
      "+DEADLINE+SCHEDULED"
      nil nil)
@@ -865,7 +884,8 @@ math-block around the region."
     ("HOLD" . (:foreground "yellow"))
     ("FAILED" . (:foreground "grey"))
     ("BUY" . (:foreground "pink"))
-    ("ORDERD" . (:foreground "orange"))
+    ("SHOPPING" . (:foreground "orange"))
+    ("ORDERED" . (:foreground "sky blue"))
     ("BOUGHT" . (:foreground "green"))
     ("CANCELED" . (:foreground "grey"))
     ("VERIFIED" . (:foreground "green"))
@@ -875,7 +895,7 @@ math-block around the region."
   '((sequence "TODO(t)" "|" "DONE(d)")
     (sequence "DEVELOPING(v)" "READY(y)" "PROGRESSING(p)" "HOLD(h)" "|" "FINISHED(f)")
     (sequence "UNKNOWN(u)" "RESEARCHING(r)" "|" "ANSWERED(a)")
-    (sequence "BUY(b)" "ORDERED(o)" "|" "BOUGHT(h)")
+    (sequence "BUY(b)" "SHOPPING(s)" "ORDERED(o)" "|" "BOUGHT(h)")
     (sequence "|" "FAILED(a)" "CANCELED(c)")))
 
 (setq org-priority-faces
@@ -893,6 +913,7 @@ math-block around the region."
 
 (setq org-log-into-drawer 'LOGBOOK)
 (setq org-todo-heirarchical-statistics nil)
+(setq org-log-done 'time)
 
 (defun detect-org-recur-advice (orig &rest all)
   (interactive)
@@ -907,7 +928,65 @@ math-block around the region."
  #'org-todo :around
  #'detect-org-recur-advice)
 
-(setq org-log-done 'time)
+(defun org-call-header-action-advice (orig &rest all)
+  (interactive)
+  (let ((action-property (org-entry-get (point) "action")))
+    (if action-property
+      (let ((string-action (format "(progn %s)" action-property)))
+        ; Call the action and it's result says if org-todo
+        ; should be called
+        (when (eval (car (read-from-string string-action)))
+          (apply orig all)))
+      (apply orig all))))
+
+(advice-add
+ #'org-todo :around
+ #'org-call-header-action-advice)
+
+(defun org-todo-action-iter-property (property func)
+  (save-excursion
+    (let ((value (org-entry-get (point) property)))
+      (org-entry-put (point) property (funcall func value)))))
+
+(defun org-todo-inc-mod (property mod-base)
+  (org-todo-action-iter-property property
+    (lambda (x)
+      (number-to-string (mod (+ (string-to-number x) 1) mod-base)))))
+
+(defun org-todo-action-shift-next-date (num-days)
+  (save-excursion
+    (org-todo-action-iter-property
+     "next-date"
+     (lambda (date)
+       (with-temp-buffer
+         (insert date)
+         (goto-char 10) ;; This would be the day in a timestamp
+         (org-timestamp-up num-days) ;; Shift this many days
+         (buffer-string))))))
+
+(defun org-todo-plan-for (thing num-days)
+  (progn
+    (when (string= "DONE" (nth 2 (org-heading-components)))
+      (org-todo-action-shift-next-date num-days)
+      (let* ((new-date (save-excursion (org-entry-get (point) "next-date")))
+            (new-heading (format "Plan %s for %s" thing new-date)))
+        (org-edit-headline new-heading)))
+    'continue))
+
+(defun org-todo-count-n (n-times)
+  (save-excursion
+    (if (string= "TODO" (nth 2 (org-heading-components)))
+      (progn
+        (org-todo-inc-mod "count" n-times)
+        (let* ((new-count (save-excursion (org-entry-get (point) "count")))
+               (old-heading (nth 4 (org-heading-components)))
+               (heading-text (string-trim-right (car (split-string old-heading "\\["))))
+               (new-heading (format "%s [%s/%d]" heading-text new-count n-times))
+               (should-continue (string= "0" new-count)))
+          (progn
+            (org-edit-headline (if should-continue heading-text new-heading))
+            should-continue)))
+       'continue)))
 
 (defun org-map-tasks (action state)
   (org-map-entries
@@ -1031,31 +1110,17 @@ math-block around the region."
   (nth 0 (split-string str "|")))
 
 (setq org-super-agenda-groups '(
-  (:name "Time Sensitive"
-     :time-grid t
-     :tag "TimeSensitive"
-     :transformer #'my-org-agenda-remove-recur)
-  (:name "Objectives"
-     :tag "Objective")
-  (:name "Meals"
-     :tag "Meal")
-  (:name "Shower"
-     :tag "Shower"
-     :transformer #'my-org-agenda-remove-recur)
   (:name "Short Term Wellfare"
      :priority "A"
      :transformer #'my-org-agenda-remove-recur)
   (:name "Long Term Wellfare"
      :priority "B"
      :transformer #'my-org-agenda-remove-recur)
-  (:name "Validation"
+  (:name "Relationships"
      :priority "C"
      :transformer #'my-org-agenda-remove-recur)
   (:name "Actualization"
      :priority "D"
-     :transformer #'my-org-agenda-remove-recur)
-  (:name "Reading"
-     :priority "E"
      :transformer #'my-org-agenda-remove-recur)
   (:name "Refinement"
      :priority "F"
@@ -1222,10 +1287,7 @@ math-block around the region."
 
 (setq org-highlight-latex-and-related '(latex script entities))
 (setq org-latex-pdf-process
-    '("bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
-      "bash -c \"bibtex %b\""
-      "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
-      "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""))
+      '("ubuntu.exe run -u jeff \"/nix/var/nix/profiles/default/bin/nix-shell --command \\\"lualatex -ineraction -nonstopmode -output-directory %o %f\\\" /home/jeff/shell.nix\""))
 
 (setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
 (setq org-refile-use-outline-path 'file)
@@ -1427,6 +1489,37 @@ _r_: Rename Buffer
    (setq powershell-indent 2))
 
 (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+(setq prolog-indent-width 2)
+
+(use-package nix-mode :ensure t)
+
+(use-package rust-mode
+  :ensure t)
+(use-package racer
+  :ensure t)
+(use-package flycheck-rust
+  :ensure t)
+(use-package flycheck-rust
+  :ensure t)
+(use-package cargo
+  :ensure t)
+
+(require 'rust-mode)
+
+(defun rust-mode-setup ()
+  (cargo-minor-mode nil)
+  (flycheck-mode))
+
+(defun racer-mode-setup ()
+  (eldoc-mode))
+
+(add-hook 'rust-mode-hook #'rust-mode-setup)
+
+(define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+(define-key rust-mode-map (kbd "C-?") #'racer-describe)
+(setq company-tooltip-align-annotations t)
+
+(setq rust-format-on-save t)
 
 (define-minor-mode custom-bindings-mode
   "A mode that activates custom-bindings."

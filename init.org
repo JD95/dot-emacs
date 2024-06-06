@@ -1395,6 +1395,8 @@ Adds any inherited tags to the immediate children.
   '(("!" "Expired Deadlines" tags-todo
      "+DEADLINE<\"<today>\"/TODO|PROGRESSING"
      nil nil)
+    ("p" "In Progress" tags-todo
+     "/PROGRESSING|RESEARCHING|SHOPPING")
     ("d" "Scheduled or Deadline" agenda
      "+DEADLINE+SCHEDULED"
      nil nil)
@@ -1767,6 +1769,7 @@ This function will help randomly select a todo in the current tree.
 ))
 (org-super-agenda-mode)
 #+end_src
+
 *** links
 
 #+begin_src emacs-lisp
@@ -1999,10 +2002,7 @@ subsystem.
 #+BEGIN_SRC emacs-lisp
 (setq org-highlight-latex-and-related '(latex script entities))
 (setq org-latex-pdf-process
-    '("bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
-      "bash -c \"bibtex %b\""
-      "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""
-      "bash -c \"pdflatex -interaction nonstopmode -output-directory %o %f\""))
+      '("ubuntu.exe run -u jeff \"/nix/var/nix/profiles/default/bin/nix-shell --command \\\"lualatex -ineraction -nonstopmode -output-directory %o %f\\\" /home/jeff/shell.nix\""))
 #+END_SRC
 *** refile
 
