@@ -1,423 +1,4 @@
-﻿#+TITLE: Emacs configuration file
-#+AUTHOR: Jeff Dwyer
-
-#+STARTUP: hidestars
-#+STARTUP: indent
-#+BABEL: :cache yes
-#+LATEX_HEADER: \usepackage{parskip}
-#+LATEX_HEADER: \usepackage{inconsolata}
-#+LATEX_HEADER: \usepackage[utf8]{inputenc}
-#+PROPERTY: header-args :tangle yes
-
-* About
-
-This is an Emacs configuration file written in [[http://orgmode.org][Org mode]] based on the original
-config by [[https://github.com/larstvei/dot-emacs][larstvei]]. I find organizing the various configurations in an org file
-to be easier to maintain than keeping separate files. I'm hoping to
-meticulously document my emacs configuration to help both myself and others
-that want to use this as a starting point for their own setup. Note that I just
-recently adding my settings *on top* of larstvei's so there may still be some
-choices that seem contradictory or odd.
-
-If you really do want to try this config out, this is how I'd go about it:
-
-Backup your old =~/.emacs=-file =~/.emacs.d= (if necessary).
-
-#+BEGIN_SRC sh :tangle no
-mv ~/.emacs.d ~/.emacs.d-bak
-mv ~/.emacs ~/.emacs-bak
-#+END_SRC
-
-#+BEGIN_SRC sh :tangle no
-git clone https://gitlab.com/JD95/dot-emacs.git
-rm -rf ~/.emacs.d
-mv ~/dot-emacs ~/.emacs.d
-cp ~/.emacs.d/default-settings.el ~/.emacs.d/settings.el
-#+END_SRC
-
-On first run it should install a bunch of packages (this might take a
-while), and you might have to restart your Emacs the first time. If you
-experience bugs, please let me know!
-
-The init.el file essentially exists to replace itself with the contents
-of init.org on the initial load. Subsequent updates to the file can be
-achieved using =update-init-el= which is defined later.
-
-* Configurations
-** Prelude
-
-This settings will help make the rest of the config run smoother.
-
-Lexical scoping is faster than dynamic scoping.
-
-#+BEGIN_SRC emacs-lisp
-;;; -*- lexical-binding: t; byte-compile-warnings: (not docstrings); -*-
-#+END_SRC
-
-** Packages
-
-Managing extensions for Emacs is simplified using =package= which is
-built in to Emacs 24 and newer. To load downloaded packages we need to
-initialize =packenableage=. =cl-lib= is a library that contains many functions from
-Common Lisp, and comes in handy quite often, so we want to make sure it's
-loaded, along with =package=, which is obviously needed.
-
-The configuration assumes that the packages listed below are
-installed. To ensure we install missing packages if they are missing.
-
-#+BEGIN_SRC emacs-lisp
-; automatically compile Emacs Lisp libraries
-(use-package auto-compile
-  :ensure t)
-; load elisp libraries while Emacs is idle
-(use-package idle-require
-  :ensure t)
-; Try out Emacs packages
-(use-package try
-  :ensure t)
-(use-package which-key
-  :ensure t)
-(use-package exec-path-from-shell
-  :ensure t)
-; Modular text completion framework
-(use-package company
-  :ensure t)
-; Emacs support library for PDF files
-(use-package pdf-tools
-  :ensure t)
-; minor mode for editing parentheses
-(use-package paredit
-  :ensure t)
-(use-package focus                ; Dim color of text in surrounding sections
-  :ensure t)
-; Diminished modes from modeline
-(use-package diminish
-  :ensure t)
-; Increase selected region by semantic units
-(use-package expand-region
-  :ensure t)
-(use-package solarized-theme
-  :ensure t)
-(use-package define-word          ; display the definition of word at point
-  :ensure t)
-(use-package avy
-  :ensure t)
-(use-package smooth-scrolling
-  :ensure t)
-(use-package git-gutter-fringe
-  :ensure t)
-(use-package markdown-mode
-  :ensure t)
-(use-package yaml-mode
-  :ensure t)
-(use-package auto-compile
-  :ensure t)
-#+END_SRC
-
-Some packages need to be installed manually, so we add a custom folder to the load path
-#+BEGIN_SRC emacs-lisp
-(add-to-list 'load-path "~/.emacs.d/lisp/")
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(require 'auto-compile)
-(auto-compile-on-load-mode)
-(auto-compile-on-save-mode)
-#+END_SRC
-
-** System
-*** macOS
-
-Settings for macOS machines. =exec-path-from-shell= is included to solve
-path issues. It to includes environment-variables from the shell, making
-using Emacs along with external processes a lot simpler. I also prefer
-using the =Command=-key as the =Meta=-key.
-
-#+BEGIN_SRC emacs-lisp
-(when (memq window-system '(mac ns))
-  (defvar select-enable-clipboard t)
-  (defvar mac-option-key-is-meta nil)
-  (defvar mac-command-key-is-meta t)
-  (defvar mac-command-modifier 'meta)
-  (defvar mac-option-modifier nil)
-  (exec-path-from-shell-initialize)
-  (grep-compute-defaults)
-  (when (fboundp 'mac-auto-operator-composition-mode)
-    (mac-auto-operator-composition-mode 1)))
-#+END_SRC
-*** Linux
-
-Settings specific for linux installs. Like macOS, =exec-path-from-shell= will
-be used to resolve environment variables from the shell.
-
-#+BEGIN_SRC emacs-lisp
-(when (eq window-system 'gnu/linux)
-  (exec-path-from-shell-initialize))
-#+END_SRC
-*** Windows
-
-#+BEGIN_SRC emacs-lisp
-(when (eq window-system 'w32)
-  (grep-compute-defaults))
-#+END_SRC
-*** Require
-
-Some features are not loaded by default to minimize initialization time,
-so they have to be required (or loaded, if you will). =require=-calls
-tends to lead to the largest bottleneck's in a
-configuration. =idle-require= delays the =require=-calls to a time where
-Emacs is in idle. So this is great for stuff you eventually want to load,
-but is not a high priority.
-
-#+BEGIN_SRC emacs-lisp
-   (require 'idle-require)             ; Need in order to use idle-require
-
-   (dolist (feature
-            '(auto-compile             ; auto-compile .el files
-              ox-latex                 ; the latex-exporter (from org)
-              ox-md                    ; Markdown exporter (from org)
-              recentf                  ; recently opened files
-              tex-mode))               ; TeX, LaTeX, and SliTeX mode commands
-     (idle-require feature))
-
-   (setq idle-require-idle-delay 5)
-   (idle-require-mode 1)
-#+END_SRC
-*** Machine Dependent Settings
-
-I pull out any machine specific settings like paths or keys and put them in
-a settings file which is not tracked by version control.
-
-#+BEGIN_SRC emacs-lisp
-(load-file "~/.emacs.d/settings.el")
-#+END_SRC
-
-*** Sane defaults
-
-These are what /I/ consider to be saner defaults.
-
-We can set variables to whatever value we'd like using =setq=.
-
-#+BEGIN_SRC emacs-lisp
-(setq auto-revert-interval 1            ; Refresh buffers fast
-      custom-file (make-temp-file "")   ; Discard customization's
-      default-input-method "TeX"        ; Use TeX when toggling input method
-      echo-keystrokes 0.1               ; Show keystrokes asap
-      inhibit-startup-message t         ; No splash screen please
-      initial-scratch-message nil       ; Clean scratch buffer
-      recentf-max-saved-items 100       ; Show more recent files
-      ring-bell-function 'ignore        ; Quiet
-      sentence-end-double-space nil)    ; No double space
-;; Some mac-bindings interfere with Emacs bindings.
-(when (boundp 'mac-pass-command-to-system)
-  (setq mac-pass-command-to-system nil))
-#+END_SRC
-
-Some variables are buffer-local, so changing them using =setq= will only
-change them in a single buffer. Using =setq-default= we change the
-buffer-local variable's default value.
-
-#+BEGIN_SRC emacs-lisp
-(setq-default indent-tabs-mode nil              ; Use spaces instead of tabs
-              split-width-threshold 160         ; Split verticly by default
-              split-height-threshold nil)       ; Split verticly by default
-#+END_SRC
-
-Answering /yes/ and /no/ to each question from Emacs can be tedious, a
-single /y/ or /n/ will suffice.
-
-#+BEGIN_SRC emacs-lisp
-(fset 'yes-or-no-p 'y-or-n-p)
-#+END_SRC
-
-To avoid file system clutter we put all auto saved files in a single
-directory.
-
-#+BEGIN_SRC emacs-lisp
-(defvar emacs-autosave-directory
-  (concat user-emacs-directory "autosaves/")
-  "This variable dictates where to put auto saves. It is set to a
-  directory called autosaves located wherever your .emacs.d/ is
-  located.")
-
-;; Sets all files to be backed up and auto saved in a single directory.
-(setq backup-directory-alist
-      `((".*" . ,emacs-autosave-directory))
-      auto-save-file-name-transforms
-      `((".*" ,emacs-autosave-directory t)))
-#+END_SRC
-
-By default the =narrow-to-region= command is disabled and issues a
-warning, because it might confuse new users. I find it useful sometimes,
-and don't want to be warned.
-
-#+BEGIN_SRC emacs-lisp
-(put 'narrow-to-region 'disabled nil)
-#+END_SRC
-
-Automaticly revert =doc-view=-buffers when the file changes on disk.
-
-#+BEGIN_SRC emacs-lisp
-(add-hook 'doc-view-mode-hook 'auto-revert-mode)
-#+END_SRC
-
-#+begin_src emacs-lisp
-(add-hook 'write-file-functions 'delete-trailing-whitespace)
-#+end_src
-
-*** Garbage Collection
-
-Run garbage collections when frame is not focused
-
-#+begin_src emacs-lisp
-(add-function :after after-focus-change-function
-  (defun me/garbage-collect-maybe ()
-    (unless (frame-focus-state)
-      (garbage-collect))))
-#+end_src
-
-*** Mode Defaults
-
-There are some modes that are enabled by default that I don't find
-particularly useful. We create a list of these modes, and disable all of
-these.
-
-#+BEGIN_SRC emacs-lisp
-(dolist (mode
-         '(tool-bar-mode                ; No toolbars, more room for text
-           scroll-bar-mode              ; No scroll bars either
-           menu-bar-mode                ; No menubar
-           blink-cursor-mode))          ; The blinking cursor gets old
-  (funcall mode 0))
-#+END_SRC
-
-Let's apply the same technique for enabling modes that are disabled by
-default.
-
-#+BEGIN_SRC emacs-lisp
-(dolist (mode
-         '(abbrev-mode                  ; E.g. sopl -> System.out.println
-           column-number-mode           ; Show column number in mode line
-           delete-selection-mode        ; Replace selected text
-           dirtrack-mode                ; directory tracking in *shell*
-           global-company-mode          ; Auto-completion everywhere
-           global-git-gutter-mode       ; Show changes latest commit
-           recentf-mode                 ; Recently opened files
-           show-paren-mode              ; Highlight matching parentheses
-           smooth-scrolling-mode
-           which-key-mode))             ; Available keybindings in popup
-  (funcall mode 1))
-
-(auto-fill-mode -1)
-(remove-hook 'text-mode-hook #'turn-on-auto-fill)
-#+END_SRC
-*** Visual
-
-Change the color-theme to =gotham=.
-
-#+BEGIN_SRC emacs-lisp
-(use-package color-theme-sanityinc-tomorrow
-  :ensure t)
-
-(require 'color-theme-sanityinc-tomorrow)
-(if (display-graphic-p)
-  (color-theme-sanityinc-tomorrow-night)
-  (load-theme 'solarized t))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(cond ((member "DejaVu Sans Mono" (font-family-list))
-       (set-face-attribute 'default nil :font "DejaVu Sans Mono")
-       (set-frame-font "DejaVu Sans Mono" nil t)))
-
-(use-package unicode-fonts :ensure t)
-;(unicode-fonts-setup)
-
-;; Use this font if the current font can't render a symbol
-(set-fontset-font "fontset-default" 'unicode "DejaVu Sans")
-#+END_SRC
-
-Prevent emacs from constantly asking for file encoding when using unicode characters
-
-#+begin_src emacs-lisp
-(prefer-coding-system 'utf-8)
-#+end_src
-
-diminish.el allows you to hide or abbreviate their presence in the
-modeline. I rarely look at the modeline to find out what minor-modes are
-enabled, so I disable every global minor-mode, and some for lisp editing.
-
-To ensure that the mode is loaded before diminish it, we should use
-~with-eval-after-load~. To avoid typing this multiple times a small macro
-is provided.
-
-#+BEGIN_SRC emacs-lisp
-(defmacro safe-diminish (file mode &optional new-name)
-  `(with-eval-after-load ,file
-     (diminish ,mode ,new-name)))
-
-(safe-diminish "eldoc" 'eldoc-mode)
-(safe-diminish "flyspell" 'flyspell-mode)
-(safe-diminish "projectile" 'projectile-mode)
-(safe-diminish "paredit" 'paredit-mode "()")
-#+END_SRC
-
-git-gutter-fringe gives a great visual indication of where you've made
-changes since your last commit. There are several packages that performs
-this task; the reason I've ended up with =git-gutter-fringe= is that it
-reuses the (already present) fringe, saving a tiny bit of screen-estate.
-
-I smuggled some configurations from [[https://github.com/torenord/.emacs.d/][torenord]], providing a cleaner look.
-
-#+BEGIN_SRC emacs-lisp
-(require 'git-gutter-fringe)
-
-(dolist (p '((git-gutter:added    . "#0c0")
-             (git-gutter:deleted  . "#c00")
-             (git-gutter:modified . "#c0c")))
-  (set-face-foreground (car p) (cdr p))
-  (set-face-background (car p) (cdr p)))
-#+END_SRC
-
-*** PDF Tools
-
-[[PDF Tools]] makes a huge improvement on the built-in [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Document-View.html][doc-view-mode]]; the only
-drawback is the =pdf-tools-install= (which has to be executed before the
-package can be used) takes a couple of /seconds/ to execute. Instead of
-running it at init-time, we'll run it whenever a PDF is opened. Note that
-it's only slow on the first run!
-
-#+BEGIN_SRC emacs-lisp
-(add-hook 'pdf-tools-enabled-hook 'auto-revert-mode)
-(add-to-list 'auto-mode-alist '("\\.pdf\\'" . pdf-tools-install))
-#+END_SRC
-
-*** Completion
-
-I want a pretty aggressive completion system, hence the no delay settings
-and short prefix length.
-
-#+BEGIN_SRC emacs-lisp
-(setq company-idle-delay 0
-      company-echo-delay 0
-      company-dabbrev-downcase nil
-      company-minimum-prefix-length 2
-      company-selection-wrap-around t
-      company-transformers '(company-sort-by-occurrence
-                             company-sort-by-backend-importance))
-#+END_SRC
-
-*** Browser
-
-Sometimes emacs will be unable to find the browser from the path, so the path to the browser is set from settings.
-
-#+BEGIN_SRC emacs-lisp
-(when browser-path
-  (setq browse-url-browser-function 'browse-url-generic
-        browse-url-generic-program browser-path))
-#+END_SRC
-
-* Custom Bindings Map
+﻿* Custom Bindings Map
 
 Inspired by [[http://stackoverflow.com/questions/683425/globally-override-key-binding-in-emacs][this StackOverflow post]] I keep a =custom-bindings-map= that
 holds all my custom bindings. This map can be activated by toggling a
@@ -449,581 +30,17 @@ This updates the compiled init.el file with any changes made to this file.
         result)))
 #+end_src
 
-** Buffer Control
-
-#+BEGIN_SRC emacs-lisp
-(defun kill-this-buffer-unless-scratch ()
-  "Works like `kill-this-buffer' unless the current buffer is the
-,*scratch* buffer. In witch case the buffer content is deleted and
-the buffer is buried."
-  (interactive)
-  (if (not (string= (buffer-name) "*scratch*"))
-      (kill-this-buffer)
-    (delete-region (point-min) (point-max))
-    (switch-to-buffer (other-buffer))
-    (bury-buffer "*scratch*")))
-
-(define-key custom-bindings-map (kbd "C-x k") 'kill-this-buffer-unless-scratch)
-#+END_SRC
-
-These functions provide something close to ~text-scale-mode~, but for every
-buffer, including the minibuffer and mode line.
-
-#+begin_src emacs-lisp
-(defun modi/revert-all-file-buffers ()
-  "Refresh all open file buffers without confirmation.
-Buffers in modified (not yet saved) state in emacs will not be reverted. They
-will be reverted though if they were modified outside emacs.
-Buffers visiting files which do not exist any more or are no longer readable
-will be killed."
-  (interactive)
-  (dolist (buf (buffer-list))
-    (let ((filename (buffer-file-name buf)))
-      ;; Revert only buffers containing files, which are not modified;
-      ;; do not try to revert non-file buffers like *Messages*.
-      (when (and filename
-                 (not (buffer-modified-p buf)))
-        (if (file-readable-p filename)
-            ;; If the file exists and is readable, revert the buffer.
-            (with-current-buffer buf
-              (revert-buffer :ignore-auto :noconfirm :preserve-modes))
-          ;; Otherwise, kill the buffer.
-          (let (kill-buffer-query-functions) ; No query done when killing buffer
-            (kill-buffer buf)
-            (message "Killed non-existing/unreadable file buffer: %s" filename))))))
-  (message "Finished reverting buffers containing unmodified files."))
-#+end_src
-
-** Date and Time
-
-A utility for inserting the current date.
-
-#+BEGIN_SRC emacs-lisp
-(defun insert-current-date (&optional omit-day-of-week-p)
-   "Insert today's date using the current locale.
-  With a prefix argument, the date is inserted without the day of
-  the week."
-   (interactive "P*")
-   (insert (calendar-date-string (calendar-current-date) nil
-                                 omit-day-of-week-p)))
-#+END_SRC
-
-A utility for inserting the current time
-
-#+BEGIN_SRC emacs-lisp
-(defvar current-time-format "%H:%M:%S"
-  "Format of date to insert with `insert-current-time' func.
-Note the weekly scope of the command's precision.")
-
-(defun insert-current-time ()
-  "Insert the current time."
-  (interactive)
-  (insert (format-time-string current-time-format (current-time))))
-#+END_SRC
-
-#+begin_src emacs-lisp
-(defun current-date ()
-  (calendar-date-string
-    (calendar-current-date)
-    nil))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun start-of-week ()
-  (calendar-date-string
-   (calendar-gregorian-from-absolute
-    (calendar-dayname-on-or-before
-      0 ; Sunday
-      (calendar-absolute-from-gregorian (calendar-current-date))))))
-#+end_src
-#+begin_src emacs-lisp
-(defun current-month ()
-  (let ((dt (calendar-current-date)))
-    (format "%s %s" (calendar-month-name (nth 0 dt)) (nth 2 dt))))
-#+end_src
-** Formulas
-#+begin_src emacs-lisp
-(defun linear-regression (xs ys)
-  (let* ((sum (lambda (items) (seq-reduce #'+ items 0)))
-         (avg-y (/ (funcall sum ys) (float (length ys))))
-         (avg-x (/ (funcall sum xs) (float (length xs))))
-         (prods (funcall sum (zipWith (lambda (x y)
-                                        (* (- x avg-x) (- y avg-y)))
-                                      xs ys)))
-         (sqrds (funcall sum (seq-map (lambda (x) (expt (- x avg-x) 2)) xs))))
-    (/ prods (float sqrds))))
-
-(defun single-regressor (points)
-  (linear-regression (seq-map-indexed (lambda (_x i) i) points) points))
-#+end_src
-
-A [[https://en.wikipedia.org/wiki/Simple_linear_regression][single regressor]] is a linear regression with the fixed y intercept at the origin.
-
-** Lists
-#+BEGIN_SRC emacs-lisp
-(defun zipWith (f xs ys)
-  (if (or (eq xs nil) (eq ys nil))
-     '()
-    (cons (funcall f (car xs) (car ys)) (zipWith f (cdr xs) (cdr ys)))))
-(defun zip (xs ys) (zipWith #'list xs ys))
-(defun pairs (xs) (zip xs (cdr xs)))
-#+END_SRC
-** Searching
-
-Often I want to find other occurrences of a word I'm at, or more
-specifically the symbol (or tag) I'm at. The
-=isearch-forward-symbol-at-point= in Emacs 24.4 works well for this, but
-I don't want to be bothered with the =isearch= interface. Rather jump
-quickly between occurrences of a symbol, or if non is found, don't do
-anything.
-
-#+BEGIN_SRC emacs-lisp
-(defun jump-to-symbol-internal (&optional backwardp)
-  "Jumps to the next symbol near the point if such a symbol
-exists. If BACKWARDP is non-nil it jumps backward."
-  (let* ((point (point))
-         (bounds (find-tag-default-bounds))
-         (beg (car bounds)) (end (cdr bounds))
-         (str (isearch-symbol-regexp (find-tag-default)))
-         (search (if backwardp 'search-backward-regexp
-                   'search-forward-regexp)))
-    (goto-char (if backwardp beg end))
-    (funcall search str nil t)
-    (cond ((<= beg (point) end) (goto-char point))
-          (backwardp (forward-char (- point beg)))
-          (t  (backward-char (- end point))))))
-
-(defun jump-to-previous-like-this ()
-  "Jumps to the previous occurrence of the symbol at point."
-  (interactive)
-  (jump-to-symbol-internal t))
-
-(defun jump-to-next-like-this ()
-  "Jumps to the next occurrence of the symbol at point."
-  (interactive)
-  (jump-to-symbol-internal))
-
-(define-key custom-bindings-map (kbd "M-,")   'jump-to-previous-like-this)
-(define-key custom-bindings-map (kbd "M-.")   'jump-to-next-like-this)
-#+END_SRC
-
-I sometimes regret killing the =*scratch*=-buffer, and have realized I
-never want to actually kill it. I just want to get it out of the way, and
-clean it up. The function below does just this for the
-=*scratch*=-buffer, and works like =kill-this-buffer= for any other
-buffer. It removes all buffer content and buries the buffer (this means
-making it the least likely candidate for =other-buffer=).
-
-This provides a utility for finding the next non-ascii character.
-This is useful when pasting text from websites or word.
-
-#+BEGIN_SRC emacs-lisp
-(defun find-first-non-ascii-char ()
-  "Find the first non-ascii character from point onwards."
-  (interactive)
-  (let (point)
-    (save-excursion
-      (setq point
-            (catch 'non-ascii
-              (while (not (eobp))
-                (or (eq (char-charset (following-char))
-                        'ascii)
-                    (throw 'non-ascii (point)))
-                (forward-char 1)))))
-    (if point
-        (goto-char point)
-      (message "No non-ascii characters."))))
-#+END_SRC
-
-** Sorting
-#+BEGIN_SRC emacs-lisp
-(defun sort-words-in-region (start end)
-  "Sort the words in a given region (START and END) and return them as a list."
-   (sort (split-string (buffer-substring-no-properties start end)) #'string<))
-
-(defun sort-words-sorted (start end)
-  "Sort the words in a given region (START and END) and return them as a string."
-  (mapconcat 'identity (sort-words-in-region start end) " "))
-
-;;;###autoload
-(defun sort-words (start end)
-  "Sort words in region alphabetically.
-Then insert them replacing the existing region.
-START and END are boundries of the selected region."
-  (interactive "r")
-  (save-excursion
-    (save-restriction
-      (narrow-to-region start end)
-      (let ((words (sort-words-sorted (point-min) (point-max))))
-        (delete-region (point-min) (point-max))
-        (goto-char (point-min))
-        (insert words)))))
-#+END_SRC
-** Themes
-
-When interactively changing the theme (using =M-x load-theme=), the
-current custom theme is not disabled. This often gives weird-looking
-results; we can advice =load-theme= to always disable themes currently
-enabled themes.
-
-#+BEGIN_SRC emacs-lisp
-(defadvice load-theme
-    (before disable-before-load (theme &optional no-confirm no-enable) activate)
-  (mapc 'disable-theme custom-enabled-themes))
-#+END_SRC
-
-** Updating Config
-
-#+BEGIN_SRC emacs-lisp
-(defun update-init-el ()
-  (interactive)
-  (package-refresh-contents)
-  ;; Open the configuration
-  (find-file (concat user-emacs-directory "init.org"))
-  ;; tangle it
-  (org-babel-tangle)
-  ;; load it
-  (load-file (concat user-emacs-directory "init.el"))
-  ;; finally byte-compile it
-  (byte-compile-file (concat user-emacs-directory "init.el"))
-)
-#+END_SRC
-
-** Window Controls
-
-This allows a window to shift from a horizontal split into a vertical split
-
-#+BEGIN_SRC emacs-lisp
-(defun toggle-window-split ()
-  "Change the window split from horizontal to vertical."
-  (interactive)
-  (if (= (count-windows) 2)
-      (let* ((this-win-buffer (window-buffer))
-             (next-win-buffer (window-buffer (next-window)))
-             (this-win-edges (window-edges (selected-window)))
-             (next-win-edges (window-edges (next-window)))
-             (this-win-2nd (not (and (<= (car this-win-edges)
-                                         (car next-win-edges))
-                                     (<= (cadr this-win-edges)
-                                         (cadr next-win-edges)))))
-             (splitter
-              (if (= (car this-win-edges)
-                     (car (window-edges (next-window))))
-                  'split-window-horizontally
-                'split-window-vertically)))
-        (delete-other-windows)
-        (let ((first-win (selected-window)))
-          (funcall splitter)
-          (if this-win-2nd (other-window 1))
-          (set-window-buffer (selected-window) this-win-buffer)
-          (set-window-buffer (next-window) next-win-buffer)
-          (select-window first-win)
-          (if this-win-2nd (other-window 1))))))
-
-(define-key custom-bindings-map (kbd "C-x |") 'toggle-window-split)
-#+END_SRC
-
-Here are some utilities for setting up a workspace. Generally, they
-are just present window configs generated from a macro.
-
-#+BEGIN_SRC emacs-lisp
-(defun general-workspace ()
- "Set up a general split screen workspace."
- (interactive)
- (delete-other-windows nil)
- (split-window-below nil)
- (split-window-right nil)
- (other-window 1)
- (other-window 1)
- (eshell nil))
-
- (defun single-window-workspace ()
- "Change to a single window workspace."
- (interactive)
- (delete-other-windows nil))
-
-(defun zettelkasten-workspace ()
-  "A workspace for editing the Zettelkasten"
-  (interactive)
-  (delete-other-windows nil)
-  (when (boundp 'zettelkasten-people-path)
-    (find-file zettelkasten-people-path))
-  (split-window-right 50)
-  (other-window 1)
-  (when (boundp 'zettelkasten-journal-path)
-    (find-file zettelkasten-journal-path))
-  (when (get-buffer "*Org Agenda*")
-    (split-window-right nil)
-    (other-window 1)
-    (switch-to-buffer (get-buffer "*Org Agenda*"))))
-#+END_SRC
-
 * Minor Modes
-** avy
-
-Avy is a tool for jumping to specific words based on their first symbol
-
-#+BEGIN_SRC emacs-lisp
-(define-key custom-bindings-map (kbd "M-s") 'avy-goto-word-1)
-#+END_SRC
-** calendar
-
-Define a function to display week numbers in =calender-mode=. The snippet
-is from [[http://www.emacswiki.org/emacs/CalendarWeekNumbers][EmacsWiki]].
-
-#+BEGIN_SRC emacs-lisp
-(defun calendar-show-week (arg)
-  "Displaying week number in calendar-mode."
-  (interactive "P")
-  (copy-face font-lock-constant-face 'calendar-iso-week-face)
-  (set-face-attribute
-   'calendar-iso-week-face nil :height 0.7)
-  (setq calendar-intermonth-text
-        (and arg
-             '(propertize
-               (format
-                "%2d"
-                (car (calendar-iso-from-absolute
-                      (calendar-absolute-from-gregorian
-                       (list month day year)))))
-               'font-lock-face 'calendar-iso-week-face))))
-#+END_SRC
-
-Evaluate the =calendar-show-week= function.
-
-#+BEGIN_SRC emacs-lisp
-(calendar-show-week t)
-#+END_SRC
-** evil
-
-These are the configurations for evil mode editing.
-
-#+BEGIN_SRC emacs-lisp
-(use-package undo-tree
-  :ensure t)
-
-(global-undo-tree-mode)
-
-(use-package evil
-  :ensure t
-  :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-  :config
-    (evil-mode 1)
-    (evil-set-undo-system 'undo-tree))
-
-(use-package evil-collection
-  :after evil
-  :ensure t
-  :config
-    (evil-collection-init))
-#+END_SRC
-** expand-region
-#+BEGIN_SRC emacs-lisp
-(define-key custom-bindings-map (kbd "C->")  'er/expand-region)
-(define-key custom-bindings-map (kbd "C-<")  'er/contract-region)
-#+END_SRC
-** flyspell
-
-Flyspell offers on-the-fly spell checking. We can enable flyspell for all
-text-modes with this snippet.
-
-#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-flyspell)
-(add-hook 'text-mode-hook 'turn-on-flyspell)
-#+END_SRC
-
-To use flyspell for programming there is =flyspell-prog-mode=, that only
-enables spell checking for comments and strings. We can enable it for all
-programming modes using the =prog-mode-hook=.
-
-#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-flyspell)
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
-#+END_SRC
-
-When working with several languages, we should be able to cycle through
-the languages we most frequently use. Every buffer should have a separate
-cycle of languages, so that cycling in one buffer does not change the
-state in a different buffer (this problem occurs if you only have one
-global cycle). We can implement this by using a [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Closures.html][closure]].
-
-#+BEGIN_SRC emacs-lisp
-(defun cycle-languages ()
-  "Changes the ispell dictionary to the first element in
-ISPELL-LANGUAGES, and returns an interactive function that cycles
-the languages in ISPELL-LANGUAGES when invoked."
-  (lexical-let ((ispell-languages '#1=("american" "norsk" . #1#)))
-    (ispell-change-dictionary (car ispell-languages))
-    (lambda ()
-      (interactive)
-      ;; Rotates the languages cycle and changes the ispell dictionary.
-      (ispell-change-dictionary
-       (car (setq ispell-languages (cdr ispell-languages)))))))
-#+END_SRC
-
-=flyspell= signals an error if there is no spell-checking tool is
-installed. We can advice =turn-on-flyspell= and =flyspell-prog-mode= to
-only try to enable =flyspell= if a spell-checking tool is available. Also
-we want to enable cycling the languages by typing =C-c l=, so we bind the
-function returned from =cycle-languages=.
-
-#+BEGIN_SRC emacs-lisp
-(defadvice turn-on-flyspell (before check nil activate)
-  "Turns on flyspell only if a spell-checking tool is installed."
-  (when (executable-find ispell-program-name)
-    (local-set-key (kbd "C-c l") (cycle-languages))))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(defadvice flyspell-prog-mode (before check nil activate)
-  "Turns on flyspell only if a spell-checking tool is installed."
-  (when (executable-find ispell-program-name)
-    (local-set-key (kbd "C-c l") (cycle-languages))))
-#+END_SRC
-
-Some keybindings for ease of use
-
-#+BEGIN_SRC emacs-lisp
-(define-key custom-bindings-map (kbd "C-c s") 'ispell-word)
-#+END_SRC
-** git-gutter
-#+BEGIN_SRC emacs-lisp
-(use-package git-gutter-fringe
-  :ensure t)
-
-(define-key custom-bindings-map (kbd "M-g r") #'git-gutter:update-all-windows)
-#+END_SRC
-** ivy
-
-#+begin_src emacs-lisp
-(use-package ivy
-  :ensure t
-  :config (setq ivy-use-virtual-buffers t
-                ivy-use-selectable-prompt t
-                enable-recursive-minibuffers t
-                ivy-display-style 'fancy
-                ivy-count-format "(%d/%d)"
-                ivy-wrap t))
-
-(use-package ivy-hydra
-  :ensure t)
-
-(global-set-key (kbd "C-s") 'swiper-isearch)
-(global-set-key (kbd "M-x") 'counsel-M-x)
-(global-set-key (kbd "C-x C-f") 'counsel-find-file)
-(global-set-key (kbd "M-y") 'counsel-yank-pop)
-(global-set-key (kbd "C-c v") 'ivy-push-view)
-(global-set-key (kbd "C-c V") 'ivy-pop-view)
-(global-set-key (kbd "C-x b")  #'counsel-switch-buffer)
-(global-set-key (kbd "C-x C-b") #'list-buffers)
-(global-set-key (kbd "C-x k")  #'kill-buffer*)
-
-(setq ivy-re-builders-alist
-      '((swiper-isearch . ivy--regex)
-        (counsel-projectile-find-file . ivy--regex)
-        (t             . ivy--regex-fuzzy)))
-#+end_src
-
-Use Prescient with Ivy. This adds memory to counsel selections, sorting the results based on usage history.
-
-#+begin_src emacs-lisp
-(use-package prescient
-  :ensure t)
-(use-package ivy-prescient
-  :ensure t
-  :after counsel
-  :config
-    (ivy-prescient-mode 1)
-    (prescient-persist-mode 1))
-
-(setq prescient-history-length 100)
-(setq prescient-frequency-decay 0.997)
-(setq prescient-frequency-threshold 0.5)
-(setq prescient-sort-length-enable t)
-#+end_src
-
-There are several methods that can be used to filter prescient results:
-- literal: query is a literal sub-strings of the candidate
-- initalism: query is initials of the candidate
-- prefix: query is beginnings of parts of a candidate
-- anchored: parts of query are separated by capital letters, similar to prefix with no spaces
-- fuzzy: character of query exist in candidate in right order
-- regexp: the query is a regexp, find all matches
-#+begin_src emacs-lisp
-(setq ivy-prescient-enable-filtering t)
-(setq prescient-filter-method '(literal regexp fuzzy))
-#+end_src
-
-However, we don't want this behavior on all selections. =ivy-prescient-sort-commands= allows us to specify either only the commands we want to use prescient with or which commands to ignore.
-
-#+begin_src emacs-lisp
-(setq ivy-prescient-sort-commands
-  '(:not ivy-switch-buffer swiper-isearch))
-#+end_src
 
 ** hyrda
 
 Allows for the creation of menus.
 
 #+BEGIN_SRC emacs-lisp
-(use-package hydra
-  :ensure t)
+(use-package hydra :ensure t)
 (require 'hydra)
 #+END_SRC
 
-*** zoom
-
-This menu allows for zooming in and out of the current buffer.
-
-#+BEGIN_SRC emacs-lisp
-(defhydra hydra-zoom nil
-"zoom"
-  ("k" text-scale-increase "in")
-  ("j" text-scale-decrease "out"))
-
-(global-set-key (kbd "<f2>") #'hydra-zoom/body)
-#+END_SRC
-
-*** window
-
-#+BEGIN_SRC emacs-lisp
-(defhydra hydra-window ()
-   "
-Movement^^        ^Split^               ^Resize^
----------------------------------------------------
-_h_ ←           _v_ertical      _H_ X←
-_j_ ↓           _x_ horizontal  _J_ X↓
-_k_ ↑           _S_ave          _K_ X↑
-_l_ →           _o_nly this     _L_ X→
-_d_lt Other
-_SPC_ cancel
-"
-   ("h" windmove-left )
-   ("j" windmove-down )
-   ("k" windmove-up )
-   ("l" windmove-right )
-   ("H" evil-window-decrease-width)
-   ("J" evil-window-decrease-height)
-   ("K" evil-window-increase-height)
-   ("L" evil-window-increase-width)
-   ("v" (lambda ()
-          (interactive)
-          (split-window-right)
-          (windmove-right))
-       )
-   ("x" (lambda ()
-          (interactive)
-          (split-window-below)
-          (windmove-down))
-       )
-   ("S" save-buffer)
-   ("d" delete-window)
-   ("o" delete-other-windows)
-   ("SPC" nil)
-   )
-
-(define-key evil-window-map (kbd "C-w") 'hydra-window/body)
-#+END_SRC
 ** magit
 
 #+BEGIN_SRC emacs-lisp :tangle (config-require 'use-magit)
@@ -1258,156 +275,60 @@ Org itself installed earlier
 
 #+BEGIN_SRC emacs-lisp
 
-(use-package ox-twbs
-  :ensure t)
-(use-package evil-org
-  :ensure t)
-(use-package org-ql
-  :ensure t)
-(use-package org-recur
-  :hook ((org-mode . org-recur-mode)
-         (org-agenda-mode . org-recur-agenda-mode))
-  :demand t
-  :config
-    (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
-    (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
-    (setq org-recur-finish-done t
-          org-recur-finish-archive t))
-
-(setq org-modules '(org-habit))
 #+END_SRC
 
 *** editing
 
-Use aspell if present, mainly useful on windows.
-
-#+BEGIN_SRC emacs-lisp
-(cond
- ((executable-find "aspell")
-  (setq ispell-program-name "aspell")
-  ;; Please note ispell-extra-args contains ACTUAL parameters passed to aspell
-  (setq ispell-extra-args '("--sug-mode=ultra" "--lang=en_US"))
- )
-)
-#+END_SRC
 
 Shortens url links in org mode
 
 #+BEGIN_SRC emacs-lisp
-(defun compress-org-link (arg)
-  (interactive "P")
-  (let ((url (thing-at-point 'url))
-    (bounds (bounds-of-thing-at-point 'url)))
-    (kill-region (car bounds) (cdr bounds))
-    (insert (format "[[%s][%s]]" url
-      (truncate-string-to-width url
-         (if arg
-           (prefix-numeric-value arg)
-           40)
-       nil nil "...")))))
 #+END_SRC
 
 Customizes the structure templates
 
 #+BEGIN_SRC emacs-lisp
-(setq org-structure-template-alist
-  '(("a" . "export ascii")
-    ("c" . "center")
-    ("C" . "comment")
-    ("e" . "example")
-    ("E" . "export")
-    ("h" . "export html")
-    ("l" . "export latex")
-    ("q" . "quote")
-    ("s" . "src")
-    ("v" . "verse")))
 #+END_SRC
 
 Prevents editing invisible text
 
 #+begin_src emacs-lisp
-(setq org-fold-catch-invisible-edits 'error)
-(setq org-src-preserve-indentation nil)
-(setq org-edit-src-content-indentation 0)
 #+end_src
 
 This converts markdown style links into org-mode style links
 
 #+begin_src emacs-lisp
-(defun org-convert-markdown-links-to-org ()
-  (interactive)
-  (query-replace-regexp "\\[\\(.+\\)\\](\\(.*\\))" "[[\\2][\\1]]" nil (region-beginning) (region-end)))
 #+end_src
 
 This function helps with adding books to my index
 
 #+begin_src emacs-lisp
-(defun org-replace-file-path-with-todo-link (start end)
-  (interactive "r")
-  (query-replace-regexp
-   (rx (0+ any)
-       (or (: (= 2 (in digit)) ":" (= 2 (in digit)))
-           (: (= 4 (in digit)) "-" (= 2 (in digit)) "-" (= 2 (in digit))))
-           (1+ " ")
-           (: (group (0+ any)) "." (group (or "pdf" "epub" "djvu"))))
-   "** READY [[file:./\\1.\\2][\\1]]"
-   nil start end))
 #+end_src
 
 *** evil org
 
 #+BEGIN_SRC emacs-lisp
-(require 'evil-org)
-(add-hook 'org-mode-hook 'evil-org-mode)
-(add-hook 'org-mode-hook 'visual-line-mode)
-(evil-org-set-key-theme '(navigation insert textobjects additional))
 #+END_SRC
 *** tags
 
 For when a parent heading needs to be broken up into it's children.
 Adds any inherited tags to the immediate children.
 #+begin_src emacs-lisp
-(with-eval-after-load 'org
-  (advice-add 'org-set-tags-command :override #'counsel-org-tag))
 
-(defun org-apply-tags-to-children ()
-  (interactive)
-  (save-excursion
-    (org-back-to-heading t)
-    (let* ((depth (+ 1 (org-current-level))))
-      (org-map-entries
-       (lambda ()
-         (when (<= (org-current-level) depth)
-           (org-set-tags (org-get-tags))))
-       nil
-       'tree))))
 #+end_src
 
 *** file associations
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 #+END_SRC
 *** agenda
 
 #+begin_src emacs-lisp
-(setq org-agenda-custom-commands
-  '(("!" "Expired Deadlines" tags-todo
-     "+DEADLINE<\"<today>\"/TODO|PROGRESSING"
-     nil nil)
-    ("p" "In Progress" tags-todo
-     "/PROGRESSING|RESEARCHING|SHOPPING")
-    ("d" "Scheduled or Deadline" agenda
-     "+DEADLINE+SCHEDULED"
-     nil nil)
-    ("u" "Upcoming Events"
-     ((org-ql-block '(and (ts :from today :to +62) (tags "Event")))))))
 #+end_src
 
 Highlight the current line in agenda view
 
 #+begin_src emacs-lisp
-(add-hook 'org-agenda-finalize-hook #'hl-line-mode)
 #+end_src
 
 **** schedule
@@ -1415,31 +336,15 @@ Highlight the current line in agenda view
 Don't delay for scheduled tasks
 
 #+BEGIN_SRC emacs-lisp
-(setq org-scheduled-delay-days 0)
 #+END_SRC
 
 Hide all tags on agenda view
 #+BEGIN_SRC emacs-lisp
-(setq org-agenda-hide-tags-regexp ".*")
 #+END_SRC
 
 **** habits
 
 #+BEGIN_SRC emacs-lisp
-(require 'org-habit)
-(set-face-attribute 'org-habit-overdue-face nil :foreground "gray5" :background "#D84747")
-(set-face-attribute 'org-habit-overdue-future-face nil :foreground "gray5" :background "#D84747")
-(set-face-attribute 'org-habit-alert-face nil :foreground "gray5" :background "#FFE438")
-(set-face-attribute 'org-habit-alert-future-face nil :foreground "gray5" :background "#FFE438")
-(set-face-attribute 'org-habit-ready-face nil :foreground "gray5" :background "#53C65F")
-(set-face-attribute 'org-habit-ready-future-face nil :foreground "gray5" :background "#53C65F")
-(set-face-attribute 'org-habit-clear-face nil :foreground "gray5" :background "#20A4F3")
-(set-face-attribute 'org-habit-clear-future-face nil :foreground "gray5" :background "#20A4F3")
-(setq org-habit-today-glyph (make-glyph-code ?!))
-(setq org-habit-completed-glyph (make-glyph-code ?*))
-(setq org-habit-graph-column 45)
-(setq org-habit-preceding-days 14)
-(setq org-habit-following-days 3)
 #+END_SRC
 
 **** todo states
@@ -1447,93 +352,25 @@ Hide all tags on agenda view
 Edna is a package that adds extensible conditions and dependencies for todo states.
 
 #+begin_src emacs-lisp
-(use-package org-edna
-  :ensure t)
-
-(require 'org-edna)
-(org-edna-mode)
 #+end_src
 
 #+BEGIN_SRC emacs-lisp
-(setq org-todo-keyword-faces
-  '(("TODO" . (:foreground "red"))
-    ("DEVELOPING" . (:foreground "DarkRed"))
-    ("PROGRESSING" . (:foreground "orange"))
-    ("RESEARCHING" . (:foreground "orange"))
-    ("UNVERIFIED" . (:foreground "indian red"))
-    ("HOLD" . (:foreground "yellow"))
-    ("FAILED" . (:foreground "grey"))
-    ("BUY" . (:foreground "pink"))
-    ("SHOPPING" . (:foreground "orange"))
-    ("ORDERED" . (:foreground "sky blue"))
-    ("BOUGHT" . (:foreground "green"))
-    ("CANCELED" . (:foreground "grey"))
-    ("VERIFIED" . (:foreground "green"))
-    ("ANSWERED" . (:foreground "green"))))
-
-(setq org-todo-keywords
-  '((sequence "TODO(t)" "|" "DONE(d)")
-    (sequence "DEVELOPING(v)" "READY(y)" "PROGRESSING(p)" "HOLD(h)" "|" "FINISHED(f)")
-    (sequence "UNKNOWN(u)" "RESEARCHING(r)" "|" "ANSWERED(a)")
-    (sequence "BUY(b)" "SHOPPING(s)" "ORDERED(o)" "|" "BOUGHT(h)")
-    (sequence "|" "FAILED(a)" "CANCELED(c)")))
 #+END_SRC
 
 Sets priority color faces
 
 #+BEGIN_SRC emacs-lisp
-(setq org-priority-faces
-  '((?A . (:foreground "#fc0303"))
-    (?B . (:foreground "#db792e"))
-    (?C . (:foreground "#ebe06a"))
-    (?D . (:foreground "#56fc6c"))
-    (?E . (:foreground "#00fbff"))
-    (?F . (:foreground "#ad61ff"))))
-
-(setq org-priority-highest ?A)
-(setq org-priority-lowest ?Z)
-(setq org-priority-default ?Z)
-(setq org-log-into-drawer 'LOGBOOK)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(setq org-log-into-drawer 'LOGBOOK)
-(setq org-todo-heirarchical-statistics nil)
-(setq org-log-done 'time)
 #+END_SRC
 
 Auto detect what kind of todo item is being completed and call the right function
 
 #+begin_src emacs-lisp
-(defun detect-org-recur-advice (orig &rest all)
-  (interactive)
-  (let ((header-text (nth 4 (org-heading-components))))
-    (if (seq-contains-p header-text ?|)
-      (progn
-        (org-recur-finish)
-        (read-char "Task completed! Press any key to continue...") nil 1)
-      (apply orig all))))
-
-(advice-add
- #'org-todo :around
- #'detect-org-recur-advice)
 #+end_src
 
 #+begin_src emacs-lisp
-(defun org-call-header-action-advice (orig &rest all)
-  (interactive)
-  (let ((action-property (org-entry-get (point) "action")))
-    (if action-property
-      (let ((string-action (format "(progn %s)" action-property)))
-        ; Call the action and it's result says if org-todo
-        ; should be called
-        (when (eval (car (read-from-string string-action)))
-          (apply orig all)))
-      (apply orig all))))
-
-(advice-add
- #'org-todo :around
- #'org-call-header-action-advice)
 #+end_src
 
 ***** actions
@@ -1541,54 +378,11 @@ Auto detect what kind of todo item is being completed and call the right functio
 Helpers
 
 #+begin_src emacs-lisp
-(defun org-todo-action-iter-property (property func)
-  (save-excursion
-    (let ((value (org-entry-get (point) property)))
-      (org-entry-put (point) property (funcall func value)))))
-
-(defun org-todo-inc-mod (property mod-base)
-  (org-todo-action-iter-property property
-    (lambda (x)
-      (number-to-string (mod (+ (string-to-number x) 1) mod-base)))))
-
-(defun org-todo-action-shift-next-date (num-days)
-  (save-excursion
-    (org-todo-action-iter-property
-     "next-date"
-     (lambda (date)
-       (with-temp-buffer
-         (insert date)
-         (goto-char 10) ;; This would be the day in a timestamp
-         (org-timestamp-up num-days) ;; Shift this many days
-         (buffer-string))))))
 #+end_src
 
 Usable actions
 
 #+begin_src emacs-lisp
-(defun org-todo-plan-for (thing num-days)
-  (progn
-    (when (string= "DONE" (nth 2 (org-heading-components)))
-      (org-todo-action-shift-next-date num-days)
-      (let* ((new-date (save-excursion (org-entry-get (point) "next-date")))
-            (new-heading (format "Plan %s for %s" thing new-date)))
-        (org-edit-headline new-heading)))
-    'continue))
-
-(defun org-todo-count-n (n-times)
-  (save-excursion
-    (if (string= "TODO" (nth 2 (org-heading-components)))
-      (progn
-        (org-todo-inc-mod "count" n-times)
-        (let* ((new-count (save-excursion (org-entry-get (point) "count")))
-               (old-heading (nth 4 (org-heading-components)))
-               (heading-text (string-trim-right (car (split-string old-heading "\\["))))
-               (new-heading (format "%s [%s/%d]" heading-text new-count n-times))
-               (should-continue (string= "0" new-count)))
-          (progn
-            (org-edit-headline (if should-continue heading-text new-heading))
-            should-continue)))
-       'continue)))
 #+end_src
 
 **** todo editing
@@ -1596,66 +390,25 @@ Usable actions
 These functions helps clear out done tasks in an org file
 
 #+BEGIN_SRC emacs-lisp
-(defun org-map-tasks (action state)
-  (org-map-entries
-    (lambda ()
-      (funcall action)
-      (setq org-map-continue-from (outline-previous-heading)))
-    state 'file))
-
-(defun org-archive-done-tasks ()
-  (interactive)
-  (org-map-tasks 'org-archive-subtree "/DONE"))
-
-(defun org-cut-done-tasks ()
-  (interactive)
-  (org-map-tasks 'org-cut-subtree "/DONE"))
 #+END_SRC
 
 Generates a sequence of todo items based on a sequence of numbers
 
 #+BEGIN_SRC emacs-lisp
-(defun org-todo-sequence ()
-  "Creates a list of todo items ending with numbers from start to end"
-  (interactive)
-  (let* ((item (read-string "todo item: "))
-         (start (string-to-number (read-string "start index: ")))
-         (end (string-to-number (read-string "end index: ")))
-         (todo-item (concat "* TODO " item))
-         (line-item (lambda (i) (concat todo-item " " (number-to-string i) "\n")))
-         (items (mapcar line-item (number-sequence start end))))
-    (mapc 'insert items)))
 #+END_SRC
 
 Helps sort sections
 
 #+BEGIN_SRC emacs-lisp
-(defun org-sort-alpha-todo ()
-  (interactive)
-  (org-sort-entries nil ?a)
-  (org-sort-entries nil ?p)
-  (org-sort-entries nil ?o))
 #+END_SRC
 
 Count only the subtasks directly beneath a header
 
 #+begin_src emacs-lisp
-(setq org-hierarchical-todo-statistics nil)
 #+end_src
 
 Sets all immediate children of header to set deadline for sibling 1 day after completion
 #+begin_src emacs-lisp
-(defun org-set-daily-subtask-deadline ()
-  (interactive)
-  (save-excursion
-    (org-back-to-heading t)
-    (let* ((depth (+ 1 (org-current-level))))
-      (org-map-entries
-       (lambda ()
-         (when (<= (org-current-level) depth)
-           (org-set-property "TRIGGER" "next-sibling deadline!(\"++1d\")")))
-       nil
-       'tree))))
 #+end_src
 
 ***** custom edna triggers
@@ -1663,22 +416,6 @@ Sets all immediate children of header to set deadline for sibling 1 day after co
 These org-edna functions change only the time on a schedule or deadline.
 
 #+begin_src emacs-lisp
-(defun org-edna-set-time (type last-entry args)
-  (ignore last-entry)
-  (let* ((new-time (nth 0 args))
-         (prev-ts (org-edna--get-planning-info type))
-         (time-val (split-string new-time ":"))
-         (ts (org-read-date-analyze prev-ts nil '(nil nil nil nil nil nil))))
-    (setcar (nthcdr 2 ts) (string-to-number (nth 0 time-val)))
-    (setcar (nthcdr 1 ts) (string-to-number (nth 1 time-val)))
-    (org--deadline-or-schedule nil type
-       (format-time-string "%F %R" (apply 'encode-time (mapcar (lambda (e) (or e 0)) ts))))))
-
-(defun org-edna-action/schedule-time! (last-entry &rest args)
-  (org-edna-set-time 'scheduled last-entry args))
-
-(defun org-edna-action/deadline-time! (last-entry &rest args)
-  (org-edna-set-time 'deadline last-entry args))
 #+end_src
 
 **** todo navigation
@@ -1686,119 +423,25 @@ These org-edna functions change only the time on a schedule or deadline.
 This function will help randomly select a todo in the current tree.
 
 #+BEGIN_SRC emacs-lisp
-(defun org-goto-random-subtree (todo-pred &optional depth)
-  (interactive)
-  (org-back-to-heading t)
-  (let ((todos '())
-        (top-level (org-current-level)))
-    ;; Gather todo headings
-    (org-map-tree
-     (lambda () (when (and
-                  (if depth
-                      (<= (org-current-level) (+ top-level depth))
-                      t)
-                  (funcall todo-pred))
-             (setq todos (cons (point) todos)))))
-    ;; Randomly select one
-    (goto-char
-     (nth (random (- (length todos) 1)) todos)))
-)
-
-(defun at-todo (exclude-states)
-  (and (org-get-todo-state)
-       (member (org-get-todo-state) exclude-states)))
-
-(defun org-goto-random-subtree-todo ()
-  (interactive)
-  (org-goto-random-subtree
-   (lambda () (at-todo '("TODO" "DEVELOPING" "PROGRESSING")))))
-
-(defun org-goto-random-subtree-todo-below ()
-  (interactive)
-  (org-goto-random-subtree
-    (lambda () (at-todo '("TODO" "DEVELOPING" "PROGRESSING")))
-    1))
 #+END_SRC
 **** stats
 
 #+begin_src emacs-lisp
-(defun force-double-digit-format-advice (orig fmt &rest args)
-  (if (string= fmt "[%d%%]")
-      (apply #'format "[%02d%%]" args)
-      (apply orig fmt args)))
-
-(defun org-update-parent-todo-statistics-advice (orig &rest all)
-  (progn
-    (advice-add
-      #'format :around
-      #'force-double-digit-format-advice)
-    (apply orig all)
-    (advice-remove
-      #'format
-      #'force-double-digit-format-advice)))
-
-(advice-add
-  #'org-update-parent-todo-statistics :around
-  #'org-update-parent-todo-statistics-advice)
 #+end_src
 **** super
 
 #+begin_src emacs-lisp
-(use-package org-super-agenda
-  :ensure t)
-
-(defun my-org-agenda-remove-recur (str)
-  (nth 0 (split-string str "|")))
-
-(setq org-super-agenda-groups '(
-  (:name "Short Term Wellfare"
-     :priority "A"
-     :transformer #'my-org-agenda-remove-recur)
-  (:name "Long Term Wellfare"
-     :priority "B"
-     :transformer #'my-org-agenda-remove-recur)
-  (:name "Relationships"
-     :priority "C"
-     :transformer #'my-org-agenda-remove-recur)
-  (:name "Actualization"
-     :priority "D"
-     :transformer #'my-org-agenda-remove-recur)
-  (:name "Refinement"
-     :priority "F"
-     :transformer #'my-org-agenda-remove-recur)
-))
-(org-super-agenda-mode)
 #+end_src
 
 *** links
 
 #+begin_src emacs-lisp
-(defun org-force-open-current-window ()
-  (interactive)
-  (let ((org-link-frame-setup (quote
-                               ((vm . vm-visit-folder)
-                                (vm-imap . vm-visit-imap-folder)
-                                (gnus . gnus)
-                                (file . find-file)
-                                (wl . wl)))
-                              ))
-    (org-open-at-point)))
-;; Depending on universal argument try opening link
-(defun org-open-maybe (&optional arg)
-  (interactive "P")
-  (if arg
-      (org-open-at-point)
-    (org-force-open-current-window)
-    )
-  )
-
 #+end_src
 
 Prevent org mode from auto expanding relative paths.
 - This is needed for Zettelkasten to be portable
 
 #+begin_src emacs-lisp
-(setq org-link-file-path-type 'relative)
 #+end_src
 
 *** source blocks
@@ -1807,35 +450,17 @@ When editing org-files with source-blocks, we want the source blocks to
 be themed as they would in their native mode.
 
 #+BEGIN_SRC emacs-lisp
-(setq org-src-fontify-natively t
-      org-src-tab-acts-natively t
-      org-confirm-babel-evaluate nil
-      org-edit-src-content-indentation 0)
 #+END_SRC
 
 This is quite an ugly fix for allowing code markup for expressions like
 ="this string"=, because the quotation marks causes problems.
 
 #+BEGIN_SRC emacs-lisp
-(ignore-errors (eval-after-load "org"
-  '(progn
-     (require 'ob-shell)
-     (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n,")
-     (custom-set-variables `(org-emphasis-alist ',org-emphasis-alist)))))
 #+END_SRC
 
 Make blocks more distinct
 
 #+begin_src emacs-lisp
-(setq org-fontify-quote-and-verse-blocks t)
-(custom-set-faces
- '(org-block-begin-line
-   ((t (:foreground "#D6D6D6" :background "#2e373b"))))
- '(org-block
-   ((t (:foreground "#70acc2"))))
- '(org-block-end-line
-   ((t (:foreground "#D6D6D6" :background "#2e373b"))))
- )
 #+end_src
 
 *** pdf
@@ -1848,19 +473,6 @@ Calling this function from an org-buffer jumps to the corresponding section
 in the exported pdf (given that the pdf-file exists), using pdf-tools.
 
 #+BEGIN_SRC emacs-lisp
-(defun org-sync-pdf ()
-  (interactive)
-  (let ((headline (nth 4 (org-heading-components)))
-        (pdf (concat (file-name-base (buffer-name)) ".pdf")))
-    (when (file-exists-p pdf)
-      (find-file-other-window pdf)
-      (pdf-links-action-perform
-       (cl-find headline (pdf-info-outline pdf)
-                :key (lambda (alist) (cdr (assoc 'title alist)))
-                :test 'string-equal)))))
-
-(with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-'") 'org-sync-pdf))
 #+END_SRC
 
 *** babel
@@ -1869,21 +481,6 @@ in the exported pdf (given that the pdf-file exists), using pdf-tools.
 This allows for the execution of literate sh files.
 
 #+BEGIN_SRC emacs-lisp
-(defun sudo-shell-command (command)
-  (interactive "MShell command (root): ")
-  (with-temp-buffer
-    (cd "/sudo::/")
-    (async-shell-command command)))
-(defun org-tangle-sh ()
-  (interactive)
-  (find-file buffer-file-name)
-  (org-babel-tangle)
-  (let ((script-file (concat
-          (car (split-string buffer-file-name ".org")) ".sh")))
-    (sudo-shell-command
-      (concat "chmod +x " script-file " && " "./" script-file))
-  )
-)
 #+END_SRC
 
 *** export
@@ -1894,91 +491,12 @@ presentation, I might not want to export all of the paragraphs. This is done
 by adding advice to the various export commands to ignore certain tags.
 
 #+BEGIN_SRC emacs-lisp
-(defun org-ascii-set-export-options
-    (orig &optional async subtreep visible-only body-only ext-plist)
-  (let ((org-export-exclude-tags '("no_ascii_export")))
-    (funcall orig async subtreep visible-only body-only ext-plist)))
-
-(advice-add 'org-ascii-export-to-ascii
-            :around #'org-ascii-set-export-options)
-
-(advice-add 'org-ascii-export-as-ascii
-            :around #'org-ascii-set-export-options)
-
-(defun org-html-set-export-options
-    (orig &optional async subtreep visible-only body-only ext-plist)
-  (let ((org-export-exclude-tags '("no_html_export")))
-    (funcall orig async subtreep visible-only body-only ext-plist)))
-
-(advice-add 'org-html-export-to-html
-            :around #'org-html-set-export-options)
-
-(advice-add 'org-html-export-to-html-and-browse
-            :around #'org-html-set-export-options)
-
-(defun org-latex-set-export-options
-    (orig &optional async subtreep visible-only body-only ext-plist)
-  (let ((org-export-exclude-tags '("no_latex_export")))
-    (funcall orig async subtreep visible-only body-only ext-plist)))
-
-(advice-add 'org-latex-export-to-pdf
-            :around #'org-latex-set-export-options)
-
-(defun org-reveal-set-export-options
-    (orig &optional async subtreep visible-only body-only ext-plist)
-  (let ((org-export-exclude-tags '("no_reveal_export")))
-    (funcall orig async subtreep visible-only body-only ext-plist)))
-
-(advice-add 'org-reveal-export-to-html
-            :around #'org-reveal-set-export-options)
-
-(advice-add 'org-reveal-export-to-html-and-browse
-            :around #'org-reveal-set-export-options)
-
-(defun org-twbs-set-export-options
-    (orig &optional async subtreep visible-only body-only ext-plist)
-  (let ((org-export-exclude-tags '("no_twbs_export")))
-    (funcall orig async subtreep visible-only body-only ext-plist)))
-
-(advice-add 'org-twbs-export-to-html
-            :around #'org-twbs-set-export-options)
-
-(advice-add 'org-twbs-export-to-html-and-browse
-            :around #'org-twbs-set-export-options)
 #+END_SRC
 
 
 This function will render the given org file as html and then insert the result into the current buffer. This is useful for embedding the contents of other org files.
 
 #+begin_src emacs-lisp
-(defun render-org-twbs (org-file)
-  "Render the given org file as html using twbs."
-
-  (interactive "f\nf")
-
-  (unless (string= "org" (file-name-extension org-file))
-    (error "INFILE must be an org file."))
-
-  (let* ;; Check if the file is already open
-        ((open (find-buffer-visiting org-file))
-
-        ;; Load the file into a buffer
-        (org-file-buffer (find-file-noselect org-file))
-
-        ;; Switch to temp buffers to render contents of org file
-        (result (with-current-buffer org-file-buffer
-                  ;; Temporarily use the org-file-buffer and render
-                  (org-twbs-export-as-html nil nil t t)
-                  (with-current-buffer "*Org HTML Export*"
-                     ;; Temporarily switch and get result of render
-                     (buffer-string)))))
-
-    (kill-buffer "*Org HTML Export*")
-
-    ;; Don't kill the buffer if it was open previously
-    (unless open (kill-buffer org-file-buffer))
-
-    result))
 #+end_src
 *** latex
 
@@ -1986,13 +504,11 @@ This function will render the given org file as html and then insert the result 
 =tex-mode=.
 
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.tex\\'" . latex-mode))
 #+END_SRC
 
 Use ~biblatex~ for bibliography.
 
 #+BEGIN_SRC emacs-lisp
-(setq-default bibtex-dialect 'biblatex)
 #+END_SRC
 
 When exporting from org-mode to pdf via latex, use pdflatex and bibtex. Uses
@@ -2000,35 +516,6 @@ an explicit bash command to allow for this to work on windows via the linux
 subsystem.
 
 #+BEGIN_SRC emacs-lisp
-(setq org-highlight-latex-and-related '(latex script entities))
-
-;; linux commands are run via a wsl distro with nix setup
-;; the commands are run in a shell with the various packages made available
-(defun my/wsl-command (cmd)
-  (concat
-     "wsl.exe -d nix-ubuntu -u jeff -e /nix/var/nix/profiles/default/bin/nix-shell --command \""
-     cmd
-     "\" /home/jeff/shell.nix"))
-
-(setq org-latex-pdf-process
-      `(,(my/wsl-command "lualatex -output-directory %o %f")))
-(setq org-image-actual-width nil)
-
-(setq org-preview-latex-default-process 'dvisvgm)
-
-;; The files generated by intermediate steps are sent to the tmp folder
-;; No logs are output to emacs so it's best to just route to a log file in tmp as well
-;; :image-converter (,(my/wsl-command "dvisvgm %f --no-fonts --exact-bbox --scale='1.0' --output=%o/%b.svg > /mnt/d/Temp/test.log 2>&1"))
-(setq org-preview-latex-process-alist
-      `((dvisvgm :description "dvi > svg"
-                :message "you need to install the programs: latex and dvisvgm."
-                :programs nil
-                :post-clear nil
-                :image-input-type "dvi"
-                :image-output-type "svg"
-                :image-size-adjust (3.0 . 1.0)
-                :latex-compiler (,(my/wsl-command "latex -interaction nonstopmode -output-directory %o %f"))
-                :image-converter (,(my/wsl-command "dvisvgm %f --no-fonts --exact-bbox --scale=%S --output=%o/%b.svg")))))
 #+END_SRC
 *** refile
 
@@ -2037,8 +524,6 @@ Configures refile to file things two headers deep and use outline completion
 So like =Project Backlog/Some Project/= it refile to this sub header
 
 #+begin_src emacs-lisp
-(setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
-(setq org-refile-use-outline-path 'file)
 #+end_src
 *** ref
 #+BEGIN_SRC emacs-lisp
@@ -2047,233 +532,55 @@ So like =Project Backlog/Some Project/= it refile to this sub header
 *** keybindings
 
 #+BEGIN_SRC emacs-lisp
-(define-key custom-bindings-map (kbd "C-c c")       'org-capture)
-(define-key custom-bindings-map (kbd "C-c t")
-  (lambda () (interactive) (org-agenda nil "n")))
-(define-key custom-bindings-map (kbd "C-c l")       'org-store-link)
-(define-key custom-bindings-map (kbd "C-c a")       'org-agenda)
-;; Redefine file opening without clobbering universal argumnet
-(define-key org-mode-map "\C-c\C-o" 'org-open-maybe)
 #+END_SRC
 *** zettelkausten
 
 A utility for adding tags to zettlekausten notes
 
 #+begin_src emacs-lisp
-(defun org-zettelkasten-get-file-id ()
-  (let ((path (buffer-file-name)))
-  (with-temp-buffer
-    (insert path)
-    (goto-char (point-min))
-    (while (re-search-forward
-            (rx (char alpha) ":/"
-                (1+ (1+ (char word)) "/")
-                (group (1+ digit))
-                ".org")
-           nil t)
-      (replace-match "\\1"))
-    (buffer-string))))
-
-(defun org-zettelkasten-pick-tag ()
-  (let* ((tag-file-buffer (find-file (counsel-find-file (concat org-zettelkasten-dir "/zettl-tags/"))))
-         (name (buffer-file-name tag-file-buffer)))
-    (kill-buffer tag-file-buffer)
-    name))
-
-(defun org-zettelkasten-append-tag (tag-file-name buff-name link-text)
-  (append-to-file (concat "[[file:../" buff-name "][\n" link-text "]]") nil
-                  tag-file-name))
-
-(defun first-line-of-buffer-or-name ()
-  (let* ((text (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n"))
-         (first-line (car (delete "" text))))
-    (if (string= first-line "") (buffer-name) first-line)))
-
-(defun org-zettelkasten-buffer-name ()
-  (interactive)
-  (rename-buffer (first-line-of-buffer-or-name)))
-
-(defun org-zettelkasten-add-tag-if-missing (tag-file-name title)
-  (let* ((id (org-zettelkasten-get-file-id)))
-  (with-temp-buffer
-    (when (file-exists-p tag-file-name)
-      (insert-file-contents tag-file-name))
-    (when (not (re-search-forward id nil t))
-      (org-zettelkasten-append-tag tag-file-name (concat id ".org") title)))))
-
-(defun org-zettelkasten-add-tag ()
-  (interactive)
-  (save-window-excursion
-    (org-zettelkasten-add-tag-if-missing
-      (org-zettelkasten-pick-tag)
-      (first-line-of-buffer-or-name))))
 #+end_src
 
 List all tags for a given note
 
 #+begin_src emacs-lisp
-(defun org-zettelkasten-list-tags ()
-  (interactive)
-  (lgrep (buffer-name) "*.org" (concat org-zettelkasten-dir "/zettl-tags")))
 #+end_src
 
 Add all tags currently listed in grep to the current note
 
 #+begin_src emacs-lisp
-(defun org-zettelkasten-copy-tags-from-grep ()
-  (interactive)
-  (mapc (lambda (tag-file-name)
-          (org-zettelkasten-append-tag
-           (concat org-zettelkasten-dir "/zettl-tags/" tag-file-name)
-           (buffer-name)
-           (first-line-of-buffer-or-name)))
-    (apply #'append (with-current-buffer "*grep*"
-                      (s-match-strings-all
-                       (rx (and line-start (+ (or letter digit "-")) ".org"))
-                       (buffer-substring-no-properties (point-min) (point-max)))))))
 #+end_src
 
 List all notes which link to this one
 
 #+begin_src emacs-lisp
-(defun org-zettelkasten-list-external-refs ()
-  (interactive)
-  (lgrep (file-name-nondirectory (buffer-file-name)) "*.org" (concat org-zettelkasten-dir)))
 #+end_src
 
 Search the zettelkasten using grep
 
 #+begin_src emacs-lisp
-(defun org-zettelkasten-search ()
-  (interactive)
-  (lgrep (read-string "query: ") "*.org" org-zettelkasten-dir))
 #+end_src
 
 Create new Zettelkasten note
 
 #+begin_src emacs-lisp
-(defun org-zettelkasten-new-note ()
-  (interactive)
-  (find-file (concat org-zettelkasten-dir "/"
-                     (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org")))
-
-(defun org-zettelkasten-gen-id ()
-  (interactive)
-  (insert (format-time-string "%d%m%Y%H%M%S" (current-time))))
 #+end_src
 
 #+begin_src emacs-lisp
-(defun org-zettelkasten-conversation ()
-  (interactive)
-  (counsel-find-file (concat org-zettelkasten-dir "/conversations/")))
-
-(defun org-zettelkasten-conversation-branch ()
-  (interactive)
-  (let* ((new-note-name (concat (format-time-string "%d%m%Y%H%M%S" (current-time)) ".org"))
-         (new-note-path (concat org-zettelkasten-dir "/" new-note-name))
-         (new-note-desc (if (use-region-p)
-                              (progn
-                                (kill-region (region-beginning) (region-end))
-                                (concat "][" (car kill-ring) "]]"))
-                              "]]"))
-         (new-note-link (concat "[[file:" (file-relative-name new-note-path default-directory) new-note-desc))
-         (prev-note-title (first-line-of-buffer-or-name))
-         (prev-note-link (concat "[[file:" (file-relative-name (buffer-file-name) org-zettelkasten-dir) "][" prev-note-title "]]")))
-    (insert new-note-link)
-    (save-buffer)
-    (find-file new-note-path)
-    (insert (concat (car kill-ring) "\n\nprevious:\n" prev-note-link))
-    (org-zettelkasten-buffer-name)))
 #+end_src
 
 Functions for referencing notes
 
 #+begin_src emacs-lisp
-(setq org-zettelkasten-ref nil)
-
-(defun org-zettelkasten-grab-ref ()
-  (interactive)
-  (setq org-zettelkasten-ref (buffer-file-name)))
-
-(defun org-zettelkasten-use-ref ()
-  (interactive)
-  (let* ((link-end (if (use-region-p)
-                         (progn
-                            (kill-region (region-beginning) (region-end))
-                            (concat "][" (car kill-ring) "]]"))
-                       "]]")))
-    (insert (concat "[[file:" (file-relative-name org-zettelkasten-ref default-directory) link-end)))
-  )
 #+end_src
 
 A function for easy html export to blog
 
 #+begin_src emacs-lisp
-(defun org-zettelkasten-publish-to-blog ()
-  (interactive)
-  (let* ((input (buffer-file-name))
-        (id-regex (rx (1+ (in digit)) ".org"))
-        (id (substring input (string-match id-regex input) -4))
-        (old-buffer (buffer-name)))
-    (save-window-excursion
-      (org-zettelkasten-add-tag-if-missing
-       (concat org-zettelkasten-dir "/zettl-tags/blog-published.org")
-       (first-line-of-buffer-or-name))
-      (with-temp-buffer
-        (insert-buffer-substring old-buffer)
-         (goto-char (point-min))
-         (insert "#+TITLE: ")
-        (org-html-export-as-html))
-      (switch-to-buffer "*Org HTML Export*")
-      (write-region
-       (point-min) (point-max)
-       (concat "d:/current-projects/blog/public/" id ".html"))
-      (with-temp-buffer
-        (insert-file-contents
-         (concat org-zettelkasten-dir "/zettl-tags/blog-published.org"))
-        (while (re-search-forward (rx "../" (group (1+ (in digit))) ".org") nil t)
-          (replace-match "\\1.html"))
-        (goto-char (point-min))
-        (while (re-search-forward (rx "[[") nil t)
-          (replace-match "\n- [["))
-        (org-html-export-as-html))
-      (switch-to-buffer "*Org HTML Export*")
-      (write-region
-       (point-min) (point-max)
-       "d:/current-projects/blog/public/index.html")
-      (kill-matching-buffers "\\*Org HTML Export\\*" nil t))))
 #+end_src
 
 A hydra for quickly calling zettlekausten functions
 
 #+begin_src emacs-lisp
-(defhydra hydra-zettelkasten (:hint nil)
-  "
-^Notes^         ^Refs^         ^Tags^                    ^Search^
-----------------------------------------------------------------------
-_n_: New Note   _g_: Grab ref   _t_: Add Tag              _s_: Search
-_c_: New Convo  _u_: Use Ref    _l_: List Tags            _e_: Links to this Note
-_b_: Branch     ^ ^             _C_: Copy Tags from Grep  _p_: Publish to Blog
-_r_: Rename Buffer
-"
-  ("n" org-zettelkasten-new-note)
-  ("c" org-zettelkasten-conversation)
-  ("b" org-zettelkasten-conversation-branch)
-  ("r" org-zettelkasten-buffer-name)
-
-  ("t" org-zettelkasten-add-tag)
-  ("l" org-zettelkasten-list-tags)
-  ("C" org-zettelkasten-copy-tags-from-grep)
-
-  ("s" org-zettelkasten-search)
-  ("e" org-zettelkasten-list-external-refs)
-
-  ("g" org-zettelkasten-grab-ref)
-  ("u" org-zettelkasten-use-ref)
-  ("p" org-zettelkasten-publish-to-blog)
-)
-
-(global-set-key (kbd "C-c z") #'hydra-zettelkasten/body)
 #+end_src
 
 ** purescript
