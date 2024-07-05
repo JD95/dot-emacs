@@ -6,6 +6,10 @@
        (message (format "running module %s" ',name))
        ,@body)))
 
+(setq my/is-windows (eq window-system 'w32))
+(setq my/is-macos (memeq window-system '(mac ns)))
+(setq my/is-linux (eq window-system 'gnu/linux ))
+
 (setq find-location "")
 
 (setq browser-path "c:/Users/jeffr/AppData/Local/Vivaldi/Application/vivaldi.exe")
@@ -161,7 +165,7 @@
 
 (module os-specific-config nil
 
-  (module macos-config ((memq window-system '(mac ns)))
+  (module macos-config (my/is-macos)
     (defvar select-enable-clipboard t)
     (defvar mac-option-key-is-meta nil)
     (defvar mac-command-key-is-meta t)
@@ -177,10 +181,10 @@
     (when (boundp 'mac-pass-command-to-system)
       (setq mac-pass-command-to-system nil)))
 
-  (module linux-config ((eq window-system 'gnu/linux))
+  (module linux-config (my/is-linux)
     (exec-path-from-shell-initialize))
 
-  (module windows-config ((eq window-system 'w32))
+  (module windows-config (my/is-windows)
     (grep-compute-defaults)))
 
 ;; Modular text completion framework
