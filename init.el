@@ -1,6 +1,5 @@
 ;;; -*- lexical-binding: t; byte-compile-warnings: (not docstrings); -*-
 
-
 (defmacro module (name cond &rest body)
   `(if (and ,@cond)
      (progn
@@ -75,9 +74,6 @@
 
   ;; minor mode for editing parentheses
   (use-package paredit :ensure t))
-
-(defvar custom-bindings-map (make-keymap)
-  "A keymap for custom bindings.")
 
 ;; All of the modules for loading emacs packages
 ;; and startup
@@ -205,9 +201,11 @@
                blink-cursor-mode))         ; The blinking cursor gets old
     (funcall mode 0))
 
-
   (use-package color-theme-sanityinc-tomorrow :ensure t)
   (use-package solarized-theme :ensure t)
+
+  (setq custom-safe-themes
+    '("f36a31fc61d6eba25b68df592577d80cfe471b7673575e3af8005cd32416ab33" default))
 
   (require 'color-theme-sanityinc-tomorrow)
 
@@ -254,20 +252,18 @@
                   (git-gutter:deleted  . "#c00")
                   (git-gutter:modified . "#c0c")))
       (set-face-foreground (car p) (cdr p))
-      (set-face-background (car p) (cdr p)))
-
-    (define-key custom-bindings-map (kbd "M-g r") #'git-gutter:update-all-windows)))
+      (set-face-background (car p) (cdr p)))))
 
 (module control nil
 
-  (define-key custom-bindings-map (kbd "C-x k") 'my/kill-this-buffer-unless-scratch)
+  
 
   (module motion nil
     (use-package avy
       :ensure t
       :config
       (progn
-        (define-key custom-bindings-map (kbd "M-s") 'avy-goto-word-1)))
+        ))
 
     (use-package smooth-scrolling
       :ensure t
@@ -406,7 +402,7 @@ Note the weekly scope of the command's precision.")
           (select-window first-win)
           (if this-win-2nd (other-window 1))))))
 
-  (define-key custom-bindings-map (kbd "C-x |") 'my/toggle-window-split))
+  )
 
 (module minor-modes nil
 
@@ -421,7 +417,6 @@ Note the weekly scope of the command's precision.")
 
     (require 'projectile)
     (projectile-mode 1)
-    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
     (counsel-projectile-mode))
 
   (module ivy nil
@@ -528,9 +523,8 @@ Note the weekly scope of the command's precision.")
       ("o" delete-other-windows)
       ("SPC" nil))
 
-    (define-key evil-window-map (kbd "C-w") 'hydra-window/body)))
+    ))
 
-(define-key custom-bindings-map (kbd "C-c s") 'ispell-word)
 
 (module org nil
 
@@ -545,8 +539,6 @@ Note the weekly scope of the command's precision.")
             (org-agenda-mode . org-recur-agenda-mode))
     :demand t
     :config
-    (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
-    (define-key org-recur-mode-map (kbd "C-c d") 'org-recur-finish)
     (setq org-recur-finish-done t
       org-recur-finish-archive t))
 
@@ -966,21 +958,6 @@ Note the weekly scope of the command's precision.")
          ((t (:foreground "#D6D6D6" :background "#2e373b"))))
       )
 
-    (defun org-sync-pdf ()
-      (interactive)
-      (let ((headline (nth 4 (org-heading-components)))
-             (pdf (concat (file-name-base (buffer-name)) ".pdf")))
-        (when (file-exists-p pdf)
-          (find-file-other-window pdf)
-          (pdf-links-action-perform
-            (cl-find headline (pdf-info-outline pdf)
-              :key (lambda (alist) (cdr (assoc 'title alist)))
-              :test 'string-equal)))))
-
-    (with-eval-after-load 'org
-      (define-key org-mode-map (kbd "C-'") 'org-sync-pdf))
-
-
     (defun sudo-shell-command (command)
       (interactive "MShell command (root): ")
       (with-temp-buffer
@@ -1115,13 +1092,6 @@ Note the weekly scope of the command's precision.")
     (setq org-refile-targets '((org-agenda-files :maxlevel . 2)))
     (setq org-refile-use-outline-path 'file)
 
-    (define-key custom-bindings-map (kbd "C-c c")       'org-capture)
-    (define-key custom-bindings-map (kbd "C-c t")
-      (lambda () (interactive) (org-agenda nil "n")))
-    (define-key custom-bindings-map (kbd "C-c l")       'org-store-link)
-    (define-key custom-bindings-map (kbd "C-c a")       'org-agenda)
-    ;; Redefine file opening without clobbering universal argumnet
-    (define-key org-mode-map "\C-c\C-o" 'org-open-maybe)
 
     (defun org-zettelkasten-get-file-id ()
       (let ((path (buffer-file-name)))
@@ -1301,19 +1271,38 @@ Note the weekly scope of the command's precision.")
 
       ("g" org-zettelkasten-grab-ref)
       ("u" org-zettelkasten-use-ref)
-      ("p" org-zettelkasten-publish-to-blog)
-      )
-
-    (global-set-key (kbd "C-c z") #'hydra-zettelkasten/body)))
+      ("p" org-zettelkasten-publish-to-blog))))
 
 (use-package magit :ensure t)
-(define-key custom-bindings-map (kbd "C-c m") 'magit-status)
 (use-package markdown-mode :ensure t)
 (use-package yaml-mode :ensure t)
 
+(defvar my/custom-bindings-map (make-sparse-keymap)
+  "A keymap for custom bindings.")
+
 (define-minor-mode custom-bindings-mode
   "A mode that activates custom-bindings."
-  t nil custom-bindings-map)
+  :init-value t
+  :lighter nil
+  :keymap my/custom-bindings-map
+  :group 'my-custom-group
+  :global nil)
+
+(define-key my/custom-bindings-map (kbd "C-c a")   #'org-agenda)
+(define-key my/custom-bindings-map (kbd "C-c c")   #'org-capture)
+(define-key org-recur-mode-map     (kbd "C-c d")   #'org-recur-finish)
+(define-key my/custom-bindings-map (kbd "C-c l")   #'org-store-link)
+(define-key my/custom-bindings-map (kbd "C-c m")   #'magit-status)
+(define-key projectile-mode-map    (kbd "C-c p")   #'projectile-command-map)
+(define-key my/custom-bindings-map (kbd "C-c s")   #'ispell-word)
+(define-key my/custom-bindings-map (kbd "C-c t")   (lambda () (interactive) (org-agenda nil "n")))
+(define-key my/custom-bindings-map (kbd "C-c z")   #'hydra-zettelkasten/body)
+(define-key my/custom-bindings-map (kbd "C-x k")   #'my/kill-this-buffer-unless-scratch)
+(define-key my/custom-bindings-map (kbd "C-x |")   #'my/toggle-window-split)
+(define-key org-mode-map           (kbd "C-c C-o") #'org-open-maybe)
+(define-key evil-window-map        (kbd "C-w")     #'hydra-window/body)
+(define-key my/custom-bindings-map (kbd "M-g r")   #'git-gutter:update-all-windows)
+(define-key my/custom-bindings-map (kbd "M-s")     #'avy-goto-word-1)
 
 (message "*** Emacs loaded in %s with %d garbage collections."
      (format "%.2f seconds"
