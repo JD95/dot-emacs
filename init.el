@@ -7,6 +7,46 @@
        (message (format "running module %s" ',name))
        ,@body)))
 
+(setq find-location "")
+
+(setq browser-path "c:/Users/jeffr/AppData/Local/Vivaldi/Application/vivaldi.exe")
+
+(setq org-agenda-files
+  '("e:/nextcloud/logs.org"
+     "e:/nextcloud/projects.org"
+     "e:/nextcloud/individual-tasks.org"
+     "e:/nextcloud/repeating.org"
+     "e:/nextcloud/social.org"
+     "e:/nextcloud/reminders.org"
+     "e:/nextcloud/refinement.org"
+     "e:/nextcloud/events.org"
+     "e:/nextcloud/research.org"
+     ))
+
+(setq org-id-link-to-org-use-id t)
+
+(setq org-refile-targets
+  '((org-agenda-files :maxlevel . 1)))
+
+(setq org-zettelkasten-dir "e:/nextcloud/Zettlekasten")
+(setq zettelkasten-journal-path "e:/nextcloud/Zettlekasten/conversations/journal.org")
+(setq zettelkasten-people-path "e:/nextcloud/Zettlekasten/17062020123421.org")
+(setq z3-solver-cmd "z3")
+
+(setq use-agda t)
+(setq use-z3 nil)
+(setq use-rust t)
+(setq use-nix t)
+(setq use-javascript nil)
+(setq use-php nil)
+(setq use-python nil)
+(setq use-purescript nil)
+(setq use-idris nil)
+(setq use-haskell t)
+(setq use-magit t)
+(setq use-flyspell nil)
+
+
 ;; Customizing some elisp settings for the rest of
 ;; the setup.
 (module elisp nil
@@ -370,6 +410,20 @@ Note the weekly scope of the command's precision.")
 
 (module minor-modes nil
 
+  (module projectile nil
+    
+    (use-package projectile
+      :ensure t)
+    (use-package counsel-projectile
+      :ensure t)
+
+    (setq find-program find-location)
+
+    (require 'projectile)
+    (projectile-mode 1)
+    (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+    (counsel-projectile-mode))
+
   (module ivy nil
 
     (use-package ivy
@@ -475,11 +529,6 @@ Note the weekly scope of the command's precision.")
       ("SPC" nil))
 
     (define-key evil-window-map (kbd "C-w") 'hydra-window/body)))
-
-
-(use-package markdown-mode :ensure t)
-(use-package yaml-mode :ensure t)
-
 
 (define-key custom-bindings-map (kbd "C-c s") 'ispell-word)
 
@@ -1259,7 +1308,8 @@ Note the weekly scope of the command's precision.")
 
 (use-package magit :ensure t)
 (define-key custom-bindings-map (kbd "C-c m") 'magit-status)
-
+(use-package markdown-mode :ensure t)
+(use-package yaml-mode :ensure t)
 
 (define-minor-mode custom-bindings-mode
   "A mode that activates custom-bindings."

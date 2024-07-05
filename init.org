@@ -1,20 +1,4 @@
-﻿* Custom Bindings Map
-
-Inspired by [[http://stackoverflow.com/questions/683425/globally-override-key-binding-in-emacs][this StackOverflow post]] I keep a =custom-bindings-map= that
-holds all my custom bindings. This map can be activated by toggling a
-simple =minor-mode= that does nothing more than activating the map. This
-inhibits other =major-modes= to override these bindings. I keep this at
-the end of the init-file to make sure that all functions are actually
-defined.
-
-#+BEGIN_SRC emacs-lisp
-(defvar custom-bindings-map (make-keymap)
-  "A keymap for custom bindings.")
-#+END_SRC
-
-Defined here to allow bindings throughout the rest of the config
-
-* User Functions
+﻿* User Functions
 
 This updates the compiled init.el file with any changes made to this file.
 
@@ -32,42 +16,6 @@ This updates the compiled init.el file with any changes made to this file.
 
 * Minor Modes
 
-** hyrda
-
-Allows for the creation of menus.
-
-#+BEGIN_SRC emacs-lisp
-(use-package hydra :ensure t)
-(require 'hydra)
-#+END_SRC
-
-** magit
-
-#+BEGIN_SRC emacs-lisp :tangle (config-require 'use-magit)
-(use-package magit :ensure t)
-(define-key custom-bindings-map (kbd "C-c m") 'magit-status)
-#+END_SRC
-** projectile
-
-Use a custom program for projectile's grep
-
-#+BEGIN_SRC emacs-lisp
-(setq find-program find-location)
-#+END_SRC
-
-Enable projectile mode everywhere.
-
-#+BEGIN_SRC emacs-lisp
-(use-package projectile
-  :ensure t)
-(use-package counsel-projectile
-  :ensure t)
-
-(require 'projectile)
-(projectile-mode 1)
-(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-(counsel-projectile-mode)
-#+END_SRC
 ** yasnippet
 #+begin_src emacs-lisp
 (use-package yasnippet
