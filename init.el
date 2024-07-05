@@ -7,8 +7,8 @@
        ,@body)))
 
 (setq my/is-windows (eq window-system 'w32))
-(setq my/is-macos (memeq window-system '(mac ns)))
-(setq my/is-linux (eq window-system 'gnu/linux ))
+(setq my/is-macos (memq window-system '(mac ns)))
+(setq my/is-linux (eq window-system 'gnu/linux))
 
 (setq find-location "")
 
@@ -48,7 +48,6 @@
 (setq use-haskell t)
 (setq use-magit t)
 (setq use-flyspell nil)
-
 
 ;; Customizing some elisp settings for the rest of
 ;; the setup.
@@ -404,9 +403,7 @@ Note the weekly scope of the command's precision.")
           (set-window-buffer (selected-window) this-win-buffer)
           (set-window-buffer (next-window) next-win-buffer)
           (select-window first-win)
-          (if this-win-2nd (other-window 1))))))
-
-  )
+          (if this-win-2nd (other-window 1)))))))
 
 (module minor-modes nil
 
@@ -504,20 +501,15 @@ Note the weekly scope of the command's precision.")
       ("v" (lambda ()
              (interactive)
              (split-window-right)
-             (windmove-right))
-        )
+             (windmove-right)))
       ("x" (lambda ()
              (interactive)
              (split-window-below)
-             (windmove-down))
-        )
+             (windmove-down)))
       ("S" save-buffer)
       ("d" delete-window)
       ("o" delete-other-windows)
-      ("SPC" nil))
-
-    ))
-
+      ("SPC" nil))))
 
 (module org nil
 
@@ -536,7 +528,6 @@ Note the weekly scope of the command's precision.")
       org-recur-finish-archive t))
 
   (setq org-modules '(org-habit))
-
 
   (defun compress-org-link (arg)
     (interactive "P")
@@ -570,8 +561,6 @@ Note the weekly scope of the command's precision.")
     (interactive)
     (query-replace-regexp "\\[\\(.+\\)\\](\\(.*\\))" "[[\\2][\\1]]" nil (region-beginning) (region-end)))
 
-
-
   (defun org-replace-file-path-with-todo-link (start end)
     (interactive "r")
     (query-replace-regexp
@@ -582,7 +571,6 @@ Note the weekly scope of the command's precision.")
         (: (group (0+ any)) "." (group (or "pdf" "epub" "djvu"))))
       "** READY [[file:./\\1.\\2][\\1]]"
       nil start end))
-
 
   (require 'evil-org)
   (add-hook 'org-mode-hook 'evil-org-mode)
@@ -607,7 +595,6 @@ Note the weekly scope of the command's precision.")
 
 
   (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-
 
   (module org-agenda nil
 
@@ -674,7 +661,6 @@ Note the weekly scope of the command's precision.")
          (sequence "UNKNOWN(u)" "RESEARCHING(r)" "|" "ANSWERED(a)")
          (sequence "BUY(b)" "SHOPPING(s)" "ORDERED(o)" "|" "BOUGHT(h)")
          (sequence "|" "FAILED(a)" "CANCELED(c)")))
-
 
     (setq org-priority-faces
       '((?A . (:foreground "#fc0303"))
@@ -802,7 +788,6 @@ Note the weekly scope of the command's precision.")
 
     (setq org-hierarchical-todo-statistics nil)
 
-
     (defun org-set-daily-subtask-deadline ()
       (interactive)
       (save-excursion
@@ -847,8 +832,7 @@ Note the weekly scope of the command's precision.")
                        (setq todos (cons (point) todos)))))
         ;; Randomly select one
         (goto-char
-          (nth (random (- (length todos) 1)) todos)))
-      )
+          (nth (random (- (length todos) 1)) todos))))
 
     (defun at-todo (exclude-states)
       (and (org-get-todo-state)
@@ -890,23 +874,23 @@ Note the weekly scope of the command's precision.")
     (defun my-org-agenda-remove-recur (str)
       (nth 0 (split-string str "|")))
 
-    (setq org-super-agenda-groups '(
-                                     (:name "Short Term Wellfare"
-                                       :priority "A"
-                                       :transformer #'my-org-agenda-remove-recur)
-                                     (:name "Long Term Wellfare"
-                                       :priority "B"
-                                       :transformer #'my-org-agenda-remove-recur)
-                                     (:name "Relationships"
-                                       :priority "C"
-                                       :transformer #'my-org-agenda-remove-recur)
-                                     (:name "Actualization"
-                                       :priority "D"
-                                       :transformer #'my-org-agenda-remove-recur)
-                                     (:name "Refinement"
-                                       :priority "F"
-                                       :transformer #'my-org-agenda-remove-recur)
-                                     ))
+    (setq org-super-agenda-groups
+      '((:name "Short Term Wellfare"
+         :priority "A"
+         :transformer #'my-org-agenda-remove-recur)
+        (:name "Long Term Wellfare"
+         :priority "B"
+         :transformer #'my-org-agenda-remove-recur)
+        (:name "Relationships"
+         :priority "C"
+         :transformer #'my-org-agenda-remove-recur)
+        (:name "Actualization"
+         :priority "D"
+         :transformer #'my-org-agenda-remove-recur)
+        (:name "Refinement"
+         :priority "F"
+         :transformer #'my-org-agenda-remove-recur)))
+
     (org-super-agenda-mode)
 
     (defun org-force-open-current-window ()
@@ -916,17 +900,14 @@ Note the weekly scope of the command's precision.")
                                       (vm-imap . vm-visit-imap-folder)
                                       (gnus . gnus)
                                       (file . find-file)
-                                      (wl . wl)))
-              ))
+                                      (wl . wl)))))
         (org-open-at-point)))
     ;; Depending on universal argument try opening link
     (defun org-open-maybe (&optional arg)
       (interactive "P")
       (if arg
         (org-open-at-point)
-        (org-force-open-current-window)
-        )
-      )
+        (org-force-open-current-window)))
 
     (setq org-link-file-path-type 'relative)
 
@@ -948,14 +929,14 @@ Note the weekly scope of the command's precision.")
       '(org-block
          ((t (:foreground "#70acc2"))))
       '(org-block-end-line
-         ((t (:foreground "#D6D6D6" :background "#2e373b"))))
-      )
+         ((t (:foreground "#D6D6D6" :background "#2e373b")))))
 
     (defun sudo-shell-command (command)
       (interactive "MShell command (root): ")
       (with-temp-buffer
         (cd "/sudo::/")
         (async-shell-command command)))
+
     (defun org-tangle-sh ()
       (interactive)
       (find-file buffer-file-name)
@@ -963,9 +944,7 @@ Note the weekly scope of the command's precision.")
       (let ((script-file (concat
                            (car (split-string buffer-file-name ".org")) ".sh")))
         (sudo-shell-command
-          (concat "chmod +x " script-file " && " "./" script-file))
-        )
-      )
+          (concat "chmod +x " script-file " && " "./" script-file))))
 
     (defun org-ascii-set-export-options
       (orig &optional async subtreep visible-only body-only ext-plist)
@@ -1203,8 +1182,7 @@ Note the weekly scope of the command's precision.")
                            (kill-region (region-beginning) (region-end))
                            (concat "][" (car kill-ring) "]]"))
                          "]]")))
-        (insert (concat "[[file:" (file-relative-name org-zettelkasten-ref default-directory) link-end)))
-      )
+        (insert (concat "[[file:" (file-relative-name org-zettelkasten-ref default-directory) link-end))))
 
     (defun org-zettelkasten-publish-to-blog ()
       (interactive)
@@ -1306,7 +1284,8 @@ Note the weekly scope of the command's precision.")
 (define-key my/custom-bindings-map (kbd "M-x") #'counsel-M-x)
 (define-key my/custom-bindings-map (kbd "M-y") 'counsel-yank-pop)
 
-(message "*** Emacs loaded in %s with %d garbage collections."
-     (format "%.2f seconds"
-             (float-time
-              (time-subtract after-init-time before-init-time))) gcs-done)
+(message
+  "*** Emacs loaded in %s with %d garbage collections."
+  (format "%.2f seconds"
+    (float-time (time-subtract after-init-time before-init-time)))
+  gcs-done)
