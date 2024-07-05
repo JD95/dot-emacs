@@ -435,16 +435,6 @@ Note the weekly scope of the command's precision.")
 
     (use-package counsel :ensure t)
 
-    (global-set-key (kbd "C-s") 'swiper-isearch)
-    (global-set-key (kbd "M-x") #'counsel-M-x)
-    (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-    (global-set-key (kbd "M-y") 'counsel-yank-pop)
-    (global-set-key (kbd "C-c v") 'ivy-push-view)
-    (global-set-key (kbd "C-c V") 'ivy-pop-view)
-    (global-set-key (kbd "C-x b")  #'counsel-switch-buffer)
-    (global-set-key (kbd "C-x C-b") #'list-buffers)
-    (global-set-key (kbd "C-x k")  #'kill-buffer)
-
     (setq ivy-re-builders-alist
       '((swiper-isearch . ivy--regex)
          (counsel-projectile-find-file . ivy--regex)
@@ -487,7 +477,6 @@ Note the weekly scope of the command's precision.")
       ("k" text-scale-increase "in")
       ("j" text-scale-decrease "out"))
 
-    (global-set-key (kbd "<f2>") #'hydra-zoom/body)
 
     (defhydra hydra-window ()
       "
@@ -1288,6 +1277,7 @@ Note the weekly scope of the command's precision.")
   :group 'my-custom-group
   :global nil)
 
+(define-key my/custom-bindings-map (kbd "<f2>")    #'hydra-zoom/body)
 (define-key my/custom-bindings-map (kbd "C-c a")   #'org-agenda)
 (define-key my/custom-bindings-map (kbd "C-c c")   #'org-capture)
 (define-key org-recur-mode-map     (kbd "C-c d")   #'org-recur-finish)
@@ -1296,13 +1286,21 @@ Note the weekly scope of the command's precision.")
 (define-key projectile-mode-map    (kbd "C-c p")   #'projectile-command-map)
 (define-key my/custom-bindings-map (kbd "C-c s")   #'ispell-word)
 (define-key my/custom-bindings-map (kbd "C-c t")   (lambda () (interactive) (org-agenda nil "n")))
+(define-key my/custom-bindings-map (kbd "C-c v")   #'ivy-push-view)
+(define-key my/custom-bindings-map (kbd "C-c V")   #'ivy-pop-view)
 (define-key my/custom-bindings-map (kbd "C-c z")   #'hydra-zettelkasten/body)
+(define-key my/custom-bindings-map (kbd "C-x b")   #'counsel-switch-buffer)
 (define-key my/custom-bindings-map (kbd "C-x k")   #'my/kill-this-buffer-unless-scratch)
+(define-key my/custom-bindings-map (kbd "C-x C-b") #'list-buffers)
+(define-key my/custom-bindings-map (kbd "C-x C-f") 'counsel-find-file)
 (define-key my/custom-bindings-map (kbd "C-x |")   #'my/toggle-window-split)
 (define-key org-mode-map           (kbd "C-c C-o") #'org-open-maybe)
+(define-key my/custom-bindings-map (kbd "C-s") 'swiper-isearch)
 (define-key evil-window-map        (kbd "C-w")     #'hydra-window/body)
 (define-key my/custom-bindings-map (kbd "M-g r")   #'git-gutter:update-all-windows)
 (define-key my/custom-bindings-map (kbd "M-s")     #'avy-goto-word-1)
+(define-key my/custom-bindings-map (kbd "M-x") #'counsel-M-x)
+(define-key my/custom-bindings-map (kbd "M-y") 'counsel-yank-pop)
 
 (message "*** Emacs loaded in %s with %d garbage collections."
      (format "%.2f seconds"
